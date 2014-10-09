@@ -1889,7 +1889,7 @@ e_client_util_strv_to_slist (const gchar * const *strv)
 
 /**
  * e_client_util_copy_string_slist:
- * @copy_to: (element-type utf8) (allow-none): Where to copy; may be %NULL
+ * @copy_to: (element-type utf8) (nullable) (optional): Where to copy; may be %NULL
  * @strings: (element-type utf8): #GSList of strings to be copied
  *
  * Copies the #GSList of strings to the end of @copy_to.
@@ -1910,7 +1910,7 @@ e_client_util_copy_string_slist (GSList *copy_to,
 
 /**
  * e_client_util_copy_object_slist:
- * @copy_to: (element-type GObject) (allow-none): Where to copy; may be %NULL
+ * @copy_to: (element-type GObject) (nullable) (optional): Where to copy; may be %NULL
  * @objects: (element-type GObject): #GSList of #GObject<!-- -->s to be copied
  *
  * Copies a #GSList of #GObject<!-- -->s to the end of @copy_to.

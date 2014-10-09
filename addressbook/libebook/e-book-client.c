@@ -1253,7 +1253,7 @@ e_book_client_init (EBookClient *client)
 /**
  * e_book_client_connect_sync:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Creates a new #EBookClient for @source.  If an error occurs, the function
@@ -1387,7 +1387,7 @@ exit:
 /**
  * e_book_client_connect:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -1585,7 +1585,7 @@ connect_direct (EBookClient *client,
  * e_book_client_connect_direct_sync:
  * @registry: an #ESourceRegistry
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Like e_book_client_connect_sync(), except creates the book client for
@@ -1662,7 +1662,7 @@ exit:
 /**
  * e_book_client_connect_direct:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -2172,7 +2172,7 @@ book_client_add_contacts_thread (GSimpleAsyncResult *simple,
  * e_book_client_add_contacts:
  * @client: an #EBookClient
  * @contacts: (element-type EContact): a #GSList of #EContact objects to add
- * @cancellable: (allow-none): a #GCancellable; can be %NULL
+ * @cancellable: (nullable) (optional): a #GCancellable; can be %NULL
  * @callback: callback to call when a result is ready
  * @user_data: user data for the @callback
  *
@@ -2219,7 +2219,7 @@ e_book_client_add_contacts (EBookClient *client,
  * e_book_client_add_contacts_finish:
  * @client: an #EBookClient
  * @result: a #GAsyncResult
- * @out_added_uids: (out) (element-type utf8) (allow-none): UIDs of
+ * @out_added_uids: (out) (element-type utf8) (nullable) (optional): UIDs of
  *                  newly added contacts; can be %NULL
  * @error: (out): a #GError to set an error, if any
  *
@@ -2268,7 +2268,7 @@ e_book_client_add_contacts_finish (EBookClient *client,
  * e_book_client_add_contacts_sync:
  * @client: an #EBookClient
  * @contacts: (element-type EContact): a #GSList of #EContact objects to add
- * @out_added_uids: (out) (element-type utf8) (allow-none): UIDs of newly
+ * @out_added_uids: (out) (element-type utf8) (nullable) (optional): UIDs of newly
  *                  added contacts; can be %NULL
  * @cancellable: a #GCancellable; can be %NULL
  * @error: (out): a #GError to set an error, if any
@@ -2516,7 +2516,7 @@ book_client_modify_contacts_thread (GSimpleAsyncResult *simple,
  * e_book_client_modify_contacts:
  * @client: an #EBookClient
  * @contacts: (element-type EContact): a #GSList of #EContact objects
- * @cancellable: (allow-none): a #GCancellable; can be %NULL
+ * @cancellable: (nullable) (optional): a #GCancellable; can be %NULL
  * @callback: callback to call when a result is ready
  * @user_data: user data for the @callback
  *
@@ -2593,7 +2593,7 @@ e_book_client_modify_contacts_finish (EBookClient *client,
  * e_book_client_modify_contacts_sync:
  * @client: an #EBookClient
  * @contacts: (element-type EContact): a #GSList of #EContact objects
- * @cancellable: (allow-none): a #GCancellable; can be %NULL
+ * @cancellable: (nullable) (optional): a #GCancellable; can be %NULL
  * @error: (out): a #GError to set an error, if any
  *
  * Applies the changes made to @contacts to the stored versions in @client.

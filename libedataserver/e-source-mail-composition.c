@@ -319,7 +319,7 @@ e_source_mail_composition_dup_bcc (ESourceMailComposition *extension)
 /**
  * e_source_mail_composition_set_bcc:
  * @extension: an #ESource
- * @bcc: (allow-none): a %NULL-terminated string array of Bcc recipients
+ * @bcc: (nullable) (optional): a %NULL-terminated string array of Bcc recipients
  *
  * Sets the recipients which should automatically be added to the blind
  * carbon-copy (Bcc) list when composing a new mail message.  The recipient
@@ -406,7 +406,7 @@ e_source_mail_composition_dup_cc (ESourceMailComposition *extension)
 /**
  * e_source_mail_composition_set_cc:
  * @extension: an #ESourceMailComposition
- * @cc: (allow-none): a %NULL-terminated string array of Cc recipients
+ * @cc: (nullable) (optional): a %NULL-terminated string array of Cc recipients
  *
  * Sets the recipients which should automatically be added to the carbon
  * copy (Cc) list when composing a new mail message.  The recipient strings
@@ -488,7 +488,7 @@ e_source_mail_composition_dup_drafts_folder (ESourceMailComposition *extension)
 /**
  * e_source_mail_composition_set_drafts_folder:
  * @extension: an #ESourceMailComposition
- * @drafts_folder: (allow-none): an identifier for the preferred drafts
+ * @drafts_folder: (nullable) (optional): an identifier for the preferred drafts
  *                 folder, or %NULL
  *
  * Sets the preferred folder for draft messages by an identifier string.
@@ -619,7 +619,7 @@ e_source_mail_composition_dup_templates_folder (ESourceMailComposition *extensio
 /**
  * e_source_mail_composition_set_templates_folder:
  * @extension: an #ESourceMailComposition
- * @templates_folder: (allow-none): an identifier for the preferred templates
+ * @templates_folder: (nullable) (optional): an identifier for the preferred templates
  *                    folder, or %NULL
  *
  * Sets the preferred folder for message templates by an identifier string.
@@ -651,4 +651,3 @@ e_source_mail_composition_set_templates_folder (ESourceMailComposition *extensio
 
 	g_object_notify (G_OBJECT (extension), "templates-folder");
 }
-

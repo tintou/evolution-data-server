@@ -256,7 +256,7 @@ e_source_goa_dup_account_id (ESourceGoa *extension)
 /**
  * e_source_goa_set_account_id:
  * @extension: an #ESourceGoa
- * @account_id: (allow-none): the associated GNOME Online Account ID, or %NULL
+ * @account_id: (nullable) (optional): the associated GNOME Online Account ID, or %NULL
  *
  * Sets the identifier string of the GNOME Online Account associated
  * with the #ESource to which @extension belongs.
@@ -342,7 +342,7 @@ e_source_goa_dup_calendar_url (ESourceGoa *extension)
 /**
  * e_source_goa_set_calendar_url:
  * @extension: an #ESourceGoa
- * @calendar_url: (allow-none): the associated GNOME Online Account
+ * @calendar_url: (nullable) (optional): the associated GNOME Online Account
  *                calendar URL, or %NULL
  *
  * Sets the calendar URL of the GNOME Online Account associated
@@ -429,7 +429,7 @@ e_source_goa_dup_contacts_url (ESourceGoa *extension)
 /**
  * e_source_goa_set_contacts_url:
  * @extension: an #ESourceGoa
- * @contacts_url: (allow-none): the associated GNOME Online Account
+ * @contacts_url: (nullable) (optional): the associated GNOME Online Account
  *                contacts URL, or %NULL
  *
  * Sets the contacts URL of the GNOME Online Account associated

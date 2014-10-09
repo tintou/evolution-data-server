@@ -1075,7 +1075,7 @@ e_cal_client_view_stop (ECalClientView *client_view,
 /**
  * e_cal_client_view_set_fields_of_interest:
  * @client_view: an #ECalClientView
- * @fields_of_interest: (element-type utf8) (allow-none): List of field names
+ * @fields_of_interest: (element-type utf8) (nullable) (optional): List of field names
  *                      in which the client is interested, or %NULL to reset
  *                      the fields of interest
  * @error: return location for a #GError, or %NULL

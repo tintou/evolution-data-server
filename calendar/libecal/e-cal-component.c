@@ -5213,7 +5213,7 @@ e_cal_component_free_id (ECalComponentId *id)
 /**
  * e_cal_component_id_new:
  * @uid: a unique ID string
- * @rid: (allow-none): an optional recurrence ID string
+ * @rid: (nullable) (optional): an optional recurrence ID string
  *
  * Creates a new #ECalComponentId from @uid and @rid, which should be
  * freed with e_cal_component_free_id().
@@ -6379,4 +6379,3 @@ e_cal_component_event_dates_match (ECalComponent *comp1,
 
 	return retval;
 }
-

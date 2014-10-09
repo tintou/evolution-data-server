@@ -216,7 +216,7 @@ e_source_selectable_dup_color (ESourceSelectable *extension)
 /**
  * e_source_selectable_set_color:
  * @extension: an #ESourceSelectable
- * @color: (allow-none): a color specification, or %NULL
+ * @color: (nullable) (optional): a color specification, or %NULL
  *
  * Sets the color specification for the #ESource to which @extension
  * belongs.  A colored block is often displayed next to the data source's
@@ -293,4 +293,3 @@ e_source_selectable_set_selected (ESourceSelectable *extension,
 
 	g_object_notify (G_OBJECT (extension), "selected");
 }
-

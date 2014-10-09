@@ -288,7 +288,7 @@ e_source_collection_dup_identity (ESourceCollection *extension)
 /**
  * e_source_collection_set_identity:
  * @extension: an #ESourceCollection
- * @identity: (allow-none): the collection identity, or %NULL
+ * @identity: (nullable) (optional) the collection identity, or %NULL
  *
  * Sets the string used to uniquely identify the user account at the
  * service provider.  Often this is an email address or user name.
@@ -480,4 +480,3 @@ e_source_collection_set_mail_enabled (ESourceCollection *extension,
 
 	g_object_notify (G_OBJECT (extension), "mail-enabled");
 }
-

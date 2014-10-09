@@ -736,9 +736,9 @@ e_data_book_cursor_get_position (EDataBookCursor *cursor)
 /**
  * e_data_book_cursor_set_sexp:
  * @cursor: an #EDataBookCursor
- * @sexp: (allow-none): the search expression to set
- * @cancellable: (allow-none): A #GCancellable
- * @error: (out) (allow-none): return location for a #GError, or %NULL
+ * @sexp: (nullable) (optional): the search expression to set
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (out) (nullable) (optional): return location for a #GError, or %NULL
  *
  * Sets the search expression for the cursor
  *
@@ -796,10 +796,10 @@ e_data_book_cursor_set_sexp (EDataBookCursor *cursor,
  * @flags: The #EBookCursorStepFlags for this step
  * @origin: The #EBookCursorOrigin from whence to step
  * @count: a positive or negative amount of contacts to try and fetch
- * @results: (out) (allow-none) (element-type utf8) (transfer full):
+ * @results: (out) (nullable) (optional) (element-type utf8) (transfer full):
  *   A return location to store the results, or %NULL if %E_BOOK_CURSOR_STEP_FETCH is not specified in %flags
- * @cancellable: (allow-none): A #GCancellable
- * @error: (out) (allow-none): return location for a #GError, or %NULL
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (out) (nullable) (optional): return location for a #GError, or %NULL
  *
  * Steps @cursor through it's sorted query by a maximum of @count contacts
  * starting from @origin.
@@ -880,8 +880,8 @@ e_data_book_cursor_step (EDataBookCursor *cursor,
  * @cursor: an #EDataBookCursor
  * @index: the alphabetic index
  * @locale: the locale in which @index is expected to be a valid alphabetic index
- * @cancellable: (allow-none): A #GCancellable
- * @error: (out) (allow-none): return location for a #GError, or %NULL
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (out) (nullable) (optional): return location for a #GError, or %NULL
  *
  * Sets the @cursor position to an
  * <link linkend="cursor-alphabet">Alphabetic Index</link>
@@ -947,8 +947,8 @@ e_data_book_cursor_set_alphabetic_index (EDataBookCursor *cursor,
 /**
  * e_data_book_cursor_recalculate:
  * @cursor: an #EDataBookCursor
- * @cancellable: (allow-none): A #GCancellable
- * @error: (out) (allow-none): return location for a #GError, or %NULL
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (out) (nullable) (optional): return location for a #GError, or %NULL
  *
  * Recalculates the cursor's total and position, this is meant
  * for cursor created in Direct Read Access mode to synchronously
@@ -996,9 +996,9 @@ e_data_book_cursor_recalculate (EDataBookCursor *cursor,
 /**
  * e_data_book_cursor_load_locale:
  * @cursor: an #EDataBookCursor
- * @locale: (out) (allow-none): return location for the locale
- * @cancellable: (allow-none): A #GCancellable
- * @error: (out) (allow-none): return location for a #GError, or %NULL
+ * @locale: (out) (nullable) (optional): return location for the locale
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (out) (nullable) (optional): return location for a #GError, or %NULL
  *
  * Load the current locale setting from the cursor's underlying database.
  *
@@ -1165,7 +1165,7 @@ e_data_book_cursor_contact_removed (EDataBookCursor *cursor,
  * @cursor: an #EDataBookCursor
  * @connection: the #GDBusConnection to register with
  * @object_path: the object path to place the direct access configuration data
- * @error: (out) (allow-none): a location to store any error which might occur while registering
+ * @error: (out) (nullable) (optional): a location to store any error which might occur while registering
  *
  * Places @cursor on the @connection at @object_path
  *

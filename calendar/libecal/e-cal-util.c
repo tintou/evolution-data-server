@@ -576,7 +576,7 @@ compare_alarm_instance (gconstpointer a,
  * structure, or %NULL if no alarm instances occurred in the specified time
  * range.
  *
- * Returns: (allow-none) (transfer full): a list of all the alarms found for the
+ * Returns: (nullable) (optional) (transfer full): a list of all the alarms found for the
  * given component in the given time range. The list of alarms should be freed
  * by using e_cal_component_free_alarm_list().
  */
@@ -1402,4 +1402,3 @@ e_cal_util_get_component_occur_times (ECalComponent *comp,
 		e_cal_component_free_datetime (&dt_end);
 	}
 }
-

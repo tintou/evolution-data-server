@@ -2315,8 +2315,8 @@ __e_source_private_replace_dbus_object (ESource *source,
 
 /**
  * e_source_new:
- * @dbus_object: (allow-none): a #GDBusObject or %NULL
- * @main_context: (allow-none): a #GMainContext or %NULL
+ * @dbus_object: (nullable) (optional): a #GDBusObject or %NULL
+ * @main_context: (nullable) (optional): a #GMainContext or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Creates a new #ESource instance.
@@ -2353,7 +2353,7 @@ e_source_new (GDBusObject *dbus_object,
 /**
  * e_source_new_with_uid:
  * @uid: a new unique identifier string
- * @main_context: (allow-none): a #GMainContext or %NULL
+ * @main_context: (nullable) (optional): a #GMainContext or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Creates a new "scratch" #ESource with a predetermined unique identifier.
@@ -2568,7 +2568,7 @@ e_source_dup_parent (ESource *source)
 /**
  * e_source_set_parent:
  * @source: an #ESource
- * @parent: (allow-none): the UID of the parent #ESource, or %NULL
+ * @parent: (nullable) (optional): the UID of the parent #ESource, or %NULL
  *
  * Identifies the parent of @source by its unique identifier string.
  * This can only be set prior to adding @source to an #ESourceRegistry.
@@ -3128,7 +3128,7 @@ e_source_compare_by_display_name (ESource *source1,
 /**
  * e_source_to_string:
  * @source: an #ESource
- * @length: (allow-none): return location for the length of the returned
+ * @length: (nullable) (optional): return location for the length of the returned
  *          string, or %NULL
  *
  * Outputs the current contents of @source as a key file string.
@@ -3207,7 +3207,7 @@ e_source_parameter_to_key (const gchar *param_name)
 /**
  * e_source_remove_sync:
  * @source: the #ESource to be removed
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Requests the D-Bus service to delete the key files for @source and all of
@@ -3238,7 +3238,7 @@ e_source_remove_sync (ESource *source,
 /**
  * e_source_remove:
  * @source: the #ESource to be removed
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -3300,7 +3300,7 @@ e_source_remove_finish (ESource *source,
 /**
  * e_source_write_sync:
  * @source: a writable #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Submits the current contents of @source to the D-Bus service to be
@@ -3331,7 +3331,7 @@ e_source_write_sync (ESource *source,
 /**
  * e_source_write:
  * @source: a writable #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -3394,7 +3394,7 @@ e_source_write_finish (ESource *source,
  * e_source_remote_create_sync:
  * @source: an #ESource
  * @scratch_source: an #ESource describing the resource to create
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Creates a new remote resource by picking out relevant details from
@@ -3434,7 +3434,7 @@ e_source_remote_create_sync (ESource *source,
  * e_source_remote_create:
  * @source: an #ESource
  * @scratch_source: an #ESource describing the resource to create
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -3504,7 +3504,7 @@ e_source_remote_create_finish (ESource *source,
 /**
  * e_source_remote_delete_sync:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Deletes the resource represented by @source from a remote server.
@@ -3536,7 +3536,7 @@ e_source_remote_delete_sync (ESource *source,
 /**
  * e_source_remote_delete:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -3598,10 +3598,10 @@ e_source_remote_delete_finish (ESource *source,
 /**
  * e_source_get_oauth2_access_token_sync:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
- * @out_access_token: (allow-none): return location for the access token,
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
+ * @out_access_token: (nullable) (optional): return location for the access token,
  *                    or %NULL
- * @out_expires_in: (allow-none): return location for the token expiry,
+ * @out_expires_in: (nullable) (optional): return location for the token expiry,
  *                  or %NULL
  * @error: return location for a #GError, or %NULL
  *
@@ -3637,7 +3637,7 @@ e_source_get_oauth2_access_token_sync (ESource *source,
 /**
  * e_source_get_oauth2_access_token:
  * @source: an #ESource
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -3672,9 +3672,9 @@ e_source_get_oauth2_access_token (ESource *source,
  * e_source_get_oauth2_access_token_finish:
  * @source: an #ESource
  * @result: a #GAsyncResult
- * @out_access_token: (allow-none): return location for the access token,
+ * @out_access_token: (nullable) (optional): return location for the access token,
  *                    or %NULL
- * @out_expires_in: (allow-none): return location for the token expiry,
+ * @out_expires_in: (nullable) (optional): return location for the token expiry,
  *                  or %NULL
  * @error: return location for a #GError, or %NULL
  *

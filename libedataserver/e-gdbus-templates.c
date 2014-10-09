@@ -1623,7 +1623,7 @@ e_gdbus_proxy_call_sync_void__void (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_void__boolean:
  * @proxy:
  * @out_boolean:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1650,7 +1650,7 @@ e_gdbus_proxy_call_sync_void__boolean (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_void__string:
  * @proxy:
  * @out_string:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1677,7 +1677,7 @@ e_gdbus_proxy_call_sync_void__string (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_void__strv:
  * @proxy:
  * @out_strv:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1704,7 +1704,7 @@ e_gdbus_proxy_call_sync_void__strv (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_void__uint:
  * @proxy:
  * @out_uint:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1746,7 +1746,7 @@ e_gdbus_proxy_call_sync_boolean__void (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_string__void:
  * @proxy:
  * @in_string:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1789,7 +1789,7 @@ e_gdbus_proxy_call_sync_strv__void (GDBusProxy *proxy,
  * e_gdbus_proxy_call_sync_uint__void:
  * @proxy:
  * @in_uint:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1832,7 +1832,7 @@ e_gdbus_proxy_call_sync_string__string (GDBusProxy *proxy,
 /**
  * e_gdbus_proxy_call_sync_string__strv:
  * @proxy:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -1880,7 +1880,7 @@ e_gdbus_proxy_call_sync_strv__string (GDBusProxy *proxy,
  * @proxy:
  * @in_strv:
  * @out_strv:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2171,7 +2171,7 @@ proxy_method_call_sync (const gchar *method_name,
 /**
  * e_gdbus_proxy_call_sync_void__void:
  * @proxy:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2191,7 +2191,7 @@ e_gdbus_proxy_method_call_sync_void__void (const gchar *method_name,
  * e_gdbus_proxy_call_sync_boolean__void:
  * @proxy:
  * @in_boolean:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2222,7 +2222,7 @@ e_gdbus_proxy_method_call_sync_string__void (const gchar *method_name,
  * e_gdbus_proxy_call_sync_strv__void:
  * @proxy:
  * @in_strv:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2254,7 +2254,7 @@ e_gdbus_proxy_method_call_sync_uint__void (const gchar *method_name,
  * @proxy:
  * @in_string:
  * @out_string:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2277,7 +2277,7 @@ e_gdbus_proxy_method_call_sync_string__string (const gchar *method_name,
  * @proxy:
  * @in_strv:
  * @out_string:
- * @cancellable: (allow-none):
+ * @cancellable: (nullable) (optional):
  * @error:
  * @start_func: (scope call):
  * @finish_func: (scope call):
@@ -2297,7 +2297,7 @@ e_gdbus_proxy_method_call_sync_strv__string (const gchar *method_name,
 
 /**
  * e_gdbus_templates_encode_error:
- * @in_error: (allow-none):
+ * @in_error: (nullable) (optional):
  *
  * Returns: (transfer full): a %NULL-terminated array of strings; free with
  * g_strfreev()
@@ -2351,8 +2351,8 @@ e_gdbus_templates_decode_error (const gchar * const *in_strv,
 
 /**
  * e_gdbus_templates_encode_two_strings:
- * @in_str1: (allow-none):
- * @in_str2: (allow-none):
+ * @in_str1: (nullable) (optional):
+ * @in_str2: (nullable) (optional):
  *
  * Returns: (transfer full): a %NULL-terminated array of strings; free with
  * g_strfreev()

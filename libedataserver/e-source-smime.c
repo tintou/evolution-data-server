@@ -339,7 +339,7 @@ e_source_smime_dup_encryption_certificate (ESourceSMIME *extension)
 /**
  * e_source_smime_set_encryption_certificate:
  * @extension: an #ESourceSMIME
- * @encryption_certificate: (allow-none): the certificate name used to encrypt
+ * @encryption_certificate: (nullable) (optional): the certificate name used to encrypt
  *                          messages, or %NULL
  *
  * Sets the certificate name used to encrypt messages.
@@ -511,7 +511,7 @@ e_source_smime_dup_signing_algorithm (ESourceSMIME *extension)
 /**
  * e_source_smime_set_signing_algorithm:
  * @extension: an #ESourceSMIME
- * @signing_algorithm: (allow-none): the signing algorithm for outgoing
+ * @signing_algorithm: (nullable) (optional): the signing algorithm for outgoing
  *                     messages, or %NULL
  *
  * Sets the name of the hash algorithm used to digitally sign outgoing
@@ -597,7 +597,7 @@ e_source_smime_dup_signing_certificate (ESourceSMIME *extension)
 /**
  * e_source_smime_set_signing_certificate:
  * @extension: an #ESourceSMIME
- * @signing_certificate: (allow-none): the certificate name used to sign
+ * @signing_certificate: (nullable) (optional): the certificate name used to sign
  *                       messages, or %NULL
  *
  * Sets the S/MIME certificate name used to sign messages.
@@ -672,4 +672,3 @@ e_source_smime_set_sign_by_default (ESourceSMIME *extension,
 
 	g_object_notify (G_OBJECT (extension), "sign-by-default");
 }
-

@@ -483,7 +483,7 @@ e_user_prompter_server_new (void)
  * @server: an #EUserPrompterServer
  * @prompt_id: Id of a prompt, which was responded
  * @response: Response of the prompt
- * @extension_values: (allow-none): For extension prompts can pass extra return values
+ * @extension_values: (nullable) (optional): For extension prompts can pass extra return values
  *
  * Finishes prompt initiated by a "prompt" signal or an extension prompt.
  * The @response for non-extension prompts is a 0-based index of a button

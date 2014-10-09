@@ -117,8 +117,8 @@ e_get_user_data_dir (void)
 
 /**
  * e_util_strv_equal:
- * @v1: (allow-none): a %NULL-terminated string array, or %NULL
- * @v2: (allow-none): another %NULL-terminated string array, or %NULL
+ * @v1: (nullable) (optional): a %NULL-terminated string array, or %NULL
+ * @v2: (nullable) (optional): another %NULL-terminated string array, or %NULL
  *
  * Compares @v1 and @v2 for equality, handling %NULL gracefully.
  *
@@ -158,7 +158,7 @@ e_util_strv_equal (gconstpointer v1,
 
 /**
  * e_util_strdup_strip:
- * @string: (allow-none): a string value, or %NULL
+ * @string: (nullable) (optional): a string value, or %NULL
  *
  * Duplicates @string and strips off any leading or trailing whitespace.
  * The resulting string is returned unless it is empty or %NULL, in which
@@ -982,7 +982,7 @@ e_util_strv_to_slist (const gchar * const *strv)
 
 /**
  * e_util_copy_string_slist:
- * @copy_to: (element-type utf8) (allow-none): Where to copy; can be %NULL
+ * @copy_to: (element-type utf8) (nullable) (optional): Where to copy; can be %NULL
  * @strings: (element-type utf8): #GSList of strings to be copied
  *
  * Copies #GSList of strings at the end of @copy_to.
@@ -1010,7 +1010,7 @@ e_util_copy_string_slist (GSList *copy_to,
 
 /**
  * e_util_copy_object_slist:
- * @copy_to: (element-type GObject) (allow-none): Where to copy; can be %NULL
+ * @copy_to: (element-type GObject) (nullable) (optional): Where to copy; can be %NULL
  * @objects: (element-type GObject): #GSList of #GObject<!-- -->s to be copied
  *
  * Copies #GSList of #GObject<!-- -->s at the end of @copy_to.
@@ -1117,7 +1117,7 @@ e_queue_transfer (GQueue *src_queue,
 
 /**
  * e_weak_ref_new:
- * @object: (allow-none): a #GObject or %NULL
+ * @object: (nullable) (optional): a #GObject or %NULL
  *
  * Allocates a new #GWeakRef and calls g_weak_ref_set() with @object.
  *
@@ -1981,7 +1981,7 @@ e_named_parameters_clear (ENamedParameters *parameters)
 /**
  * e_named_parameters_assign:
  * @parameters: an #ENamedParameters to assign values to
- * @from: (allow-none): an #ENamedParameters to get values from, or %NULL
+ * @from: (nullable) (optional): an #ENamedParameters to get values from, or %NULL
  *
  * Makes content of the @parameters the same as @from.
  * Functions clears content of @parameters if @from is %NULL.
@@ -2042,7 +2042,7 @@ get_parameter_index (const ENamedParameters *parameters,
  * e_named_parameters_set:
  * @parameters: an #ENamedParameters
  * @name: name of a parameter to set
- * @value: (allow-none): value to set, or %NULL to unset
+ * @value: (nullable) (optional): value to set, or %NULL to unset
  *
  * Sets parameter named @name to value @value. If @value is NULL,
  * then the parameter is removed. @value can be an empty string.
@@ -2271,10 +2271,10 @@ G_DEFINE_BOXED_TYPE (
  *            range between #G_PRIORITY_DEFAULT and #G_PRIORITY_HIGH
  * @interval: the time between calls to the function, in milliseconds
  *            (1/1000ths of a second)
- * @name: (allow-none): debug name for the source
+ * @name: (nullable) (optional): debug name for the source
  * @function: function to call
  * @data: data to pass to @function
- * @notify: (allow-none): function to call when the timeout is removed,
+ * @notify: (nullable) (optional): function to call when the timeout is removed,
  *          or %NULL
  *
  * Similar to g_timeout_add_full(), but also names the #GSource as @name.
@@ -2310,10 +2310,10 @@ e_timeout_add_with_name (gint priority,
  * @priority: the priority of the timeout source, typically in the
  *            range between #G_PRIORITY_DEFAULT and #G_PRIORITY_HIGH
  * @interval: the time between calls to the function, in seconds
- * @name: (allow-none): debug name for the source
+ * @name: (nullable) (optional): debug name for the source
  * @function: function to call
  * @data: data to pass to @function
- * @notify: (allow-none): function to call when the timeout is removed,
+ * @notify: (nullable) (optional): function to call when the timeout is removed,
  *          or %NULL
  *
  * Similar to g_timeout_add_seconds_full(), but also names the #GSource as
@@ -2345,4 +2345,3 @@ e_timeout_add_seconds_with_name (gint priority,
 
 	return tag;
 }
-

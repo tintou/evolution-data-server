@@ -199,7 +199,7 @@ e_source_mail_account_dup_identity_uid (ESourceMailAccount *extension)
 /**
  * e_source_mail_account_set_identity_uid:
  * @extension: an #ESourceMailAccount
- * @identity_uid: (allow-none): the mail identity #ESource:uid, or %NULL
+ * @identity_uid: (nullable) (optional): the mail identity #ESource:uid, or %NULL
  *
  * Sets the #ESource:uid of the #ESource that describes the mail
  * identity to be used for this account.
@@ -226,4 +226,3 @@ e_source_mail_account_set_identity_uid (ESourceMailAccount *extension,
 
 	g_object_notify (G_OBJECT (extension), "identity-uid");
 }
-

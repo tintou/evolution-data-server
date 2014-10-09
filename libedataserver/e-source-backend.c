@@ -186,7 +186,7 @@ e_source_backend_dup_backend_name (ESourceBackend *extension)
 /**
  * e_source_backend_set_backend_name:
  * @extension: an #ESourceBackend
- * @backend_name: (allow-none): a backend name, or %NULL
+ * @backend_name: (nullable) (optional): a backend name, or %NULL
  *
  * Sets the backend name for @extension.
  *
@@ -216,4 +216,3 @@ e_source_backend_set_backend_name (ESourceBackend *extension,
 
 	g_object_notify (G_OBJECT (extension), "backend-name");
 }
-

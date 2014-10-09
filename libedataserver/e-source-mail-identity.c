@@ -314,7 +314,7 @@ e_source_mail_identity_dup_address (ESourceMailIdentity *extension)
 /**
  * e_source_mail_identity_set_address:
  * @extension: an #ESourceMailIdentity
- * @address: (allow-none): the sender's email address, or %NULL
+ * @address: (nullable) (optional): the sender's email address, or %NULL
  *
  * Sets the email address for this identity from which to send messages.
  *
@@ -397,7 +397,7 @@ e_source_mail_identity_dup_name (ESourceMailIdentity *extension)
 /**
  * e_source_mail_identity_set_name:
  * @extension: an #ESourceMailIdentity
- * @name: (allow-none): the sender's name, or %NULL
+ * @name: (nullable) (optional): the sender's name, or %NULL
  *
  * Sets the sender's name for this identity.
  *
@@ -484,7 +484,7 @@ e_source_mail_identity_dup_organization (ESourceMailIdentity *extension)
 /**
  * e_source_mail_identity_set_organization:
  * @extension: an #ESourceMailIdentity
- * @organization: (allow-none): the sender's organization, or %NULL
+ * @organization: (nullable) (optional): the sender's organization, or %NULL
  *
  * Sets the sender's organization for this identity.
  *
@@ -568,7 +568,7 @@ e_source_mail_identity_dup_reply_to (ESourceMailIdentity *extension)
 /**
  * e_source_mail_identity_set_reply_to:
  * @extension: an #ESourceMailIdentity
- * @reply_to: (allow-none): the sender's reply-to address, or %NULL
+ * @reply_to: (nullable) (optional): the sender's reply-to address, or %NULL
  *
  * Sets the email address for this identity to which recipients should
  * send replies.
@@ -656,7 +656,7 @@ e_source_mail_identity_dup_signature_uid (ESourceMailIdentity *extension)
 /**
  * e_source_mail_identity_set_signature_uid:
  * @extension: an #ESourceMailIdentity
- * @signature_uid: (allow-none): the sender's signature ID, or %NULL
+ * @signature_uid: (nullable) (optional): the sender's signature ID, or %NULL
  *
  * Sets the #ESource:uid of an #ESource describing a mail signature.
  *
@@ -691,4 +691,3 @@ e_source_mail_identity_set_signature_uid (ESourceMailIdentity *extension,
 
 	g_object_notify (G_OBJECT (extension), "signature-uid");
 }
-

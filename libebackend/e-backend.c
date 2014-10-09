@@ -883,7 +883,7 @@ e_backend_get_user_prompter (EBackend *backend)
  * e_backend_trust_prompt_sync:
  * @backend: an #EBackend
  * @parameters: an #ENamedParameters with values for the trust prompt
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Asks a user a trust prompt with given @parameters, and returns what
@@ -936,7 +936,7 @@ e_backend_trust_prompt_sync (EBackend *backend,
  * e_backend_trust_prompt:
  * @backend: an #EBackend
  * @parameters: an #ENamedParameters with values for the trust prompt
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: a #GAsyncReadyCallback to call when the request is satisfied
  * @user_data: data to pass to the callback function
  *

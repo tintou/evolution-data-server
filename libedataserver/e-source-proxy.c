@@ -1590,7 +1590,7 @@ e_source_proxy_set_socks_port (ESourceProxy *extension,
  * e_source_proxy_lookup_sync:
  * @source: an #ESource
  * @uri: a URI representing the destination to connect to
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Looks into @source's #ESourceProxy extension to determine what proxy,
@@ -1780,7 +1780,7 @@ source_proxy_lookup_thread (GSimpleAsyncResult *simple,
  * e_source_proxy_lookup:
  * @source: an #ESource
  * @uri: a URI representing the destination to connect to
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -1865,4 +1865,3 @@ e_source_proxy_lookup_finish (ESource *source,
 
 	return proxies;
 }
-

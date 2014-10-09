@@ -775,7 +775,7 @@ e_source_webdav_dup_display_name (ESourceWebdav *extension)
 /**
  * e_source_webdav_set_display_name:
  * @extension: an #ESourceWebdav
- * @display_name: (allow-none): the display name of the WebDAV resource,
+ * @display_name: (nullable) (optional): the display name of the WebDAV resource,
  *                or %NULL
  *
  * Updates the last known display name of a WebDAV resource, which may
@@ -862,7 +862,7 @@ e_source_webdav_dup_email_address (ESourceWebdav *extension)
 /**
  * e_source_webdav_set_email_address:
  * @extension: an #ESourceWebdav
- * @email_address: (allow-none): the user's email address, or %NULL
+ * @email_address: (nullable) (optional): the user's email address, or %NULL
  *
  * Sets the user's email address which can be passed to a CalDAV server if
  * the user wishes to receive scheduling messages.
@@ -997,7 +997,7 @@ e_source_webdav_dup_resource_path (ESourceWebdav *extension)
 /**
  * e_source_webdav_set_resource_path:
  * @extension: an #ESourceWebdav
- * @resource_path: (allow-none): the absolute path to a WebDAV resource,
+ * @resource_path: (nullable) (optional): the absolute path to a WebDAV resource,
  *                 or %NULL
  *
  * Sets the absolute path to a resource on a WebDAV server.
@@ -1086,7 +1086,7 @@ e_source_webdav_dup_resource_query (ESourceWebdav *extension)
 /**
  * e_source_webdav_set_resource_query:
  * @extension: an #ESourceWebdav
- * @resource_query: (allow-none): the query to access a WebDAV resource,
+ * @resource_query: (nullable) (optional): the query to access a WebDAV resource,
  *                  or %NULL
  *
  * Sets the URI query required to access a resource on a WebDAV server.
@@ -1182,7 +1182,7 @@ e_source_webdav_dup_ssl_trust (ESourceWebdav *extension)
 /**
  * e_source_webdav_set_ssl_trust:
  * @extension: an #ESourceWebdav
- * @ssl_trust: (allow-none): the ssl_trust to store, or %NULL to unset
+ * @ssl_trust: (nullable) (optional): the ssl_trust to store, or %NULL to unset
  *
  * Sets the SSL certificate trust. See e_source_webdav_get_ssl_trust()
  * for more infomation about its content and how to use it.
@@ -1373,7 +1373,7 @@ encode_ssl_trust (ESourceWebdav *extension,
  * @cert: the invalid certificate of the connection over which @message is about
  *        to be sent
  * @cert_errors: the error flags for @cert
- * @registry: (allow-none): an #ESourceRegistry, to use for parent lookups
+ * @registry: (nullable) (optional): an #ESourceRegistry, to use for parent lookups
  * @parameters: an #ENamedParameters to be populated
  *
  * Checks @cert against currently stored trust response and either returns what

@@ -209,9 +209,9 @@ addsystemtz (gpointer key,
  *            VTIMEZONE and arbitrary other components, in
  *            arbitrary order: these other components are
  *            modified by this call
- * @comps: (element-type icalcomponent) (allow-none): a list of #icalcomponent
+ * @comps: (element-type icalcomponent) (nullable) (optional): a list of #icalcomponent
  * instances which also have to be patched; may be %NULL
- * @tzlookup: (allow-none): a callback function which is called to retrieve
+ * @tzlookup: (nullable) (optional): a callback function which is called to retrieve
  *            a calendar's VTIMEZONE definition; the returned
  *            definition is *not* freed by e_cal_check_timezones()
  *            (to be compatible with e_cal_get_timezone());
@@ -530,7 +530,7 @@ e_cal_tzlookup_icomp (const gchar *tzid,
  *            VTIMEZONE and arbitrary other components, in
  *            arbitrary order: these other components are
  *            modified by this call
- * @comps: (element-type icalcomponent) (allow-none): a list of #icalcomponent
+ * @comps: (element-type icalcomponent) (nullable) (optional): a list of #icalcomponent
  * instances which also have to be patched; may be %NULL
  * @tzlookup: a callback function which is called to retrieve
  *            a calendar's VTIMEZONE definition; the returned

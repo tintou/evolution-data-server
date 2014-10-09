@@ -316,7 +316,7 @@ e_source_mail_signature_dup_mime_type (ESourceMailSignature *extension)
 /**
  * e_source_mail_signature_set_mime_type:
  * @extension: an #ESourceMailSignature
- * @mime_type: (allow-none): a MIME type, or %NULL
+ * @mime_type: (nullable) (optional): a MIME type, or %NULL
  *
  * Sets the MIME type of the signature content for @extension.
  *
@@ -377,9 +377,9 @@ source_mail_signature_load_thread (GSimpleAsyncResult *simple,
  * e_source_mail_signature_load_sync:
  * @source: an #ESource
  * @contents: return location for the signature content
- * @length: (allow-none): return location for the length of the signature
+ * @length: (nullable) (optional): return location for the length of the signature
  *          content, or %NULL if the length is not needed
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Loads a signature from the signature file for @source, which is
@@ -568,7 +568,7 @@ exit:
  * e_source_mail_signature_load:
  * @source: an #ESource
  * @io_priority: the I/O priority of the request
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -621,7 +621,7 @@ e_source_mail_signature_load (ESource *source,
  * @source: an #ESource
  * @result: a #GAsyncResult
  * @contents: return location for the signature content
- * @length: (allow-none): return location for the length of the signature
+ * @length: (nullable) (optional): return location for the length of the signature
  *          content, or %NULL if the length is not needed
  * @error: return location for a #GError, or %NULL
  *
@@ -694,7 +694,7 @@ source_mail_signature_replace_thread (GSimpleAsyncResult *simple,
  * @source: an #ESource
  * @contents: the signature contents
  * @length: the length of @contents in bytes
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Replaces the signature file for @source with the given @contents
@@ -735,7 +735,7 @@ e_source_mail_signature_replace_sync (ESource *source,
  * @contents: the signature contents
  * @length: the length of @contents in bytes
  * @io_priority: the I/O priority of the request
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -841,7 +841,7 @@ source_mail_signature_symlink_thread (GSimpleAsyncResult *simple,
  * e_source_mail_signature_symlink_sync:
  * @source: an #ESource
  * @symlink_target: executable filename to link to
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Replaces the signature file for @source with a symbolic link to
@@ -885,7 +885,7 @@ e_source_mail_signature_symlink_sync (ESource *source,
  * @source: an #ESource
  * @symlink_target: executable filename to link to
  * @io_priority: the I/O priority of the request
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -963,4 +963,3 @@ e_source_mail_signature_symlink_finish (ESource *source,
 	/* Assume success unless a GError is set. */
 	return !g_simple_async_result_propagate_error (simple, error);
 }
-

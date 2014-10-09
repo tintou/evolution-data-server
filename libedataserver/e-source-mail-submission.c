@@ -257,7 +257,7 @@ e_source_mail_submission_dup_sent_folder (ESourceMailSubmission *extension)
 /**
  * e_source_mail_submission_set_sent_folder:
  * @extension: an #ESourceMailSubmission
- * @sent_folder: (allow-none): an identifier for the preferred sent folder,
+ * @sent_folder: (nullable) (optional): an identifier for the preferred sent folder,
  *               or %NULL
  *
  * Sets the preferred folder for sent messages by an identifier string.
@@ -343,7 +343,7 @@ e_source_mail_submission_dup_transport_uid (ESourceMailSubmission *extension)
 /**
  * e_source_mail_submission_set_transport_uid:
  * @extension: an #ESourceMailSubmission
- * @transport_uid: (allow-none): the mail transport #ESource:uid, or %NULL
+ * @transport_uid: (nullable) (optional): the mail transport #ESource:uid, or %NULL
  *
  * Sets the #ESource:uid of the #ESource that describes the mail
  * transport to be used for outgoing messages.

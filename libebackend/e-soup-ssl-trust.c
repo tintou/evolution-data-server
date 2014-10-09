@@ -141,8 +141,8 @@ e_soup_ssl_trust_message_finalized_cb (gpointer data,
  * e_soup_ssl_trust_connect:
  * @soup_message: a #SoupMessage about to be sent to the source
  * @source: an #ESource that uses WebDAV
- * @registry: (allow-none): an #ESourceRegistry, to use for parent lookups
- * @cancellable: (allow-none): #GCancellable to cancel the trust prompt
+ * @registry: (nullable) (optional): an #ESourceRegistry, to use for parent lookups
+ * @cancellable: (nullable) (optional): #GCancellable to cancel the trust prompt
  *
  * Sets up automatic SSL certificate trust handling for @message using the trust
  * data stored in @source's WebDAV extension. If @message is about to be sent on

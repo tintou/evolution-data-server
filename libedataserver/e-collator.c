@@ -289,7 +289,7 @@ convert_to_ustring (const gchar *string,
 /**
  * e_collator_new:
  * @locale: The locale under which to sort
- * @error: (allow-none): A location to store a #GError from the #E_COLLATOR_ERROR domain
+ * @error: (nullable) (optional): A location to store a #GError from the #E_COLLATOR_ERROR domain
  *
  * Creates a new #ECollator for the given @locale,
  * the returned collator should be freed with e_collator_unref().
@@ -308,8 +308,8 @@ e_collator_new (const gchar *locale,
 /**
  * e_collator_new_interpret_country:
  * @locale: The locale under which to sort
- * @country_code: (allow-none) (out) (transfer full): A location to store the interpreted country code from @locale 
- * @error: (allow-none): A location to store a #GError from the #E_COLLATOR_ERROR domain
+ * @country_code: (nullable) (optional) (out) (transfer full): A location to store the interpreted country code from @locale 
+ * @error: (nullable) (optional): A location to store a #GError from the #E_COLLATOR_ERROR domain
  *
  * Creates a new #ECollator for the given @locale,
  * the returned collator should be freed with e_collator_unref().
@@ -452,7 +452,7 @@ e_collator_unref (ECollator *collator)
  * e_collator_generate_key:
  * @collator: An #ECollator
  * @str: The string to generate a collation key for
- * @error: (allow-none): A location to store a #GError from the #E_COLLATOR_ERROR domain
+ * @error: (nullable) (optional): A location to store a #GError from the #E_COLLATOR_ERROR domain
  *
  * Generates a collation key for @str, the result of comparing
  * two collation keys with strcmp() will be the same result
@@ -587,10 +587,10 @@ e_collator_generate_key_for_index (ECollator *collator,
 /**
  * e_collator_collate:
  * @collator: An #ECollator
- * @str_a: (allow-none): A string to compare
- * @str_b: (allow-none): The string to compare with @str_a
+ * @str_a: (nullable) (optional): A string to compare
+ * @str_b: (nullable) (optional): The string to compare with @str_a
  * @result: (out): A location to store the comparison result
- * @error: (allow-none): A location to store a #GError from the #E_COLLATOR_ERROR domain
+ * @error: (nullable) (optional): A location to store a #GError from the #E_COLLATOR_ERROR domain
  *
  * Compares @str_a with @str_b, the order of strings is determined by the parameters of @collator.
  *
@@ -644,9 +644,9 @@ e_collator_collate (ECollator *collator,
  * e_collator_get_index_labels:
  * @collator: An #ECollator
  * @n_labels: (out): The number of labels/indexes available for @collator
- * @underflow: (allow-none) (out): The underflow index, for any words which sort below the active alphabet(s)
- * @inflow: (allow-none) (out): The inflow index, for any words which sort between the active alphabets (if there is more than one)
- * @overflow: (allow-none) (out): The overflow index, for any words which sort above the active alphabet(s)
+ * @underflow: (nullable) (optional) (out): The underflow index, for any words which sort below the active alphabet(s)
+ * @inflow: (nullable) (optional) (out): The inflow index, for any words which sort between the active alphabets (if there is more than one)
+ * @overflow: (nullable) (optional) (out): The overflow index, for any words which sort above the active alphabet(s)
  *
  * Fetches the displayable labels and index positions for the active alphabet.
  *

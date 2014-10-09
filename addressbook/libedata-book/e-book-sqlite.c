@@ -6455,8 +6455,8 @@ ebsql_new_default (const gchar *path,
 /**
  * e_book_sqlite_new:
  * @path: location to load or create the new database
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Creates a new #EBookSqlite with the default summary configuration.
  *
@@ -6493,13 +6493,13 @@ e_book_sqlite_new (const gchar *path,
 /**
  * e_book_sqlite_new_full:
  * @path: location to load or create the new database
- * @setup: (allow-none): an #ESourceBackendSummarySetup describing how the summary should be setup, or %NULL to use the default
- * @vcard_callback: (allow-none) (scope async) (closure user_data): A function to resolve vcards
- * @change_callback: (allow-none) (scope async) (closure user_data): A function to catch notifications of vcard changes
- * @user_data: (allow-none): callback user data
- * @user_data_destroy: (allow-none): A function to free @user_data automatically when the created #EBookSqlite is destroyed.
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @setup: (nullable) (optional): an #ESourceBackendSummarySetup describing how the summary should be setup, or %NULL to use the default
+ * @vcard_callback: (nullable) (optional) (scope async) (closure user_data): A function to resolve vcards
+ * @change_callback: (nullable) (optional) (scope async) (closure user_data): A function to catch notifications of vcard changes
+ * @user_data: (nullable) (optional): callback user data
+ * @user_data_destroy: (nullable) (optional): A function to free @user_data automatically when the created #EBookSqlite is destroyed.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Opens or creates a new addressbook at @path.
  *
@@ -6644,8 +6644,8 @@ e_book_sqlite_new_full (const gchar *path,
  * e_book_sqlite_lock:
  * @ebsql: An #EBookSqlite
  * @lock_type: The #EbSqlLockType to acquire
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Obtains an exclusive lock on @ebsql and starts a transaction.
  *
@@ -6713,7 +6713,7 @@ e_book_sqlite_lock (EBookSqlite *ebsql,
  * e_book_sqlite_unlock:
  * @ebsql: An #EBookSqlite
  * @action: Which #EbSqlUnlockAction to take while unlocking
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Releases an exclusive on @ebsql and finishes a transaction previously
  * started with e_book_sqlite_lock_updates().
@@ -6804,8 +6804,8 @@ e_book_sqlite_ref_source (EBookSqlite *ebsql)
  * @contact: EContact to be added
  * @extra: Extra data to store in association with this contact
  * @replace: Whether this contact should replace another contact with the same UID.
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * This is a convenience wrapper for e_book_sqlite_add_contacts(),
  * which is the preferred means to add or modify multiple contacts when possible.
@@ -6841,10 +6841,10 @@ e_book_sqlite_add_contact (EBookSqlite *ebsql,
  * e_book_sqlite_new_contacts:
  * @ebsql: An #EBookSqlite
  * @contacts: (element-type EContact): A list of contacts to add to @ebsql
- * @extra: (allow-none) (element-type utf8): A list of extra data to store in association with this contact
+ * @extra: (nullable) (optional) (element-type utf8): A list of extra data to store in association with this contact
  * @replace: Whether this contact should replace another contact with the same UID.
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Adds or replaces contacts in @ebsql. If @replace_existing is specified then existing
  * contacts with the same UID will be replaced, otherwise adding an existing contact
@@ -6923,8 +6923,8 @@ e_book_sqlite_add_contacts (EBookSqlite *ebsql,
  * e_book_sqlite_remove_contact:
  * @ebsql: An #EBookSqlite
  * @uid: the uid of the contact to remove
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Removes the contact indicated by @uid from @ebsql.
  *
@@ -6978,8 +6978,8 @@ generate_delete_stmt (const gchar *table,
  * e_book_sqlite_remove_contacts:
  * @ebsql: An #EBookSqlite
  * @uids: a #GSList of uids indicating which contacts to remove
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Removes the contacts indicated by @uids from @ebsql.
  *
@@ -7055,7 +7055,7 @@ e_book_sqlite_remove_contacts (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @uid: The uid of the contact to check for
  * @exists: (out): Return location to store whether the contact exists.
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Checks if a contact bearing the UID indicated by @uid is stored in @ebsql.
  *
@@ -7095,7 +7095,7 @@ e_book_sqlite_has_contact (EBookSqlite *ebsql,
  * @uid: The uid of the contact to fetch
  * @meta_contact: Whether an entire contact is desired, or only the metadata
  * @ret_contact: (out) (transfer full): Return location to store the fetched contact
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetch the #EContact specified by @uid in @ebsql.
  *
@@ -7137,7 +7137,7 @@ e_book_sqlite_get_contact (EBookSqlite *ebsql,
  * @uid: The uid of the contact to fetch
  * @meta_contact: Whether an entire contact is desired, or only the metadata
  * @contact: (out) (transfer full): Return location to store the fetched contact
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetch the #EContact specified by @uid in @ebsql without locking internal mutex.
  *
@@ -7182,7 +7182,7 @@ ebsql_get_contact_unlocked (EBookSqlite *ebsql,
  * @uid: The uid of the contact to fetch
  * @meta_contact: Whether an entire contact is desired, or only the metadata
  * @ret_vcard: (out) (transfer full): Return location to store the fetched vcard string
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetch a vcard string for @uid in @ebsql.
  *
@@ -7256,7 +7256,7 @@ e_book_sqlite_get_vcard (EBookSqlite *ebsql,
  * @uid: The uid of the contact to fetch
  * @meta_contact: Whether an entire contact is desired, or only the metadata
  * @ret_vcard: (out) (transfer full): Return location to store the fetched vcard string
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetch a vcard string for @uid in @ebsql without locking internal mutex.
  *
@@ -7323,8 +7323,8 @@ ebsql_get_vcard_unlocked (EBookSqlite *ebsql,
  * e_book_sqlite_set_contact_extra:
  * @ebsql: An #EBookSqlite
  * @uid: The uid of the contact to set the extra data for
- * @extra: (allow-none): The extra data to set
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @extra: (nullable) (optional): The extra data to set
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Sets or replaces the extra data associated with @uid.
  *
@@ -7358,7 +7358,7 @@ e_book_sqlite_set_contact_extra (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @uid: The uid of the contact to fetch the extra data for
  * @ret_extra: (out) (transfer full): Return location to store the extra data
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetches the extra data previously set for @uid, either with
  * e_book_sqlite_set_contact_extra() or when adding contacts.
@@ -7394,7 +7394,7 @@ e_book_sqlite_get_contact_extra (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @uid: The uid of the contact to fetch the extra data for
  * @ret_extra: (out) (transfer full): Return location to store the extra data
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetches the extra data previously set for @uid, either with
  * e_book_sqlite_set_contact_extra() or when adding contacts,
@@ -7427,12 +7427,12 @@ ebsql_get_contact_extra_unlocked (EBookSqlite *ebsql,
 /**
  * e_book_sqlite_search:
  * @ebsql: An #EBookSqlite
- * @sexp: (allow-none): search expression; use %NULL or an empty string to list all stored contacts.
+ * @sexp: (nullable) (optional): search expression; use %NULL or an empty string to list all stored contacts.
  * @meta_contacts: Whether entire contacts are desired, or only the metadata
  * @ret_list: (out) (transfer full) (element-type EbSqlSearchData): Return location
  * to store a #GSList of #EbSqlSearchData structures
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Searches @ebsql for contacts matching the search expression indicated by @sexp.
  *
@@ -7480,10 +7480,10 @@ e_book_sqlite_search (EBookSqlite *ebsql,
 /**
  * e_book_sqlite_search_uids:
  * @ebsql: An #EBookSqlite
- * @sexp: (allow-none): search expression; use %NULL or an empty string to get all stored contacts.
+ * @sexp: (nullable) (optional): search expression; use %NULL or an empty string to get all stored contacts.
  * @ret_list: (out) (transfer full): Return location to store a #GSList of contact uids
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Similar to e_book_sqlitedb_search(), but fetches only a list of contact UIDs.
  *
@@ -7518,7 +7518,7 @@ e_book_sqlite_search_uids (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @key: The key to fetch a value for
  * @value: (out) (transfer full): A return location to store the value for @key
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Fetches the value for @key and stores it in @value
  *
@@ -7554,7 +7554,7 @@ e_book_sqlite_get_key_value (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @key: The key to fetch a value for
  * @value: The new value for @key
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * Sets the value for @key to be @value
  *
@@ -7589,7 +7589,7 @@ e_book_sqlite_set_key_value (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @key: The key to fetch a value for
  * @value: (out): A return location to store the value for @key
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * A convenience function to fetch the value of @key as an integer.
  *
@@ -7630,7 +7630,7 @@ e_book_sqlite_get_key_value_int (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @key: The key to fetch a value for
  * @value: The new value for @key
- * @error: (allow-none): A location to store any error that may have occurred.
+ * @error: (nullable) (optional): A location to store any error that may have occurred.
  *
  * A convenience function to set the value of @key as an integer.
  *
@@ -7681,7 +7681,7 @@ e_book_sqlite_search_data_free (EbSqlSearchData *data)
  * e_book_sqlite_set_locale:
  * @ebsql: An #EBookSqlite
  * @lc_collate: The new locale for the addressbook
- * @cancellable: (allow-none): A #GCancellable
+ * @cancellable: (nullable) (optional): A #GCancellable
  * @error: A location to store any error that may have occurred
  *
  * Relocalizes any locale specific data in the specified
@@ -7948,9 +7948,9 @@ collect_results_for_cursor_cb (gpointer ref,
  * @flags: The #EbSqlCursorStepFlags for this step
  * @origin: The #EbSqlCursorOrigin from whence to step
  * @count: A positive or negative amount of contacts to try and fetch
- * @results: (out) (allow-none) (element-type EbSqlSearchData) (transfer full):
+ * @results: (out) (nullable) (optional) (element-type EbSqlSearchData) (transfer full):
  *   A return location to store the results, or %NULL if %EBSQL_CURSOR_STEP_FETCH is not specified in %flags.
- * @cancellable: (allow-none): A #GCancellable
+ * @cancellable: (nullable) (optional): A #GCancellable
  * @error: A return location to store any error that might be reported.
  *
  * Steps @cursor through it's sorted query by a maximum of @count contacts
@@ -8274,10 +8274,10 @@ e_book_sqlite_cursor_set_sexp (EBookSqlite *ebsql,
  * e_book_sqlite_cursor_calculate:
  * @ebsql: An #EBookSqlite
  * @cursor: The #EbSqlCursor
- * @total: (out) (allow-none): A return location to store the total result set for this cursor
- * @position: (out) (allow-none): A return location to store the total results before the cursor value
- * @cancellable: (allow-none): A #GCancellable
- * @error: (allow-none): A return location to store any error that might be reported.
+ * @total: (out) (nullable) (optional): A return location to store the total result set for this cursor
+ * @position: (out) (nullable) (optional): A return location to store the total results before the cursor value
+ * @cancellable: (nullable) (optional): A #GCancellable
+ * @error: (nullable) (optional): A return location to store any error that might be reported.
  *
  * Calculates the @total amount of results for the @cursor's query expression,
  * as well as the current @position of @cursor in the results. @position is
@@ -8361,7 +8361,7 @@ e_book_sqlite_cursor_calculate (EBookSqlite *ebsql,
  * @ebsql: An #EBookSqlite
  * @cursor: The #EbSqlCursor
  * @contact: The #EContact to compare
- * @matches_sexp: (out) (allow-none): Whether the contact matches the cursor's search expression
+ * @matches_sexp: (out) (nullable) (optional): Whether the contact matches the cursor's search expression
  *
  * Compares @contact with @cursor and returns whether @contact is less than, equal to, or greater
  * than @cursor.

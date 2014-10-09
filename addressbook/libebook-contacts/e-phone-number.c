@@ -92,7 +92,7 @@ e_phone_number_is_supported (void)
 
 /**
  * e_phone_number_get_country_code_for_region:
- * @region_code: (allow-none): a two-letter country code, a locale name, or
+ * @region_code: (nullable) (optional): a two-letter country code, a locale name, or
  * %NULL
  * @error: (out): a #GError to set an error, if any
  *
@@ -159,7 +159,7 @@ e_phone_number_get_default_region (GError **error)
 /**
  * e_phone_number_from_string:
  * @phone_number: the phone number to parse
- * @region_code: (allow-none): a two-letter country code, or %NULL
+ * @region_code: (nullable) (optional): a two-letter country code, or %NULL
  * @error: (out): a #GError to set an error, if any
  *
  * Parses the string passed in @phone_number. Note that no validation is
@@ -345,7 +345,7 @@ e_phone_number_compare_strings (const gchar *first_number,
  * e_phone_number_compare_strings_with_region:
  * @first_number: the first EPhoneNumber to compare
  * @second_number: the second EPhoneNumber to compare
- * @region_code: (allow-none): a two-letter country code, or %NULL
+ * @region_code: (nullable) (optional): a two-letter country code, or %NULL
  * @error: (out): a #GError to set an error, if any
  *
  * Compares two phone numbers within the context of @region_code.

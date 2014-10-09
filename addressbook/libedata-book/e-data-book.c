@@ -2207,8 +2207,8 @@ e_data_book_get_object_path (EDataBook *book)
  * e_data_book_set_locale:
  * @book: an #EDataBook 
  * @locale: the new locale to set for this book
- * @cancellable: (allow-none): a #GCancellable
- * @error: (allow-none): a location to store any error which might occur
+ * @cancellable: (nullable) (optional): a #GCancellable
+ * @error: (nullable) (optional): a location to store any error which might occur
  *
  * Set's the locale for this addressbook, this can result in renormalization of
  * locale sensitive data.

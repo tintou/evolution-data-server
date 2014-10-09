@@ -457,7 +457,7 @@ e_source_authentication_dup_host (ESourceAuthentication *extension)
 /**
  * e_source_authentication_set_host:
  * @extension: an #ESourceAuthentication
- * @host: (allow-none): a host name, or %NULL
+ * @host: (nullable) (optional): a host name, or %NULL
  *
  * Sets the host name used to authenticate to a remote account.
  *
@@ -548,7 +548,7 @@ e_source_authentication_dup_method (ESourceAuthentication *extension)
 /**
  * e_source_authentication_set_method:
  * @extension: an #ESourceAuthentication
- * @method: (allow-none): authentication method, or %NULL
+ * @method: (nullable) (optional): authentication method, or %NULL
  *
  * Sets the authentication method for a remote account.  There are no
  * pre-defined method names; backends are free to set this however they
@@ -814,7 +814,7 @@ e_source_authentication_dup_user (ESourceAuthentication *extension)
 /**
  * e_source_authentication_set_user:
  * @extension: an #ESourceAuthentication
- * @user: (allow-none): a user name, or %NULL
+ * @user: (nullable) (optional): a user name, or %NULL
  *
  * Sets the user name used to authenticate to a remote account.
  *

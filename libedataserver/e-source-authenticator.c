@@ -411,7 +411,7 @@ e_source_authenticator_get_without_password (ESourceAuthenticator *auth)
  * e_source_authenticator_try_password_sync:
  * @auth: an #ESourceAuthenticator
  * @password: a user-provided password
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
  * Attempts to authenticate using @password.
@@ -454,7 +454,7 @@ e_source_authenticator_try_password_sync (ESourceAuthenticator *auth,
  * e_source_authenticator_try_password:
  * @auth: an #ESourceAuthenticator
  * @password: a user-provided password
- * @cancellable: (allow-none): optional #GCancellable object, or %NULL
+ * @cancellable: (nullable) (optional): optional #GCancellable object, or %NULL
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request
  *            is satisfied
  * @user_data: (closure): data to pass to the callback function
@@ -525,4 +525,3 @@ e_source_authenticator_try_password_finish (ESourceAuthenticator *auth,
 
 	return iface->try_password_finish (auth, result, error);
 }
-
