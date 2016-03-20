@@ -55,10 +55,7 @@ struct _CamelCertDBPrivate {
 };
 
 G_DEFINE_TYPE (CamelCertDB, camel_certdb, G_TYPE_OBJECT)
-G_DEFINE_BOXED_TYPE (CamelCert,
-		camel_cert,
-		camel_cert_ref,
-		camel_cert_unref)
+G_DEFINE_TYPE (CamelCert, camel_cert, G_TYPE_OBJECT)
 
 typedef struct {
 	gchar *hostname;
@@ -205,7 +202,7 @@ certdb_cert_load (CamelCertDB *certdb,
 	return cert;
 
 error:
-	camel_cert_unref (cert);
+	g_object_unref (cert);
 
 	return NULL;
 }
@@ -266,41 +263,37 @@ camel_certdb_init (CamelCertDB *certdb)
 CamelCert *
 camel_cert_new (void)
 {
-	CamelCert *cert;
-
-	cert = g_slice_new0 (CamelCert);
-	cert->refcount = 1;
-
-	return cert;
+	return g_object_new (CAMEL_TYPE_CERT, NULL);
 }
 
-CamelCert *
-camel_cert_ref (CamelCert *cert)
+static void
+cert_finalize (GObject *object)
 {
-	g_return_val_if_fail (cert != NULL, NULL);
-	g_return_val_if_fail (cert->refcount > 0, NULL);
+	CamelCert *cert = CAMEL_CERT (object);
+	g_free (cert->issuer);
+	g_free (cert->subject);
+	g_free (cert->hostname);
+	g_free (cert->fingerprint);
 
-	g_atomic_int_inc (&cert->refcount);
-	return cert;
+	if (cert->rawcert != NULL)
+		g_bytes_unref (cert->rawcert);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_cert_parent_class)->finalize (object);
 }
 
-void
-camel_cert_unref (CamelCert *cert)
+static void
+camel_cert_class_init (CamelCertClass *class)
 {
-	g_return_if_fail (cert != NULL);
-	g_return_if_fail (cert->refcount > 0);
+	GObjectClass *object_class;
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = cert_finalize;
+}
 
-	if (g_atomic_int_dec_and_test (&cert->refcount)) {
-		g_free (cert->issuer);
-		g_free (cert->subject);
-		g_free (cert->hostname);
-		g_free (cert->fingerprint);
-
-		if (cert->rawcert != NULL)
-			g_bytes_unref (cert->rawcert);
-
-		g_slice_free (CamelCert, cert);
-	}
+static void
+camel_cert_init (CamelCert *cert)
+{
+	
 }
 
 static const gchar *
@@ -677,7 +670,7 @@ camel_certdb_get_host (CamelCertDB *certdb,
 
 	cert = g_hash_table_lookup (certdb->priv->cert_hash, key);
 	if (cert != NULL)
-		camel_cert_ref (cert);
+		g_object_ref (cert);
 
 	certdb_key_free (key);
 
@@ -711,10 +704,10 @@ camel_certdb_put (CamelCertDB *certdb,
 	if (old_cert != NULL) {
 		g_hash_table_remove (certdb->priv->cert_hash, key);
 		g_ptr_array_remove (certdb->priv->certs, old_cert);
-		camel_cert_unref (old_cert);
+		g_object_unref (old_cert);
 	}
 
-	camel_cert_ref (cert);
+	g_object_ref (cert);
 	g_ptr_array_add (certdb->priv->certs, cert);
 	/* takes ownership of 'key' */
 	g_hash_table_insert (certdb->priv->cert_hash, key, cert);
@@ -748,7 +741,7 @@ camel_certdb_remove_host (CamelCertDB *certdb,
 	if (cert != NULL) {
 		g_hash_table_remove (certdb->priv->cert_hash, key);
 		g_ptr_array_remove (certdb->priv->certs, cert);
-		camel_cert_unref (cert);
+		g_object_unref (cert);
 
 		certdb->priv->dirty = TRUE;
 	}
@@ -779,7 +772,7 @@ camel_certdb_clear (CamelCertDB *certdb)
 	g_hash_table_foreach_remove (certdb->priv->cert_hash, cert_remove, NULL);
 	for (i = 0; i < certdb->priv->certs->len; i++) {
 		cert = (CamelCert *) certdb->priv->certs->pdata[i];
-		camel_cert_unref (cert);
+		g_object_unref (cert);
 	}
 
 	certdb->priv->saved_certs = 0;
@@ -794,7 +787,7 @@ camel_certdb_clear (CamelCertDB *certdb)
  * @certdb: a #CamelCertDB
  *
  * Gathers a list of known certificates. Each certificate in the returned #GSList
- * is referenced, thus unref it with camel_cert_unref() when done with it, the same
+ * is referenced, thus unref it with g_object_unref() when done with it, the same
  * as free the list itself.
  *
  * Returns: (transfer full) (element-type CamelCert): Newly allocated list of
@@ -815,7 +808,7 @@ camel_certdb_list_certs (CamelCertDB *certdb)
 	for (ii = 0; ii < certdb->priv->certs->len; ii++) {
 		CamelCert *cert = (CamelCert *) certdb->priv->certs->pdata[ii];
 
-		camel_cert_ref (cert);
+		g_object_ref (cert);
 		certs = g_slist_prepend (certs, cert);
 	}
 

@@ -59,7 +59,7 @@ struct _CamelMimePart {
 	CamelMedium parent;
 	CamelMimePartPrivate *priv;
 
-	struct _camel_header_raw *headers; /* mime headers */
+	CamelHeaderRaw *headers; /* mime headers */
 };
 
 struct _CamelMimePartClass {

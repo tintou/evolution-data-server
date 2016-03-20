@@ -316,8 +316,8 @@ recursive_scan (CamelStore *store,
 
 	/* link in ... */
 	fi = folder_info_new (store, root, path, flags, cancellable);
-	fi->parent = parent;
-	fi->next = *fip;
+	fi->parent_info = parent;
+	fi->next_info = *fip;
 	*fip = fi;
 
 	if (((flags & CAMEL_STORE_FOLDER_INFO_RECURSIVE) || parent == NULL)) {
@@ -343,12 +343,12 @@ recursive_scan (CamelStore *store,
 			if (path[0]) {
 				tmp = g_strdup_printf ("%s/%s", path, d->d_name);
 				recursive_scan (
-					store, &fi->child, fi, visited,
+					store, &fi->child_info, fi, visited,
 					root, tmp, flags, cancellable);
 				g_free (tmp);
 			} else {
 				recursive_scan (
-					store, &fi->child, fi, visited,
+					store, &fi->child_info, fi, visited,
 					root, d->d_name, flags, cancellable);
 			}
 		}
@@ -404,7 +404,7 @@ folders_scan (CamelStore *store,
 			gint i;
 
 			for (i = 0; i < folders->len; i++)
-				camel_folder_info_free (folders->pdata[i]);
+				g_object_unref (folders->pdata[i]);
 			g_ptr_array_set_size (folders, 0);
 			break;
 		}
@@ -618,9 +618,9 @@ mh_store_get_folder_info_sync (CamelStore *store,
 			CamelFolderInfo *rfi;
 
 			rfi = fi;
-			fi = rfi->child;
-			rfi->child = NULL;
-			camel_folder_info_free (rfi);
+			fi = rfi->child_info;
+			rfi->child_info = NULL;
+			g_object_unref (rfi);
 		}
 
 		g_hash_table_foreach (visited, inode_free, NULL);

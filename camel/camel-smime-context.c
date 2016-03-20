@@ -66,7 +66,7 @@ struct _CamelSMIMEContextPrivate {
 	CERTCertDBHandle *certdb;
 
 	gchar *encrypt_key;
-	camel_smime_sign_t sign_mode;
+	CamelSMIMESignMode sign_mode;
 
 	gint password_tries;
 	guint send_encrypt_key_prefs : 1;
@@ -1355,18 +1355,18 @@ camel_smime_context_set_encrypt_key (CamelSMIMEContext *context,
 /* set signing mode, clearsigned multipart/signed or enveloped */
 void
 camel_smime_context_set_sign_mode (CamelSMIMEContext *context,
-                                   camel_smime_sign_t type)
+                                   CamelSMIMESignMode mode)
 {
-	context->priv->sign_mode = type;
+	context->priv->sign_mode = mode;
 }
 
 /* TODO: This is suboptimal, but the only other solution is to pass around NSSCMSMessages */
-guint32
+CamelSMIMEDescribeFlags
 camel_smime_context_describe_part (CamelSMIMEContext *context,
                                    CamelMimePart *part)
 {
 	CamelCipherContextClass *class;
-	guint32 flags = 0;
+	CamelSMIMEDescribeFlags flags = 0;
 	CamelContentType *ct;
 	const gchar *tmp;
 

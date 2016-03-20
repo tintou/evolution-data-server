@@ -110,7 +110,7 @@ change_folder (CamelStore *store,
 		camel_store_folder_deleted (store, fi);
 	else
 		camel_store_folder_created (store, fi);
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 }
 
 static void
@@ -339,9 +339,9 @@ vee_store_get_folder_info_sync (CamelStore *store,
 		if (pinfo) {
 			pinfo->flags = (pinfo->flags & ~(CAMEL_FOLDER_CHILDREN | CAMEL_FOLDER_NOCHILDREN)) | CAMEL_FOLDER_CHILDREN;
 			d (printf ("updating parent flags for children '%s' %08x\n", pinfo->full_name, pinfo->flags));
-			tail = pinfo->child;
+			tail = pinfo->child_info;
 			if (tail == NULL)
-				pinfo->child = info;
+				pinfo->child_info = info;
 		} else if (info != res) {
 			tail = res;
 		} else {
@@ -349,10 +349,10 @@ vee_store_get_folder_info_sync (CamelStore *store,
 		}
 
 		if (info && tail) {
-			while (tail->next)
-				tail = tail->next;
-			tail->next = info;
-			info->parent = pinfo;
+			while (tail->next_info)
+				tail = tail->next_info;
+			tail->next_info = info;
+			info->parent_info = pinfo;
 		}
 
 		g_free (pname);
@@ -370,9 +370,9 @@ vee_store_get_folder_info_sync (CamelStore *store,
 			res = info;
 		else {
 			tail = res;
-			while (tail->next)
-				tail = tail->next;
-			tail->next = info;
+			while (tail->next_info)
+				tail = tail->next_info;
+			tail->next_info = info;
 		}
 	}
 
@@ -643,7 +643,7 @@ camel_vee_store_set_unmatched_enabled (CamelVeeStore *vstore,
 		camel_store_folder_deleted (CAMEL_STORE (vstore), fi_unmatched);
 	}
 
-	camel_folder_info_free (fi_unmatched);
+	g_object_unref (fi_unmatched);
 }
 
 struct AddToUnmatchedData {
@@ -733,7 +733,7 @@ camel_vee_store_note_subfolder_used (CamelVeeStore *vstore,
 
 		if (camel_folder_change_info_changed (atud.changes))
 			camel_folder_changed (unmatched_folder, atud.changes);
-		camel_folder_change_info_free (atud.changes);
+		g_object_unref (atud.changes);
 	}
 
 	g_mutex_unlock (&vstore->priv->sf_counts_mutex);
@@ -852,7 +852,7 @@ camel_vee_store_note_vuid_used (CamelVeeStore *vstore,
 
 		if (camel_folder_change_info_changed (changes))
 			camel_folder_changed (CAMEL_FOLDER (vstore->priv->unmatched_folder), changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	g_mutex_unlock (&vstore->priv->vu_counts_mutex);
@@ -915,7 +915,7 @@ camel_vee_store_note_vuid_unused (CamelVeeStore *vstore,
 
 		if (camel_folder_change_info_changed (changes))
 			camel_folder_changed (CAMEL_FOLDER (vstore->priv->unmatched_folder), changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	g_mutex_unlock (&vstore->priv->vu_counts_mutex);
@@ -996,7 +996,7 @@ vee_store_rebuild_unmatched_folder (CamelSession *session,
 
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (unmatched_folder, changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 
 	/* coverity[unchecked_value] */
 	g_cancellable_set_error_if_cancelled (cancellable, error);

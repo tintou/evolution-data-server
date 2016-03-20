@@ -165,7 +165,7 @@ vee_summary_notify_mi_changed (CamelVeeFolder *vfolder,
 
 	camel_folder_change_info_change_uid (changes, camel_message_info_uid (mi));
 	camel_folder_changed (CAMEL_FOLDER (vfolder), changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 }
 
 static gboolean

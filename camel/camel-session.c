@@ -1068,7 +1068,7 @@ camel_session_get_password (CamelSession *session,
                             CamelService *service,
                             const gchar *prompt,
                             const gchar *item,
-                            guint32 flags,
+                            CamelSessionFlags flags,
                             GError **error)
 {
 	CamelSessionClass *class;
@@ -1463,6 +1463,10 @@ camel_session_submit_job (CamelSession *session,
 
 /**
  * camel_session_set_junk_headers:
+ * @session: a #CamelSession
+ * @headers: (array length=len):
+ * @values: (array):
+ * @len: length of @headers and @values
  *
  * Since: 2.22
  **/
@@ -1506,7 +1510,7 @@ camel_session_get_junk_headers (CamelSession *session)
  * camel_session_authenticate_sync:
  * @session: a #CamelSession
  * @service: a #CamelService
- * @mechanism: a SASL mechanism name, or %NULL
+ * @mechanism: (nullable): a SASL mechanism name, or %NULL
  * @cancellable: optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *

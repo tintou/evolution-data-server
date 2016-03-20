@@ -58,12 +58,12 @@ typedef struct _CamelSession CamelSession;
 typedef struct _CamelSessionClass CamelSessionClass;
 typedef struct _CamelSessionPrivate CamelSessionPrivate;
 
-enum {
+typedef enum {
 	CAMEL_SESSION_PASSWORD_REPROMPT = 1 << 0,
 	CAMEL_SESSION_PASSWORD_SECRET = 1 << 2,
 	CAMEL_SESSION_PASSWORD_STATIC = 1 << 3,
 	CAMEL_SESSION_PASSPHRASE = 1 << 4
-};
+} CamelSessionFlags;
 
 struct _CamelSession {
 	GObject parent;
@@ -102,7 +102,7 @@ struct _CamelSessionClass {
 						 CamelService *service,
 						 const gchar *prompt,
 						 const gchar *item,
-						 guint32 flags,
+						 CamelSessionFlags flags,
 						 GError **error);
 	gboolean	(*forget_password)	(CamelSession *session,
 						 CamelService *service,
@@ -171,7 +171,7 @@ gchar *		camel_session_get_password	(CamelSession *session,
 						 CamelService *service,
 						 const gchar *prompt,
 						 const gchar *item,
-						 guint32 flags,
+						 CamelSessionFlags flags,
 						 GError **error);
 gboolean	camel_session_forget_password	(CamelSession *session,
 						 CamelService *service,

@@ -89,15 +89,12 @@ localtime_r (t,
 #define d(x)
 #define d2(x)
 
+G_DEFINE_TYPE (CamelContentDisposition, camel_content_disposition, G_TYPE_OBJECT)
+
 G_DEFINE_BOXED_TYPE (CamelContentType,
 		camel_content_type,
 		camel_content_type_ref,
 		camel_content_type_unref)
-
-G_DEFINE_BOXED_TYPE (CamelContentDisposition,
-		camel_content_disposition,
-		camel_content_disposition_ref,
-		camel_content_disposition_unref)
 
 G_DEFINE_BOXED_TYPE (CamelHeaderAddress,
 		camel_header_address,
@@ -3747,17 +3744,39 @@ camel_content_transfer_encoding_decode (const gchar *in)
 	return NULL;
 }
 
+static void
+content_disposition_finalize (GObject *object)
+{
+	camel_header_param_list_free (CAMEL_CONTENT_DISPOSITION(object)->params);
+	g_free (CAMEL_CONTENT_DISPOSITION(object)->disposition);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_content_disposition_parent_class)->finalize (object);
+}
+
+static void
+camel_content_disposition_class_init (CamelContentDispositionClass *class)
+{
+	GObjectClass *object_class;
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = content_disposition_finalize;
+}
+
+static void
+camel_content_disposition_init (CamelContentDisposition *d)
+{
+	
+}
+
 CamelContentDisposition *
 camel_content_disposition_decode (const gchar *in)
 {
 	CamelContentDisposition *d = NULL;
 	const gchar *inptr = in;
 
-	if (in == NULL)
-		return NULL;
+	g_return_val_if_fail (in != NULL, NULL);
 
-	d = g_malloc (sizeof (*d));
-	d->refcount = 1;
+	d = g_object_new (CAMEL_TYPE_CONTENT_DISPOSITION, NULL);
 	d->disposition = decode_token (&inptr);
 	if (d->disposition == NULL) {
 		w (g_warning ("Empty disposition type"));
@@ -3766,37 +3785,13 @@ camel_content_disposition_decode (const gchar *in)
 	return d;
 }
 
-CamelContentDisposition *
-camel_content_disposition_ref (CamelContentDisposition *d)
-{
-	if (d)
-		d->refcount++;
-
-	return d;
-}
-
-void
-camel_content_disposition_unref (CamelContentDisposition *d)
-{
-	if (d) {
-		if (d->refcount <= 1) {
-			camel_header_param_list_free (d->params);
-			g_free (d->disposition);
-			g_free (d);
-		} else {
-			d->refcount--;
-		}
-	}
-}
-
 gchar *
 camel_content_disposition_format (CamelContentDisposition *d)
 {
 	GString *out;
 	gchar *ret;
 
-	if (d == NULL)
-		return NULL;
+	g_return_val_if_fail (d != NULL, NULL);
 
 	out = g_string_new ("");
 	if (d->disposition)
@@ -4471,7 +4466,7 @@ camel_header_location_decode (const gchar *in)
 
 #ifdef CHECKS
 static void
-check_header (struct _camel_header_raw *header)
+check_header (CamelHeaderRaw *header)
 {
 	guchar *cp;
 
@@ -4487,7 +4482,7 @@ check_header (struct _camel_header_raw *header)
 #endif
 
 void
-camel_header_raw_append_parse (struct _camel_header_raw **list,
+camel_header_raw_append_parse (CamelHeaderRaw **list,
                                const gchar *header,
                                gint offset)
 {
@@ -4513,12 +4508,12 @@ camel_header_raw_append_parse (struct _camel_header_raw **list,
 }
 
 void
-camel_header_raw_append (struct _camel_header_raw **list,
+camel_header_raw_append (CamelHeaderRaw **list,
                          const gchar *name,
                          const gchar *value,
                          gint offset)
 {
-	struct _camel_header_raw *l, *n;
+	CamelHeaderRaw *l, *n;
 
 	d (printf ("Header: %s: %s\n", name, value));
 
@@ -4530,7 +4525,7 @@ camel_header_raw_append (struct _camel_header_raw **list,
 #ifdef CHECKS
 	check_header (n);
 #endif
-	l = (struct _camel_header_raw *) list;
+	l = (CamelHeaderRaw *) list;
 	while (l->next) {
 		l = l->next;
 	}
@@ -4551,11 +4546,11 @@ camel_header_raw_append (struct _camel_header_raw **list,
 #endif
 }
 
-static struct _camel_header_raw *
-header_raw_find_node (struct _camel_header_raw **list,
+static CamelHeaderRaw *
+header_raw_find_node (CamelHeaderRaw **list,
                       const gchar *name)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	l = *list;
 	while (l) {
@@ -4567,11 +4562,11 @@ header_raw_find_node (struct _camel_header_raw **list,
 }
 
 const gchar *
-camel_header_raw_find (struct _camel_header_raw **list,
+camel_header_raw_find (CamelHeaderRaw **list,
                        const gchar *name,
                        gint *offset)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	l = header_raw_find_node (list, name);
 	if (l) {
@@ -4583,12 +4578,12 @@ camel_header_raw_find (struct _camel_header_raw **list,
 }
 
 const gchar *
-camel_header_raw_find_next (struct _camel_header_raw **list,
+camel_header_raw_find_next (CamelHeaderRaw **list,
                             const gchar *name,
                             gint *offset,
                             const gchar *last)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	if (last == NULL || name == NULL)
 		return NULL;
@@ -4600,7 +4595,7 @@ camel_header_raw_find_next (struct _camel_header_raw **list,
 }
 
 static void
-header_raw_free (struct _camel_header_raw *l)
+header_raw_free (CamelHeaderRaw *l)
 {
 	g_free (l->name);
 	g_free (l->value);
@@ -4608,13 +4603,13 @@ header_raw_free (struct _camel_header_raw *l)
 }
 
 void
-camel_header_raw_remove (struct _camel_header_raw **list,
+camel_header_raw_remove (CamelHeaderRaw **list,
                          const gchar *name)
 {
-	struct _camel_header_raw *l, *p;
+	CamelHeaderRaw *l, *p;
 
 	/* the next pointer is at the head of the structure, so this is safe */
-	p = (struct _camel_header_raw *) list;
+	p = (CamelHeaderRaw *) list;
 	l = *list;
 	while (l) {
 		if (!g_ascii_strcasecmp (l->name, name)) {
@@ -4629,7 +4624,7 @@ camel_header_raw_remove (struct _camel_header_raw **list,
 }
 
 void
-camel_header_raw_replace (struct _camel_header_raw **list,
+camel_header_raw_replace (CamelHeaderRaw **list,
                           const gchar *name,
                           const gchar *value,
                           gint offset)
@@ -4639,9 +4634,9 @@ camel_header_raw_replace (struct _camel_header_raw **list,
 }
 
 void
-camel_header_raw_clear (struct _camel_header_raw **list)
+camel_header_raw_clear (CamelHeaderRaw **list)
 {
-	struct _camel_header_raw *l, *n;
+	CamelHeaderRaw *l, *n;
 	l = *list;
 	while (l) {
 		n = l->next;
@@ -4778,7 +4773,7 @@ mailing_list_init (gpointer param)
 }
 
 gchar *
-camel_header_raw_check_mailing_list (struct _camel_header_raw **list)
+camel_header_raw_check_mailing_list (CamelHeaderRaw **list)
 {
 	static GOnce once = G_ONCE_INIT;
 	const gchar *v;

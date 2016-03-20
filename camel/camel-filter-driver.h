@@ -48,7 +48,7 @@
 
 G_BEGIN_DECLS
 
-struct _CamelSession;
+typedef struct _CamelSession CamelSession;
 
 typedef struct _CamelFilterDriver CamelFilterDriver;
 typedef struct _CamelFilterDriverClass CamelFilterDriverClass;
@@ -84,7 +84,7 @@ typedef void (*CamelFilterPlaySoundFunc)  (CamelFilterDriver *driver, const gcha
 typedef void (*CamelFilterSystemBeepFunc) (CamelFilterDriver *driver, gpointer user_data);
 
 GType          camel_filter_driver_get_type (void);
-CamelFilterDriver  *camel_filter_driver_new     (struct _CamelSession *session);
+CamelFilterDriver  *camel_filter_driver_new     (CamelSession *session);
 
 /* modifiers */
 void camel_filter_driver_set_logfile          (CamelFilterDriver *d, FILE *logfile);

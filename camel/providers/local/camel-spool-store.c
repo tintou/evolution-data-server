@@ -160,8 +160,8 @@ spool_new_fi (CamelStore *store,
 	fi->total = -1;
 	fi->flags = flags;
 
-	fi->parent = parent;
-	fi->next = *fip;
+	fi->parent_info = parent;
+	fi->next_info = *fip;
 	*fip = fi;
 
 	return fi;
@@ -237,7 +237,7 @@ scan_dir (CamelStore *store,
 		fi = spool_new_fi (
 			store, parent, fip, path,
 			CAMEL_FOLDER_NOSELECT);
-		fip = &fi->child;
+		fip = &fi->child_info;
 		parent = fi;
 	}
 
@@ -362,7 +362,7 @@ get_folder_info_elm (CamelStore *store,
 	if (scan_dir (
 		store, visited, path, top, flags,
 		NULL, &fi, cancellable, error) == -1 && fi != NULL) {
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 		fi = NULL;
 	}
 

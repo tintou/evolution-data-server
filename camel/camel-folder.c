@@ -44,6 +44,10 @@
 	(G_TYPE_INSTANCE_GET_PRIVATE \
 	((obj), CAMEL_TYPE_FOLDER, CamelFolderPrivate))
 
+#define CAMEL_FOLDER_CHANGE_INFO_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), CAMEL_TYPE_FOLDER_CHANGE_INFO, CamelFolderChangeInfoPrivate))
+
 #define d(x)
 #define w(x)
 
@@ -123,6 +127,8 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
+G_DEFINE_TYPE (CamelFolderChangeInfo, camel_folder_change_info, G_TYPE_OBJECT)
+
 G_DEFINE_ABSTRACT_TYPE (CamelFolder, camel_folder, CAMEL_TYPE_OBJECT)
 
 G_DEFINE_BOXED_TYPE (CamelFolderQuotaInfo,
@@ -189,7 +195,7 @@ folder_emit_changed_cb (gpointer user_data)
 
 		g_signal_emit (folder, signals[CHANGED], 0, changes);
 
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 
 		g_object_unref (folder);
 	}
@@ -679,10 +685,10 @@ folder_finalize (GObject *object)
 	g_free (priv->display_name);
 	g_free (priv->description);
 
-	camel_folder_change_info_free (priv->changed_frozen);
+	g_object_unref (priv->changed_frozen);
 
 	if (priv->pending_changes != NULL)
-		camel_folder_change_info_free (priv->pending_changes);
+		g_object_unref (priv->pending_changes);
 
 	g_rec_mutex_clear (&priv->lock);
 	g_mutex_clear (&priv->change_lock);
@@ -970,7 +976,7 @@ folder_thaw (CamelFolder *folder)
 
 	if (info) {
 		camel_folder_changed (folder, info);
-		camel_folder_change_info_free (info);
+		g_object_unref (info);
 
 		if (folder->summary)
 			camel_folder_summary_save_to_db (folder->summary, NULL);
@@ -1286,7 +1292,7 @@ camel_folder_class_init (CamelFolderClass *class)
 		G_STRUCT_OFFSET (CamelFolderClass, changed),
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 1,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_CHANGE_INFO);
 
 	/**
 	 * CamelFolder::deleted
@@ -4128,6 +4134,57 @@ camel_folder_transfer_messages_to_finish (CamelFolder *source,
 	return g_task_propagate_boolean (G_TASK (result), error);
 }
 
+static void
+folder_change_info_finalize (GObject *object)
+{
+	CamelFolderChangeInfoPrivate *p;
+	CamelFolderChangeInfo *info;
+
+	g_return_if_fail (object != NULL);
+	info = CAMEL_FOLDER_CHANGE_INFO (object);
+	p = info->priv;
+
+	if (p->uid_source)
+		g_hash_table_destroy (p->uid_source);
+
+	g_hash_table_destroy (p->uid_stored);
+	g_ptr_array_free (p->uid_filter, TRUE);
+	camel_mempool_destroy (p->uid_pool);
+
+	g_ptr_array_free (info->uid_added, TRUE);
+	g_ptr_array_free (info->uid_removed, TRUE);
+	g_ptr_array_free (info->uid_changed, TRUE);
+	g_ptr_array_free (info->uid_recent, TRUE);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_folder_change_info_parent_class)->finalize (object);
+}
+
+static void
+camel_folder_change_info_class_init (CamelFolderChangeInfoClass *class)
+{
+	GObjectClass *object_class;
+
+	g_type_class_add_private (class, sizeof (CamelFolderChangeInfoPrivate));
+
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = folder_change_info_finalize;
+}
+
+static void
+camel_folder_change_info_init (CamelFolderChangeInfo *info)
+{
+	info->uid_added = g_ptr_array_new ();
+	info->uid_removed = g_ptr_array_new ();
+	info->uid_changed = g_ptr_array_new ();
+	info->uid_recent = g_ptr_array_new ();
+	info->priv = CAMEL_FOLDER_CHANGE_INFO_GET_PRIVATE (info);
+	info->priv->uid_stored = g_hash_table_new (g_str_hash, g_str_equal);
+	info->priv->uid_source = NULL;
+	info->priv->uid_filter = g_ptr_array_new ();
+	info->priv->uid_pool = camel_mempool_new (512, 256, CAMEL_MEMPOOL_ALIGN_BYTE);
+}
+
 /**
  * camel_folder_change_info_new:
  *
@@ -4141,20 +4198,7 @@ camel_folder_transfer_messages_to_finish (CamelFolder *source,
 CamelFolderChangeInfo *
 camel_folder_change_info_new (void)
 {
-	CamelFolderChangeInfo *info;
-
-	info = g_slice_new (CamelFolderChangeInfo);
-	info->uid_added = g_ptr_array_new ();
-	info->uid_removed = g_ptr_array_new ();
-	info->uid_changed = g_ptr_array_new ();
-	info->uid_recent = g_ptr_array_new ();
-	info->priv = g_slice_new (struct _CamelFolderChangeInfoPrivate);
-	info->priv->uid_stored = g_hash_table_new (g_str_hash, g_str_equal);
-	info->priv->uid_source = NULL;
-	info->priv->uid_filter = g_ptr_array_new ();
-	info->priv->uid_pool = camel_mempool_new (512, 256, CAMEL_MEMPOOL_ALIGN_BYTE);
-
-	return info;
+	return g_object_new (CAMEL_TYPE_FOLDER_CHANGE_INFO, NULL);
 }
 
 /**
@@ -4545,34 +4589,4 @@ camel_folder_change_info_clear (CamelFolderChangeInfo *info)
 	p->uid_stored = g_hash_table_new (g_str_hash, g_str_equal);
 	g_ptr_array_set_size (p->uid_filter, 0);
 	camel_mempool_flush (p->uid_pool, TRUE);
-}
-
-/**
- * camel_folder_change_info_free:
- * @info: a #CamelFolderChangeInfo
- *
- * Free memory associated with the folder change info lists.
- **/
-void
-camel_folder_change_info_free (CamelFolderChangeInfo *info)
-{
-	struct _CamelFolderChangeInfoPrivate *p;
-
-	g_return_if_fail (info != NULL);
-
-	p = info->priv;
-
-	if (p->uid_source)
-		g_hash_table_destroy (p->uid_source);
-
-	g_hash_table_destroy (p->uid_stored);
-	g_ptr_array_free (p->uid_filter, TRUE);
-	camel_mempool_destroy (p->uid_pool);
-	g_slice_free (struct _CamelFolderChangeInfoPrivate, p);
-
-	g_ptr_array_free (info->uid_added, TRUE);
-	g_ptr_array_free (info->uid_removed, TRUE);
-	g_ptr_array_free (info->uid_changed, TRUE);
-	g_ptr_array_free (info->uid_recent, TRUE);
-	g_slice_free (CamelFolderChangeInfo, info);
 }

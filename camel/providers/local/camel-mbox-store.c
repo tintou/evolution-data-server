@@ -225,7 +225,7 @@ scan_dir (CamelStore *store,
 			}
 		} else {
 			fi = camel_folder_info_new ();
-			fi->parent = parent;
+			fi->parent_info = parent;
 
 			fi->full_name = full_name;
 			fi->display_name = short_name;
@@ -240,7 +240,7 @@ scan_dir (CamelStore *store,
 			if (tail == NULL)
 				folders = fi;
 			else
-				tail->next = fi;
+				tail->next_info = fi;
 
 			tail = fi;
 
@@ -259,7 +259,7 @@ scan_dir (CamelStore *store,
 				*inew = in;
 				g_hash_table_insert (visited, inew, inew);
 #endif
-				if ((fi->child = scan_dir (store, visited, fi, path, fi->full_name, flags, error)))
+				if ((fi->child_info = scan_dir (store, visited, fi, path, fi->full_name, flags, error)))
 					fi->flags |= CAMEL_FOLDER_CHILDREN;
 				else
 					fi->flags = (fi->flags & ~CAMEL_FOLDER_CHILDREN) | CAMEL_FOLDER_NOCHILDREN;
@@ -503,7 +503,7 @@ mbox_store_get_folder_info_sync (CamelStore *store,
 	basename = g_path_get_basename (top);
 
 	fi = camel_folder_info_new ();
-	fi->parent = NULL;
+	fi->parent_info = NULL;
 	fi->full_name = g_strdup (top);
 	fi->display_name = basename;
 	fi->unread = -1;
@@ -514,10 +514,10 @@ mbox_store_get_folder_info_sync (CamelStore *store,
 	subdir = g_strdup_printf ("%s.sbd", path);
 	if (g_stat (subdir, &st) == 0) {
 		if  (S_ISDIR (st.st_mode))
-			fi->child = scan_dir (store, visited, fi, subdir, top, flags, error);
+			fi->child_info = scan_dir (store, visited, fi, subdir, top, flags, error);
 	}
 
-	if (fi->child)
+	if (fi->child_info)
 		fi->flags |= CAMEL_FOLDER_CHILDREN;
 	else
 		fi->flags |= CAMEL_FOLDER_NOCHILDREN;
@@ -783,7 +783,7 @@ mbox_store_delete_folder_sync (CamelStore *store,
 	fi->unread = -1;
 
 	camel_store_folder_deleted (store, fi);
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 
 	return TRUE;
 }

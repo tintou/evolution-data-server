@@ -809,7 +809,7 @@ nntp_store_get_subscribed_folder_info (CamelNNTPStore *nntp_store,
 				}
 				if (changes) {
 					camel_folder_changed (CAMEL_FOLDER (folder), changes);
-					camel_folder_change_info_free (changes);
+					g_object_unref (changes);
 				}
 				g_object_unref (folder);
 			}
@@ -822,7 +822,7 @@ nntp_store_get_subscribed_folder_info (CamelNNTPStore *nntp_store,
 			CAMEL_FOLDER_NOCHILDREN |
 			CAMEL_FOLDER_SYSTEM;
 		if (last)
-			last->next = fi;
+			last->next_info = fi;
 		else
 			first = fi;
 		last = fi;
@@ -846,20 +846,20 @@ tree_insert (CamelFolderInfo *root,
 		root = fi;
 	else if (!last) {
 		kfi = root;
-		while (kfi->next)
-			kfi = kfi->next;
-		kfi->next = fi;
-		fi->parent = kfi->parent;
+		while (kfi->next_info)
+			kfi = kfi->next_info;
+		kfi->next_info = fi;
+		fi->parent_info = kfi->parent_info;
 	} else {
-		if (!last->child) {
-			last->child = fi;
-			fi->parent = last;
+		if (!last->child_info) {
+			last->child_info = fi;
+			fi->parent_info = last;
 		} else {
-			kfi = last->child;
-			while (kfi->next)
-				kfi = kfi->next;
-			kfi->next = fi;
-			fi->parent = last;
+			kfi = last->child_info;
+			while (kfi->next_info)
+				kfi = kfi->next_info;
+			kfi->next_info = fi;
+			fi->parent_info = last;
 		}
 	}
 	return root;
@@ -1039,7 +1039,7 @@ nntp_store_get_cached_folder_info (CamelNNTPStore *nntp_store,
 
 			if (fi->full_name && g_hash_table_lookup (known, fi->full_name)) {
 				/* a duplicate has been found above */
-				camel_folder_info_free (fi);
+				g_object_unref (fi);
 				continue;
 			}
 
@@ -1050,7 +1050,7 @@ nntp_store_get_cached_folder_info (CamelNNTPStore *nntp_store,
 				first = nntp_push_to_hierarchy (nntp_store, first, fi, known);
 			} else {
 				if (last)
-					last->next = fi;
+					last->next_info = fi;
 				else
 					first = fi;
 				last = fi;
@@ -1576,7 +1576,7 @@ nntp_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 			camel_subscribable_folder_subscribed (
 				subscribable, fi);
 
-			camel_folder_info_free (fi);
+			g_object_unref (fi);
 		}
 
 		camel_store_summary_info_unref (store_summary, si);
@@ -1639,7 +1639,7 @@ nntp_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			camel_subscribable_folder_unsubscribed (
 				subscribable, fi);
 
-			camel_folder_info_free (fi);
+			g_object_unref (fi);
 		}
 
 		camel_store_summary_info_unref (store_summary, si);

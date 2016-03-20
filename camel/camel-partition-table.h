@@ -100,6 +100,8 @@ struct _CamelPartitionMapBlock {
 	struct _CamelPartitionMap partition[(CAMEL_BLOCK_SIZE - 8) / sizeof (struct _CamelPartitionMap)];
 };
 
+typedef gint (*CamelPartitionTableKeyCheck)(CamelPartitionTable *cpi, const gchar *key, camel_key_t keyid, gpointer data);
+
 struct _CamelPartitionTable {
 	GObject parent;
 	CamelPartitionTablePrivate *priv;
@@ -107,7 +109,7 @@ struct _CamelPartitionTable {
 	CamelBlockFile *blocks;
 	camel_block_t rootid;
 
-	gint (*is_key)(CamelPartitionTable *cpi, const gchar *key, camel_key_t keyid, gpointer data);
+	CamelPartitionTableKeyCheck is_key;
 	gpointer is_key_data;
 
 	/* we keep a list of partition blocks active at all times */
@@ -120,7 +122,7 @@ struct _CamelPartitionTableClass {
 
 GType		camel_partition_table_get_type	(void);
 CamelPartitionTable *
-		camel_partition_table_new	(struct _CamelBlockFile *bs,
+		camel_partition_table_new	(CamelBlockFile *bs,
 						 camel_block_t root);
 gint		camel_partition_table_sync	(CamelPartitionTable *cpi);
 gint		camel_partition_table_add	(CamelPartitionTable *cpi,

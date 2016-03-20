@@ -220,7 +220,7 @@ maildir_store_get_folder_sync (CamelStore *store,
 		   content migration only. */
 		folder_info = camel_store_get_folder_info_sync (store, NULL, CAMEL_STORE_FOLDER_INFO_RECURSIVE, cancellable, NULL);
 		if (folder_info)
-			camel_folder_info_free (folder_info);
+			g_object_unref (folder_info);
 	}
 
 	service = CAMEL_SERVICE (store);
@@ -761,25 +761,25 @@ scan_dirs (CamelStore *store,
 			CamelFolderInfo *old_topfi = *topfi;
 
 			*topfi = camel_folder_info_build (folders, (*topfi)->full_name, '/', TRUE);
-			camel_folder_info_free (old_topfi);
+			g_object_unref (old_topfi);
 		}
 
 		fi = *topfi;
 
 		if (fi && (flags & CAMEL_STORE_FOLDER_INFO_RECURSIVE) != 0) {
 			while (fi) {
-				if (fi->child) {
+				if (fi->child_info) {
 					fi->flags = fi->flags & (~CAMEL_FOLDER_NOCHILDREN);
 					fi->flags = fi->flags | CAMEL_FOLDER_CHILDREN;
 
-					fi = fi->child;
-				} else if (fi->next) {
-					fi = fi->next;
+					fi = fi->child_info;
+				} else if (fi->next_info) {
+					fi = fi->next_info;
 				} else {
 					while (fi) {
-						fi = fi->parent;
-						if (fi && fi->next) {
-							fi = fi->next;
+						fi = fi->parent_info;
+						if (fi && fi->next_info) {
+							fi = fi->next_info;
 							break;
 						}
 					}
@@ -844,7 +844,7 @@ maildir_store_get_folder_info_sync (CamelStore *store,
 	return fi;
 
 fail:
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 
 	return NULL;
 }
@@ -886,10 +886,10 @@ rename_traverse_fi (CamelStore *store,
 			g_free (new_full_name);
 		}
 
-		if (fi->child && !rename_traverse_fi (store, store_class, fi->child, old_full_name_prefix, new_full_name_prefix, cancellable, error))
+		if (fi->child_info && !rename_traverse_fi (store, store_class, fi->child_info, old_full_name_prefix, new_full_name_prefix, cancellable, error))
 			return FALSE;
 
-		fi = fi->next;
+		fi = fi->next_info;
 	}
 
 	return ret;
@@ -950,11 +950,11 @@ maildir_store_rename_folder_sync (CamelStore *store,
 		if (ret)
 			ret = rename_traverse_fi (
 				store, store_class,
-				subfolders->child,
+				subfolders->child_info,
 				old, new,
 				cancellable, error);
 
-		camel_folder_info_free (subfolders);
+		g_object_unref (subfolders);
 	}
 
 	g_free (old_dir);
@@ -1130,7 +1130,7 @@ scan_old_dir_info (CamelStore *store,
 
 		sn = g_queue_pop_head (&queue);
 
-		last = (CamelFolderInfo *) &sn->fi->child;
+		last = (CamelFolderInfo *) &sn->fi->child_info;
 
 		if (!strcmp (sn->fi->full_name, "."))
 			name = g_strdup (path);
@@ -1183,9 +1183,9 @@ scan_old_dir_info (CamelStore *store,
 					fi->display_name = g_strdup (d->d_name);
 					snew->fi = fi;
 
-					last->next = snew->fi;
+					last->next_info = snew->fi;
 					last = snew->fi;
-					snew->fi->parent = sn->fi;
+					snew->fi->parent_info = sn->fi;
 
 					g_hash_table_insert (visited, snew, snew);
 					g_queue_push_tail (&queue, snew);
@@ -1274,12 +1274,12 @@ traverse_rename_folder_info (CamelMaildirStore *mstore,
                              GError **error)
 {
 	while (fi != NULL) {
-		if (fi->child)
-			traverse_rename_folder_info (mstore, fi->child, maildir_version, cancellable, error);
+		if (fi->child_info)
+			traverse_rename_folder_info (mstore, fi->child_info, maildir_version, cancellable, error);
 
 		maildir_maybe_rename_old_folder (mstore, fi, maildir_version, cancellable, error);
 
-		fi = fi->next;
+		fi = fi->next_info;
 	}
 }
 
@@ -1372,6 +1372,6 @@ maildir_migrate_hierarchy (CamelMaildirStore *mstore,
 	}
 
 done:
-	camel_folder_info_free (topfi);
+	g_object_unref (topfi);
 	g_free (meta_path);
 }

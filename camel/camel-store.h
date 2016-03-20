@@ -53,6 +53,24 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_STORE, CamelStoreClass))
 
+#define CAMEL_TYPE_FOLDER_INFO \
+	(camel_folder_info_get_type ())
+#define CAMEL_FOLDER_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_FOLDER_INFO, CamelFolderInfo))
+#define CAMEL_FOLDER_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_FOLDER_INFO, CamelFolderInfoClass))
+#define CAMEL_IS_FOLDER_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_FOLDER_INFO))
+#define CAMEL_IS_FOLDER_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_FOLDER_INFO))
+#define CAMEL_FOLDER_INFO_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_FOLDER_INFO, CamelFolderInfoClass))
+
 /**
  * CAMEL_STORE_ERROR:
  *
@@ -100,10 +118,14 @@ typedef enum {
 	CAMEL_STORE_ERROR_NO_FOLDER
 } CamelStoreError;
 
-typedef struct _CamelFolderInfo {
-	struct _CamelFolderInfo *next;
-	struct _CamelFolderInfo *parent;
-	struct _CamelFolderInfo *child;
+typedef struct _CamelFolderInfo CamelFolderInfo;
+typedef struct _CamelFolderInfoClass CamelFolderInfoClass;
+
+struct _CamelFolderInfo {
+	GObject parent;
+	struct _CamelFolderInfo *next_info;
+	struct _CamelFolderInfo *parent_info;
+	struct _CamelFolderInfo *child_info;
 
 	gchar *full_name;
 	gchar *display_name;
@@ -111,7 +133,11 @@ typedef struct _CamelFolderInfo {
 	CamelFolderInfoFlags flags;
 	gint32 unread;
 	gint32 total;
-} CamelFolderInfo;
+};
+
+struct _CamelFolderInfoClass {
+	GObjectClass parent_class;
+};
 
 struct _CamelDB;
 
@@ -239,7 +265,6 @@ void		camel_store_folder_info_stale	(CamelStore *store);
 GType		camel_folder_info_get_type		(void);
 CamelFolderInfo *
 		camel_folder_info_new		(void);
-void		camel_folder_info_free		(CamelFolderInfo *fi);
 #ifndef CAMEL_DISABLE_DEPRECATED
 CamelFolderInfo *
 		camel_folder_info_build		(GPtrArray *folders,

@@ -288,7 +288,7 @@ static void
 mime_part_set_disposition (CamelMimePart *mime_part,
                            const gchar *disposition)
 {
-	camel_content_disposition_unref (mime_part->priv->disposition);
+	g_object_unref (mime_part->priv->disposition);
 	if (disposition)
 		mime_part->priv->disposition =
 			camel_content_disposition_decode (disposition);
@@ -447,7 +447,7 @@ mime_part_finalize (GObject *object)
 	g_free (priv->content_location);
 
 	g_list_free_full (priv->content_languages, (GDestroyNotify) g_free);
-	camel_content_disposition_unref (priv->disposition);
+	g_object_unref (priv->disposition);
 
 	camel_header_raw_clear (&CAMEL_MIME_PART (object)->headers);
 
@@ -516,7 +516,7 @@ mime_part_get_headers (CamelMedium *medium)
 	CamelMimePart *part = (CamelMimePart *) medium;
 	GArray *headers;
 	CamelMediumHeader header;
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 
 	headers = g_array_new (FALSE, FALSE, sizeof (CamelMediumHeader));
 	for (h = part->headers; h; h = h->next) {
@@ -577,7 +577,7 @@ mime_part_write_to_stream_sync (CamelDataWrapper *dw,
 	/* TODO: content-languages header? */
 
 	if (mp->headers) {
-		struct _camel_header_raw *h = mp->headers;
+		CamelHeaderRaw *h = mp->headers;
 		gchar *val;
 		gssize (*writefn) (
 			gpointer stream,
@@ -770,7 +770,7 @@ mime_part_write_to_output_stream_sync (CamelDataWrapper *dw,
 	/* TODO: content-languages header? */
 
 	if (mp->headers) {
-		struct _camel_header_raw *h = mp->headers;
+		CamelHeaderRaw *h = mp->headers;
 		gchar *val;
 		gssize (*writefn) (
 			gpointer stream,
@@ -968,7 +968,7 @@ mime_part_construct_from_parser_sync (CamelMimePart *mime_part,
                                       GError **error)
 {
 	CamelDataWrapper *dw = (CamelDataWrapper *) mime_part;
-	struct _camel_header_raw *headers;
+	CamelHeaderRaw *headers;
 	const gchar *content;
 	gchar *buf;
 	gsize len;

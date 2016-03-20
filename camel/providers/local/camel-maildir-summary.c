@@ -50,7 +50,7 @@
 
 static CamelMessageInfo *
 		message_info_new_from_header	(CamelFolderSummary *,
-						 struct _camel_header_raw *);
+						 CamelHeaderRaw *);
 static CamelMessageInfo *
 		maildir_message_info_from_db	(CamelFolderSummary *summary,
 						 CamelMIRecord *record);
@@ -313,7 +313,7 @@ maildir_summary_add (CamelLocalSummary *cls,
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	CamelMessageInfo *mi, *info;
 	CamelMaildirSummary *mds = (CamelMaildirSummary *) s;

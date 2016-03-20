@@ -832,7 +832,7 @@ imapx_parse_param_list (CamelIMAPXInputStream *stream,
 	return TRUE;
 }
 
-struct _CamelContentDisposition *
+CamelContentDisposition *
 imapx_parse_ext_optional (CamelIMAPXInputStream *stream,
                           GCancellable *cancellable,
                           GError **error)
@@ -840,7 +840,7 @@ imapx_parse_ext_optional (CamelIMAPXInputStream *stream,
 	gint tok;
 	guint len;
 	guchar *token;
-	struct _CamelContentDisposition *dinfo = NULL;
+	CamelContentDisposition *dinfo = NULL;
 	GError *local_error = NULL;
 
 	/* this parses both extension types, from the body_fld_dsp onwards */
@@ -864,8 +864,7 @@ imapx_parse_ext_optional (CamelIMAPXInputStream *stream,
 		stream, &token, &len, cancellable, NULL);
 	switch (tok) {
 		case '(':
-			dinfo = g_malloc0 (sizeof (*dinfo));
-			dinfo->refcount = 1;
+			dinfo = g_object_new (CAMEL_TYPE_CONTENT_DISPOSITION, NULL);
 			/* should be string */
 			if (!camel_imapx_input_stream_astring (stream, &token, cancellable, &local_error)) {
 				if (!local_error)
@@ -940,7 +939,7 @@ imapx_parse_ext_optional (CamelIMAPXInputStream *stream,
 	if (local_error != NULL) {
 		g_propagate_error (error, local_error);
 		if (dinfo)
-			camel_content_disposition_unref (dinfo);
+			g_object_unref (dinfo);
 		dinfo = NULL;
 	}
 
@@ -1317,7 +1316,7 @@ imapx_parse_body (CamelIMAPXInputStream *stream,
 	guchar *token;
 	struct _CamelMessageContentInfo * cinfo = NULL;
 	struct _CamelMessageContentInfo *subinfo, *last;
-	struct _CamelContentDisposition * dinfo = NULL;
+	CamelContentDisposition * dinfo = NULL;
 	GError *local_error = NULL;
 
 	/* body            ::= "(" body_type_1part / body_type_mpart ")" */
@@ -1525,13 +1524,13 @@ imapx_parse_body (CamelIMAPXInputStream *stream,
 		if (cinfo)
 			imapx_free_body (cinfo);
 		if (dinfo)
-			camel_content_disposition_unref (dinfo);
+			g_object_unref (dinfo);
 		return NULL;
 	}
 
 	/* FIXME: do something with the disposition, currently we have no way to pass it out? */
 	if (dinfo)
-		camel_content_disposition_unref (dinfo);
+		g_object_unref (dinfo);
 
 	return cinfo;
 }

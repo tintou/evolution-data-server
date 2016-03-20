@@ -543,7 +543,7 @@ imapx_store_process_mailbox_attributes (CamelIMAPXStore *store,
 		g_free (new_folder_path);
 	}
 
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 	g_free (folder_path);
 }
 
@@ -1018,7 +1018,7 @@ event:
 	fi = imapx_store_build_folder_info (imapx_store, folder_path, 0);
 	camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (imapx_store), fi);
 	camel_store_folder_deleted (CAMEL_STORE (imapx_store), fi);
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 }
 
 static CamelFolderInfo *
@@ -1168,7 +1168,7 @@ get_folder_info_offline (CamelStore *store,
 		if (!(si->flags & CAMEL_FOLDER_NOSELECT))
 			fill_fi ((CamelStore *) imapx_store, fi);
 
-		if (!fi->child)
+		if (!fi->child_info)
 			fi->flags |= CAMEL_FOLDER_NOCHILDREN;
 
 		if (fi->unread == -1 && fi->total == -1) {
@@ -1438,7 +1438,7 @@ imapx_store_remove_unknown_mailboxes_cb (gpointer key,
 			imapx_store_mailbox_attributes_to_flags (mailbox));
 		camel_store_folder_created (CAMEL_STORE (imapx_store), fi);
 		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (imapx_store), fi);
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 		g_free (folder_path);
 	}
 
@@ -1539,7 +1539,7 @@ sync_folders (CamelIMAPXStore *imapx_store,
 		(GHashFunc) imapx_name_hash,
 		(GEqualFunc) imapx_name_equal,
 		(GDestroyNotify) g_free,
-		(GDestroyNotify) camel_folder_info_free);
+		(GDestroyNotify) g_object_unref);
 
 	/* This suppresses CamelStore signal emissions
 	 * in imapx_store_process_mailbox_attributes(). */
@@ -2283,7 +2283,7 @@ imapx_find_folder_for_initial_setup (CamelFolderInfo *root,
 		if (!folded_path)
 			break;
 
-		for (next = NULL; finfo; finfo = finfo->next) {
+		for (next = NULL; finfo; finfo = finfo->next_info) {
 			gchar *folded_display_name;
 			gint cmp;
 
@@ -2309,7 +2309,7 @@ imapx_find_folder_for_initial_setup (CamelFolderInfo *root,
 		finfo = next;
 		if (finfo) {
 			if (path_parts[ii + 1])
-				finfo = finfo->child;
+				finfo = finfo->child_info;
 			else
 				folder_fullname = g_strdup (finfo->full_name);
 		}
@@ -2525,7 +2525,7 @@ imapx_initial_setup_sync (CamelStore *store,
 		"Backend:Imapx Backend:use-real-trash-path:b", "true",
 		trash_names, G_N_ELEMENTS (trash_names));
 
-	camel_folder_info_free (finfo);
+	g_object_unref (finfo);
 
 	return TRUE;
 }
@@ -2702,7 +2702,7 @@ imapx_ensure_parents_subscribed (CamelIMAPXStore *imapx_store,
 		fi = iter->data;
 
 		camel_subscribable_folder_subscribed (subscribable, fi);
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 	}
 
 	g_slist_free (parents);
@@ -2748,7 +2748,7 @@ imapx_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 		fi = imapx_store_build_folder_info (
 			CAMEL_IMAPX_STORE (subscribable), folder_name, 0);
 		camel_subscribable_folder_subscribed (subscribable, fi);
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 	}
 
 exit:
@@ -2793,7 +2793,7 @@ imapx_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 		fi = imapx_store_build_folder_info (
 			CAMEL_IMAPX_STORE (subscribable), folder_name, 0);
 		camel_subscribable_folder_unsubscribed (subscribable, fi);
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 	}
 
 exit:

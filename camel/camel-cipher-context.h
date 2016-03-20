@@ -74,27 +74,30 @@ typedef enum _camel_cipher_validity_sign_t {
 	CAMEL_CIPHER_VALIDITY_SIGN_BAD,
 	CAMEL_CIPHER_VALIDITY_SIGN_UNKNOWN,
 	CAMEL_CIPHER_VALIDITY_SIGN_NEED_PUBLIC_KEY
-} camel_cipher_validity_sign_t;
+} CamelCipherValiditySign;
 
 typedef enum _camel_cipher_validity_encrypt_t {
 	CAMEL_CIPHER_VALIDITY_ENCRYPT_NONE,
 	CAMEL_CIPHER_VALIDITY_ENCRYPT_WEAK,
 	CAMEL_CIPHER_VALIDITY_ENCRYPT_ENCRYPTED, /* encrypted, unknown strenght */
 	CAMEL_CIPHER_VALIDITY_ENCRYPT_STRONG
-} camel_cipher_validity_encrypt_t;
+} CamelCipherValidityEncrypt;
 
 typedef enum _camel_cipher_validity_mode_t {
 	CAMEL_CIPHER_VALIDITY_SIGN,
 	CAMEL_CIPHER_VALIDITY_ENCRYPT
-} camel_cipher_validity_mode_t;
+} CamelCipherValidityMode;
+
+typedef void (*CamelCipherCertDataFree)(gpointer cert_data);
+typedef gpointer (*CamelCipherCertDataClone)(gpointer cert_data);
 
 struct _CamelCipherCertInfo {
 	gchar *name;		/* common name */
 	gchar *email;
 
 	gpointer cert_data;  /* custom certificate data; can be NULL */
-	void (*cert_data_free) (gpointer cert_data); /* called to free cert_data; can be NULL only if cert_data is NULL */
-	gpointer (*cert_data_clone) (gpointer cert_data); /* called to clone cert_data; can be NULL only if cert_data is NULL */
+	CamelCipherCertDataFree cert_data_free; /* called to free cert_data; can be NULL only if cert_data is NULL */
+	CamelCipherCertDataClone cert_data_clone; /* called to clone cert_data; can be NULL only if cert_data is NULL */
 };
 
 struct _CamelCipherValidity {
@@ -277,12 +280,12 @@ CamelCipherValidity *
 		camel_cipher_validity_clone	(CamelCipherValidity *vin);
 void		camel_cipher_validity_add_certinfo
 						(CamelCipherValidity *vin,
-						 camel_cipher_validity_mode_t mode,
+						 CamelCipherValidityMode mode,
 						 const gchar *name,
 						 const gchar *email);
 void		camel_cipher_validity_add_certinfo_ex (
 						CamelCipherValidity *vin,
-						camel_cipher_validity_mode_t mode,
+						CamelCipherValidityMode mode,
 						const gchar *name,
 						const gchar *email,
 						gpointer cert_data,

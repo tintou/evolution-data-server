@@ -1122,7 +1122,7 @@ camel_cipher_validity_clone (CamelCipherValidity *vin)
  **/
 void
 camel_cipher_validity_add_certinfo (CamelCipherValidity *vin,
-                                    enum _camel_cipher_validity_mode_t mode,
+                                    CamelCipherValidityMode mode,
                                     const gchar *name,
                                     const gchar *email)
 {
@@ -1138,7 +1138,7 @@ camel_cipher_validity_add_certinfo (CamelCipherValidity *vin,
  **/
 void
 camel_cipher_validity_add_certinfo_ex (CamelCipherValidity *vin,
-                                       camel_cipher_validity_mode_t mode,
+                                       CamelCipherValidityMode mode,
                                        const gchar *name,
                                        const gchar *email,
                                        gpointer cert_data,

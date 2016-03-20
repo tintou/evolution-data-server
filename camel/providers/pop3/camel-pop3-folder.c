@@ -92,7 +92,7 @@ cmd_builduid (CamelPOP3Engine *pe,
 {
 	GChecksum *checksum;
 	CamelPOP3FolderInfo *fi = data;
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 	CamelMimeParser *mp;
 	guint8 *digest;
 	gsize length;

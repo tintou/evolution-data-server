@@ -70,7 +70,7 @@ static CamelMIRecord *
 
 static CamelMessageInfo *
 		message_info_new_from_header	(CamelFolderSummary *,
-						 struct _camel_header_raw *);
+						 CamelHeaderRaw *);
 static CamelMessageInfo *
 		message_info_new_from_parser	(CamelFolderSummary *,
 						 CamelMimeParser *);
@@ -309,7 +309,7 @@ summary_header_to_db (CamelFolderSummary *s,
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	CamelMboxMessageInfo *mi;
 	CamelMboxSummary *mbs = (CamelMboxSummary *) s;

@@ -272,7 +272,7 @@ network_service_accept_certificate_cb (GTlsConnection *connection,
 		}
 	}
 
-	camel_cert_unref (cert);
+	g_object_unref (cert);
 	camel_certdb_save (certdb);
 
 	g_clear_object (&certdb);

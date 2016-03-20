@@ -483,7 +483,7 @@ local_store_delete_folder_sync (CamelStore *store,
 	fi->unread = -1;
 
 	camel_store_folder_deleted (store, fi);
-	camel_folder_info_free (fi);
+	g_object_unref (fi);
 
 exit:
 	g_free (name);

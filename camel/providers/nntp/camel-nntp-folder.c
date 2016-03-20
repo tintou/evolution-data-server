@@ -140,7 +140,7 @@ nntp_folder_finalize (GObject *object)
 	CamelNNTPFolder *nntp_folder = CAMEL_NNTP_FOLDER (object);
 
 	if (nntp_folder->changes) {
-		camel_folder_change_info_free (nntp_folder->changes);
+		g_object_unref (nntp_folder->changes);
 		nntp_folder->changes = NULL;
 	}
 
@@ -177,7 +177,7 @@ camel_nntp_folder_selected (CamelNNTPFolder *nntp_folder,
 		nntp_folder->changes = camel_folder_change_info_new ();
 
 		camel_folder_changed (CAMEL_FOLDER (nntp_folder), changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return res;
@@ -413,7 +413,7 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 	CamelMimeFilter *crlffilter;
 	gint ret;
 	guint u;
-	struct _camel_header_raw *header, *savedhdrs, *n, *tail;
+	CamelHeaderRaw *header, *savedhdrs, *n, *tail;
 	const gchar *full_name;
 	gchar *group, *line;
 	gboolean success = TRUE;
@@ -449,9 +449,9 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 
 	/* remove mail 'To', 'CC', and 'BCC' headers */
 	savedhdrs = NULL;
-	tail = (struct _camel_header_raw *) &savedhdrs;
+	tail = (CamelHeaderRaw *) &savedhdrs;
 
-	header = (struct _camel_header_raw *) &CAMEL_MIME_PART (message)->headers;
+	header = (CamelHeaderRaw *) &CAMEL_MIME_PART (message)->headers;
 	n = header->next;
 	while (n != NULL) {
 		if (!g_ascii_strcasecmp (n->name, "To") || !g_ascii_strcasecmp (n->name, "Cc") || !g_ascii_strcasecmp (n->name, "Bcc")) {
@@ -557,7 +557,7 @@ nntp_folder_expunge_sync (CamelFolder *folder,
 	camel_folder_summary_save_to_db (summary, NULL);
 	camel_folder_changed (folder, changes);
 
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 	camel_folder_summary_free_array (known_uids);
 
 	return TRUE;
@@ -642,7 +642,7 @@ fail:
 
 	if (changes) {
 		camel_folder_changed (folder, changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return message;
@@ -677,7 +677,7 @@ nntp_folder_refresh_info_sync (CamelFolder *folder,
 
 	if (changes) {
 		camel_folder_changed (folder, changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return success;

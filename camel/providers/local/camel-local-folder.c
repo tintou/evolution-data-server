@@ -140,7 +140,7 @@ local_folder_finalize (GObject *object)
 	g_free (local_folder->folder_path);
 	g_free (local_folder->index_path);
 
-	camel_folder_change_info_free (local_folder->changes);
+	g_object_unref (local_folder->changes);
 
 	g_mutex_clear (&local_folder->priv->search_lock);
 
@@ -651,7 +651,7 @@ camel_local_folder_construct (CamelLocalFolder *lf,
 		g_return_val_if_fail (fi != NULL, lf);
 
 		camel_store_folder_created (parent_store, fi);
-		camel_folder_info_free (fi);
+		g_object_unref (fi);
 	}
 
 	return lf;

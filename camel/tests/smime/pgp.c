@@ -89,7 +89,7 @@ gint main (gint argc, gchar **argv)
 	CamelCipherValidity *valid;
 	CamelStream *stream1, *stream2;
 	GByteArray *buffer1, *buffer2;
-	struct _CamelMimePart *sigpart, *conpart, *encpart, *outpart;
+	CamelMimePart *sigpart, *conpart, *encpart, *outpart;
 	CamelDataWrapper *dw;
 	GPtrArray *recipients;
 	gchar *before, *after;

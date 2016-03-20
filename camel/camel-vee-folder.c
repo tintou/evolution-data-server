@@ -103,7 +103,7 @@ vee_folder_changed_data_new (CamelFolder *subfolder,
 static void
 vee_folder_changed_data_free (FolderChangedData *data)
 {
-	camel_folder_change_info_free (data->changes);
+	g_object_unref (data->changes);
 	g_object_unref (data->subfolder);
 
 	g_slice_free (FolderChangedData, data);
@@ -358,7 +358,7 @@ vee_folder_rebuild_all (CamelVeeFolder *vfolder,
 
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (CAMEL_FOLDER (vfolder), changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 }
 
 static void
@@ -469,7 +469,7 @@ vee_folder_subfolder_changed (CamelVeeFolder *vfolder,
 
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (v_folder, changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 }
 
 static void
@@ -574,7 +574,7 @@ free_change_info_cb (gpointer folder,
                      gpointer change_info,
                      gpointer user_data)
 {
-	camel_folder_change_info_free (change_info);
+	g_object_unref (change_info);
 }
 
 static void
@@ -700,7 +700,7 @@ vee_folder_propagate_skipped_changes (CamelVeeFolder *vf)
 		if (g_list_find (vf->priv->subfolders, psub) != NULL)
 			class->folder_changed (vf, psub, pchanges);
 
-		camel_folder_change_info_free (pchanges);
+		g_object_unref (pchanges);
 	}
 
 	g_hash_table_remove_all (vf->priv->skipped_changes);
@@ -710,7 +710,7 @@ vee_folder_propagate_skipped_changes (CamelVeeFolder *vf)
 	if (changes) {
 		if (camel_folder_change_info_changed (changes))
 			camel_folder_changed (CAMEL_FOLDER (vf), changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 }
 
@@ -1020,7 +1020,7 @@ vee_folder_rebuild_folder (CamelVeeFolder *vfolder,
 
 	if (camel_folder_change_info_changed (changes))
 		camel_folder_changed (CAMEL_FOLDER (vfolder), changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 }
 
 static void
@@ -1100,7 +1100,7 @@ vee_folder_remove_folder (CamelVeeFolder *vfolder,
 	if (!vfolder->priv->destroyed &&
 	    camel_folder_change_info_changed (changes))
 		camel_folder_changed (CAMEL_FOLDER (vfolder), changes);
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 }
 
 static void

@@ -1330,6 +1330,12 @@ read_uids_to_hash_callback (gpointer ref_hash,
 
 /**
  * camel_db_get_folder_uids:
+ * @db: 
+ * @folder_name: 
+ * @sort_by: 
+ * @collate: 
+ * @hash: (element-type utf8 uint):
+ * @error: 
  *
  * Fills hash with uid->GUINT_TO_POINTER (flag)
  *
@@ -2770,6 +2776,8 @@ static struct _known_column_names {
 
 /**
  * camel_db_get_column_ident:
+ * @hash: (out) (transfer container) (element-type int int):
+ * @col_names: (array length=ncols):
  *
  * Traverses column name from index @index into an enum
  * #CamelDBKnownColumnNames value.  The @col_names contains @ncols columns.

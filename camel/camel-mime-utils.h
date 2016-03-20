@@ -40,7 +40,29 @@
 #define CAMEL_UUDECODE_STATE_END    (1 << 17)
 #define CAMEL_UUDECODE_STATE_MASK   (CAMEL_UUDECODE_STATE_BEGIN | CAMEL_UUDECODE_STATE_END)
 
+#define CAMEL_TYPE_CONTENT_DISPOSITION \
+	(camel_content_disposition_get_type ())
+#define CAMEL_CONTENT_DISPOSITION(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_CONTENT_DISPOSITION, CamelContentDisposition))
+#define CAMEL_CONTENT_DISPOSITION_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_CONTENT_DISPOSITION, CamelContentDispositionClass))
+#define CAMEL_IS_CONTENT_DISPOSITION(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_CONTENT_DISPOSITION))
+#define CAMEL_IS_CONTENT_DISPOSITION_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_CONTENT_DISPOSITION))
+#define CAMEL_CONTENT_DISPOSITION_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_CONTENT_DISPOSITION, CamelContentDispositionClass))
+
 G_BEGIN_DECLS
+
+typedef struct _CamelContentDisposition CamelContentDisposition;
+typedef struct _CamelContentDispositionClass CamelContentDispositionClass;
+typedef struct _CamelContentDispositionPrivate CamelContentDispositionPrivate;
 
 typedef struct _camel_header_param {
 	struct _camel_header_param *next;
@@ -58,18 +80,22 @@ typedef struct {
 
 /* a raw rfc822 header */
 /* the value MUST be US-ASCII */
-struct _camel_header_raw {
+typedef struct _camel_header_raw {
 	struct _camel_header_raw *next;
 	gchar *name;
 	gchar *value;
 	gint offset;		/* in file, if known */
-};
+} CamelHeaderRaw;
 
-typedef struct _CamelContentDisposition {
+struct _CamelContentDisposition {
+	GObject parent;
 	gchar *disposition;
 	struct _camel_header_param *params;
-	guint refcount;
-} CamelContentDisposition;
+};
+
+struct _CamelContentDispositionClass {
+	GObjectClass parent_class;
+};
 
 typedef enum _camel_header_address_t {
 	CAMEL_HEADER_ADDRESS_NONE,	/* uninitialised */
@@ -142,24 +168,22 @@ void camel_content_type_dump (CamelContentType *content_type);
 /* Content-Disposition header */
 GType camel_content_disposition_get_type (void) G_GNUC_CONST;
 CamelContentDisposition *camel_content_disposition_decode (const gchar *in);
-CamelContentDisposition *camel_content_disposition_ref (CamelContentDisposition *disposition);
-void camel_content_disposition_unref (CamelContentDisposition *disposition);
 gchar *camel_content_disposition_format (CamelContentDisposition *disposition);
 
 /* decode the contents of a content-encoding header */
 gchar *camel_content_transfer_encoding_decode (const gchar *in);
 
 /* raw headers */
-void camel_header_raw_append (struct _camel_header_raw **list, const gchar *name, const gchar *value, gint offset);
-void camel_header_raw_append_parse (struct _camel_header_raw **list, const gchar *header, gint offset);
-const gchar *camel_header_raw_find (struct _camel_header_raw **list, const gchar *name, gint *offset);
-const gchar *camel_header_raw_find_next (struct _camel_header_raw **list, const gchar *name, gint *offset, const gchar *last);
-void camel_header_raw_replace (struct _camel_header_raw **list, const gchar *name, const gchar *value, gint offset);
-void camel_header_raw_remove (struct _camel_header_raw **list, const gchar *name);
-void camel_header_raw_fold (struct _camel_header_raw **list);
-void camel_header_raw_clear (struct _camel_header_raw **list);
+void camel_header_raw_append (CamelHeaderRaw **list, const gchar *name, const gchar *value, gint offset);
+void camel_header_raw_append_parse (CamelHeaderRaw **list, const gchar *header, gint offset);
+const gchar *camel_header_raw_find (CamelHeaderRaw **list, const gchar *name, gint *offset);
+const gchar *camel_header_raw_find_next (CamelHeaderRaw **list, const gchar *name, gint *offset, const gchar *last);
+void camel_header_raw_replace (CamelHeaderRaw **list, const gchar *name, const gchar *value, gint offset);
+void camel_header_raw_remove (CamelHeaderRaw **list, const gchar *name);
+void camel_header_raw_fold (CamelHeaderRaw **list);
+void camel_header_raw_clear (CamelHeaderRaw **list);
 
-gchar *camel_header_raw_check_mailing_list (struct _camel_header_raw **list);
+gchar *camel_header_raw_check_mailing_list (CamelHeaderRaw **list);
 
 /* fold a header */
 gchar *camel_header_address_fold (const gchar *in, gsize headerlen);

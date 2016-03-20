@@ -75,7 +75,7 @@ static void
 offline_downsync_data_free (OfflineDownsyncData *data)
 {
 	if (data->changes != NULL)
-		camel_folder_change_info_free (data->changes);
+		g_object_unref (data->changes);
 
 	g_object_unref (data->folder);
 

@@ -49,7 +49,7 @@ static gboolean	summary_header_from_db		(CamelFolderSummary *,
 
 static CamelMessageInfo *
 		message_info_new_from_header	(CamelFolderSummary *,
-						 struct _camel_header_raw *);
+						 CamelHeaderRaw *);
 
 static gint	local_summary_decode_x_evolution
 						(CamelLocalSummary *cls,
@@ -394,7 +394,7 @@ camel_local_summary_add (CamelLocalSummary *cls,
  **/
 gint
 camel_local_summary_write_headers (gint fd,
-                                   struct _camel_header_raw *header,
+                                   CamelHeaderRaw *header,
                                    const gchar *xevline,
                                    const gchar *status,
                                    const gchar *xstatus)
@@ -734,7 +734,7 @@ summary_header_to_db (CamelFolderSummary *s,
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	CamelLocalMessageInfo *mi;
 	CamelLocalSummary *cls = (CamelLocalSummary *) s;

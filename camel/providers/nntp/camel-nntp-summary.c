@@ -53,7 +53,7 @@ struct _CamelNNTPSummaryPrivate {
 	gint xover_setup;
 };
 
-static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, struct _camel_header_raw *);
+static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, CamelHeaderRaw *);
 static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
 static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
 
@@ -99,7 +99,7 @@ camel_nntp_summary_new (CamelFolder *folder)
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	CamelMessageInfoBase *mi;
 	CamelNNTPSummary *cns = (CamelNNTPSummary *) s;
@@ -171,7 +171,7 @@ add_range_xover (CamelNNTPSummary *cns,
 	CamelSettings *settings;
 	CamelService *service;
 	CamelFolderSummary *s;
-	struct _camel_header_raw *headers = NULL;
+	CamelHeaderRaw *headers = NULL;
 	gchar *line, *tab;
 	gchar *host;
 	guint len;

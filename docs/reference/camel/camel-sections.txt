@@ -140,9 +140,9 @@ CamelCipherContext
 CamelCipherValidity
 CamelCipherCertInfo
 CamelCipherHash
-camel_cipher_validity_sign_t
-camel_cipher_validity_encrypt_t
-camel_cipher_validity_mode_t
+CamelCipherValiditySign
+CamelCipherValidityEncrypt
+CamelCipherValidityMode
 camel_cipher_context_new
 camel_cipher_context_get_session
 camel_cipher_context_id_to_hash
@@ -480,7 +480,6 @@ camel_folder_transfer_messages_to
 camel_folder_transfer_messages_to_finish
 camel_folder_change_info_new
 camel_folder_change_info_clear
-camel_folder_change_info_free
 camel_folder_change_info_changed
 camel_folder_change_info_add_source
 camel_folder_change_info_add_source_list
@@ -2063,8 +2062,8 @@ camel_sexp_get_type
 <FILE>camel-smime-context</FILE>
 <TITLE>CamelSMIMEContext</TITLE>
 CamelSMIMEContext
-camel_smime_sign_t
-camel_smime_describe_t
+CamelSMIMESignMode
+CamelSMIMEDescribeFlags
 camel_smime_context_new
 camel_smime_context_set_encrypt_key
 camel_smime_context_set_sign_mode
@@ -2102,9 +2101,7 @@ camel_store_folder_opened
 camel_store_folder_renamed
 camel_store_folder_info_stale
 camel_folder_info_new
-camel_folder_info_free
 camel_folder_info_build
-camel_folder_info_clone
 camel_store_can_refresh_folder
 camel_store_get_folder_sync
 camel_store_get_folder
@@ -2825,8 +2822,6 @@ camel_content_type_format
 camel_content_type_simple
 camel_content_type_dump
 camel_content_disposition_decode
-camel_content_disposition_ref
-camel_content_disposition_unref
 camel_content_disposition_format
 camel_content_transfer_encoding_decode
 camel_header_raw_append

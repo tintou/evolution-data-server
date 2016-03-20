@@ -121,12 +121,12 @@ static void cfs_schedule_info_release_timer (CamelFolderSummary *summary);
 static struct _node *my_list_append (struct _node **list, struct _node *n);
 static gint my_list_size (struct _node **list);
 
-static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, struct _camel_header_raw *);
+static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, CamelHeaderRaw *);
 static CamelMessageInfo * message_info_new_from_parser (CamelFolderSummary *, CamelMimeParser *);
 static CamelMessageInfo * message_info_new_from_message (CamelFolderSummary *summary, CamelMimeMessage *msg, const gchar *bodystructure);
 static void		  message_info_free (CamelFolderSummary *, CamelMessageInfo *);
 
-static CamelMessageContentInfo * content_info_new_from_header (CamelFolderSummary *, struct _camel_header_raw *);
+static CamelMessageContentInfo * content_info_new_from_header (CamelFolderSummary *, CamelHeaderRaw *);
 static CamelMessageContentInfo * content_info_new_from_parser (CamelFolderSummary *, CamelMimeParser *);
 static CamelMessageContentInfo * content_info_new_from_message (CamelFolderSummary *summary, CamelMimePart *mp);
 static void			 content_info_free (CamelFolderSummary *, CamelMessageContentInfo *);
@@ -1063,7 +1063,7 @@ info_set_user_flag (CamelMessageInfo *info,
 		camel_folder_summary_touch (mi->summary);
 		camel_folder_change_info_change_uid (changes, camel_message_info_uid (info));
 		camel_folder_changed (mi->summary->priv->folder, changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return res;
@@ -1088,7 +1088,7 @@ info_set_user_tag (CamelMessageInfo *info,
 		camel_folder_summary_touch (mi->summary);
 		camel_folder_change_info_change_uid (changes, camel_message_info_uid (info));
 		camel_folder_changed (mi->summary->priv->folder, changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return res;
@@ -1136,7 +1136,7 @@ info_set_flags (CamelMessageInfo *info,
 
 		camel_folder_change_info_change_uid (changes, camel_message_info_uid (info));
 		camel_folder_changed (mi->summary->priv->folder, changes);
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 	}
 
 	return TRUE;
@@ -3078,7 +3078,7 @@ camel_folder_summary_insert (CamelFolderSummary *summary,
  **/
 CamelMessageInfo *
 camel_folder_summary_info_new_from_header (CamelFolderSummary *summary,
-                                           struct _camel_header_raw *h)
+                                           CamelHeaderRaw *h)
 {
 	CamelFolderSummaryClass *class;
 
@@ -3552,7 +3552,7 @@ content_info_new_from_message (CamelFolderSummary *summary,
 }
 
 static gchar *
-summary_format_address (struct _camel_header_raw *h,
+summary_format_address (CamelHeaderRaw *h,
                         const gchar *name,
                         const gchar *charset)
 {
@@ -3579,7 +3579,7 @@ summary_format_address (struct _camel_header_raw *h,
 }
 
 static gchar *
-summary_format_string (struct _camel_header_raw *h,
+summary_format_string (CamelHeaderRaw *h,
                        const gchar *name,
                        const gchar *charset)
 {
@@ -3620,7 +3620,7 @@ camel_folder_summary_content_info_new (CamelFolderSummary *summary)
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *summary,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	const gchar *received, *date, *content, *charset = NULL;
 	GSList *refs, *irt, *scan;
@@ -3764,7 +3764,7 @@ message_info_free (CamelFolderSummary *summary,
 
 static CamelMessageContentInfo *
 content_info_new_from_header (CamelFolderSummary *summary,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
 	CamelMessageContentInfo *ci;
 	const gchar *charset;
@@ -3989,7 +3989,7 @@ summary_build_content_info_message (CamelFolderSummary *summary,
 	CamelFolderSummaryPrivate *p = summary->priv;
 	CamelMessageContentInfo *info = NULL, *child;
 	CamelContentType *ct;
-	const struct _camel_header_raw *header;
+	const CamelHeaderRaw *header;
 	gboolean is_calendar = FALSE, is_note = FALSE;
 
 	if (summary->priv->build_content)
@@ -4529,7 +4529,7 @@ camel_message_info_ref (gpointer o)
 /**
  * camel_message_info_new_from_header:
  * @summary: a #CamelFolderSummary object or %NULL
- * @header: raw header
+ * @header: a #CamelHeaderRaw
  *
  * Create a new #CamelMessageInfo pre-populated with info from
  * @header.
@@ -4538,7 +4538,7 @@ camel_message_info_ref (gpointer o)
  **/
 CamelMessageInfo *
 camel_message_info_new_from_header (CamelFolderSummary *summary,
-                                    struct _camel_header_raw *header)
+                                    CamelHeaderRaw *header)
 {
 	if (summary != NULL)
 		return CAMEL_FOLDER_SUMMARY_GET_CLASS (summary)->

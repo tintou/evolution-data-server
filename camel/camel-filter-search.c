@@ -251,7 +251,7 @@ check_header (struct _CamelSExp *f,
 		} else if (fms->message || !check_header_in_message_info (fms->info, argc, argv, how, &matched)) {
 			CamelMimeMessage *message;
 			CamelMimePart *mime_part;
-			struct _camel_header_raw *header;
+			CamelHeaderRaw *header;
 			const gchar *charset = NULL;
 			camel_search_t type = CAMEL_SEARCH_TYPE_ENCODED;
 			CamelContentType *ct;
@@ -396,7 +396,7 @@ get_full_header (CamelMimeMessage *message)
 	CamelMimePart *mime_part;
 	GString *str = g_string_new ("");
 	gchar   *ret;
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 
 	mime_part = CAMEL_MIME_PART (message);
 
@@ -941,7 +941,7 @@ junk_test (struct _CamelSExp *f,
 	/* Not every message info has headers available, thus try headers of the message itself */
 	message = camel_filter_search_get_message (fms, f);
 	if (message) {
-		struct _camel_header_raw *h;
+		CamelHeaderRaw *h;
 
 		for (h = CAMEL_MIME_PART (message)->headers; h; h = h->next) {
 			const gchar *value;

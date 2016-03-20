@@ -1691,7 +1691,7 @@ camel_filter_driver_filter_message (CamelFilterDriver *driver,
 	g_return_val_if_fail (message != NULL || (source != NULL && uid != NULL), -1);
 
 	if (info == NULL) {
-		struct _camel_header_raw *h;
+		CamelHeaderRaw *h;
 
 		if (message) {
 			g_object_ref (message);

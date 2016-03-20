@@ -93,10 +93,7 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (
 	G_IMPLEMENT_INTERFACE (
 		G_TYPE_INITABLE, camel_store_initable_init))
 
-G_DEFINE_BOXED_TYPE (CamelFolderInfo,
-		camel_folder_info,
-		camel_folder_info_clone,
-		camel_folder_info_free)
+G_DEFINE_TYPE (CamelFolderInfo, camel_folder_info, G_TYPE_OBJECT)
 
 static void
 async_context_free (AsyncContext *async_context)
@@ -121,7 +118,7 @@ signal_closure_free (SignalClosure *signal_closure)
 		g_object_unref (signal_closure->folder);
 
 	if (signal_closure->folder_info != NULL)
-		camel_folder_info_free (signal_closure->folder_info);
+		g_object_unref (signal_closure->folder_info);
 
 	g_free (signal_closure->folder_name);
 
@@ -281,7 +278,7 @@ cs_delete_cached_folder (CamelStore *store,
 
 static CamelFolder *
 store_get_special (CamelStore *store,
-                   camel_vtrash_folder_t type)
+                   CamelVTrashFolderType type)
 {
 	CamelFolder *folder;
 	GPtrArray *folders;
@@ -461,25 +458,25 @@ store_synchronize_sync (CamelStore *store,
 			}
 
 			/* pick the next */
-			next = fi->child;
+			next = fi->child_info;
 			if (next == NULL)
-				next = fi->next;
+				next = fi->next_info;
 			if (next == NULL) {
-				next = fi->parent;
+				next = fi->parent_info;
 				while (next != NULL) {
-					if (next->next != NULL) {
-						next = next->next;
+					if (next->next_info != NULL) {
+						next = next->next_info;
 						break;
 					}
 
-					next = next->parent;
+					next = next->parent_info;
 				}
 			}
 
 			fi = next;
 		}
 
-		camel_folder_info_free (root);
+		g_object_unref (root);
 	} else {
 		/* sync only folders opened until now */
 		folders = camel_object_bag_list (store->folders);
@@ -723,7 +720,7 @@ camel_store_folder_created (CamelStore *store,
 
 	signal_closure = g_slice_new0 (SignalClosure);
 	g_weak_ref_init (&signal_closure->store, store);
-	signal_closure->folder_info = camel_folder_info_clone (folder_info);
+	signal_closure->folder_info = g_object_ref (folder_info);
 
 	/* Prioritize ahead of GTK+ redraws. */
 	camel_session_idle_add (
@@ -763,7 +760,7 @@ camel_store_folder_deleted (CamelStore *store,
 
 	signal_closure = g_slice_new0 (SignalClosure);
 	g_weak_ref_init (&signal_closure->store, store);
-	signal_closure->folder_info = camel_folder_info_clone (folder_info);
+	signal_closure->folder_info = g_object_ref (folder_info);
 
 	/* Prioritize ahead of GTK+ redraws. */
 	camel_session_idle_add (
@@ -846,7 +843,7 @@ camel_store_folder_renamed (CamelStore *store,
 
 	signal_closure = g_slice_new0 (SignalClosure);
 	g_weak_ref_init (&signal_closure->store, store);
-	signal_closure->folder_info = camel_folder_info_clone (folder_info);
+	signal_closure->folder_info = g_object_ref (folder_info);
 	signal_closure->folder_name = g_strdup (old_name);
 
 	/* Prioritize ahead of GTK+ redraws. */
@@ -923,7 +920,7 @@ add_special_info (CamelStore *store,
 	g_return_if_fail (info != NULL);
 
 	parent = NULL;
-	for (fi = info; fi; fi = fi->next) {
+	for (fi = info; fi; fi = fi->next_info) {
 		if (!strcmp (fi->full_name, name))
 			break;
 		parent = fi;
@@ -947,8 +944,8 @@ add_special_info (CamelStore *store,
 			CAMEL_FOLDER_SUBSCRIBED;
 
 		/* link it into the right spot */
-		vinfo->next = parent->next;
-		parent->next = vinfo;
+		vinfo->next_info = parent->next_info;
+		parent->next_info = vinfo;
 	}
 
 	/* Fill in the new fields */
@@ -973,34 +970,42 @@ dump_fi (CamelFolderInfo *fi,
 	while (fi) {
 		printf ("%sfull_name: %s\n", s, fi->full_name);
 		printf ("%sflags: %08x\n", s, fi->flags);
-		dump_fi (fi->child, depth + 2);
-		fi = fi->next;
+		dump_fi (fi->child_info, depth + 2);
+		fi = fi->next_info;
 	}
 }
 
-/**
- * camel_folder_info_free:
- * @fi: a #CamelFolderInfo
- *
- * Frees @fi.
- **/
-void
-camel_folder_info_free (CamelFolderInfo *fi)
+static void
+folder_info_finalize (GObject *object)
 {
-	if (fi != NULL) {
-		camel_folder_info_free (fi->next);
-		camel_folder_info_free (fi->child);
-		g_free (fi->full_name);
-		g_free (fi->display_name);
-		g_slice_free (CamelFolderInfo, fi);
-	}
+	g_object_unref (CAMEL_FOLDER_INFO (object)->next_info);
+	g_object_unref (CAMEL_FOLDER_INFO (object)->child_info);
+	g_free (CAMEL_FOLDER_INFO (object)->full_name);
+	g_free (CAMEL_FOLDER_INFO (object)->display_name);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_folder_info_parent_class)->finalize (object);
+}
+
+static void
+camel_folder_info_class_init (CamelFolderInfoClass *class)
+{
+	GObjectClass *object_class;
+
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = folder_info_finalize;
+}
+
+static void
+camel_folder_info_init (CamelFolderInfo *fi)
+{
+	
 }
 
 /**
  * camel_folder_info_new:
  *
- * Allocates a new #CamelFolderInfo instance.  Free it with
- * camel_folder_info_free().
+ * Allocates a new #CamelFolderInfo instance.
  *
  * Returns: a new #CamelFolderInfo instance
  *
@@ -1009,7 +1014,7 @@ camel_folder_info_free (CamelFolderInfo *fi)
 CamelFolderInfo *
 camel_folder_info_new (void)
 {
-	return g_slice_new0 (CamelFolderInfo);
+	return g_object_new (CAMEL_TYPE_FOLDER_INFO, NULL);
 }
 
 static gint
@@ -1101,11 +1106,11 @@ camel_folder_info_build (GPtrArray *folders,
 				g_hash_table_insert (hash, pname, pfi);
 				g_ptr_array_add (folders, pfi);
 			}
-			tail = (CamelFolderInfo *) &pfi->child;
-			while (tail->next)
-				tail = tail->next;
-			tail->next = fi;
-			fi->parent = pfi;
+			tail = (CamelFolderInfo *) &pfi->child_info;
+			while (tail->next_info)
+				tail = tail->next_info;
+			tail->next_info = fi;
+			fi->parent_info = pfi;
 		} else if (!top || !g_ascii_strcasecmp (fi->full_name, "Inbox"))
 			top = fi;
 	}
@@ -1116,16 +1121,16 @@ camel_folder_info_build (GPtrArray *folders,
 	for (i = 0; i < folders->len; i++) {
 		fi = folders->pdata[i];
 
-		if (fi->child)
+		if (fi->child_info)
 			fi->flags &= ~CAMEL_FOLDER_NOCHILDREN;
 
-		if (fi->parent || fi == top)
+		if (fi->parent_info || fi == top)
 			continue;
 		if (tail == NULL) {
 			tail = fi;
 			top = fi;
 		} else {
-			tail->next = fi;
+			tail->next_info = fi;
 			tail = fi;
 		}
 	}
@@ -1140,40 +1145,23 @@ folder_info_clone_rec (CamelFolderInfo *fi,
 	CamelFolderInfo *info;
 
 	info = camel_folder_info_new ();
-	info->parent = parent;
+	info->parent_info = parent;
 	info->full_name = g_strdup (fi->full_name);
 	info->display_name = g_strdup (fi->display_name);
 	info->unread = fi->unread;
 	info->flags = fi->flags;
 
-	if (fi->next)
-		info->next = folder_info_clone_rec (fi->next, parent);
+	if (fi->next_info)
+		info->next_info = folder_info_clone_rec (fi->next_info, parent);
 	else
-		info->next = NULL;
+		info->next_info = NULL;
 
-	if (fi->child)
-		info->child = folder_info_clone_rec (fi->child, info);
+	if (fi->child_info)
+		info->child_info = folder_info_clone_rec (fi->child_info, info);
 	else
-		info->child = NULL;
+		info->child_info = NULL;
 
 	return info;
-}
-
-/**
- * camel_folder_info_clone:
- * @fi: a #CamelFolderInfo
- *
- * Clones @fi recursively.
- *
- * Returns: the cloned #CamelFolderInfo tree.
- **/
-CamelFolderInfo *
-camel_folder_info_clone (CamelFolderInfo *fi)
-{
-	if (fi == NULL)
-		return NULL;
-
-	return folder_info_clone_rec (fi, NULL);
 }
 
 /**
@@ -1399,7 +1387,7 @@ try_again:
 		/* If we successfully created the folder, retry the
 		 * method without the CAMEL_STORE_FOLDER_CREATE flag. */
 		if (folder_info != NULL) {
-			camel_folder_info_free (folder_info);
+			g_object_unref (folder_info);
 			goto try_again;
 		}
 	}
@@ -1534,15 +1522,15 @@ camel_store_get_folder_finish (CamelStore *store,
  * %CAMEL_STORE_FOLDER_INFO_NO_VIRTUAL, don't include special virtual
  * folders (such as vTrash or vJunk).
  *
- * The returned #CamelFolderInfo tree should be freed with
- * camel_folder_info_free().
+ * The returned #CamelFolderInfo tree reference should be freed with
+ * g_object_unref().
  *
  * The CAMEL_STORE_FOLDER_INFO_FAST flag should be considered
  * deprecated; most backends will behave the same whether it is
  * supplied or not.  The only guaranteed way to get updated folder
  * counts is to both open the folder and invoke refresh_info() it.
  *
- * Returns: a #CamelFolderInfo tree, or %NULL on error
+ * Returns: (transfer full) (nullable): a #CamelFolderInfo tree, or %NULL on error
  *
  * Since: 3.0
  **/
@@ -1667,12 +1655,12 @@ camel_store_get_folder_info_sync (CamelStore *store,
 		}
 
 		if (root_info != NULL) {
-			info = root_info->next;
-			root_info->next = NULL;
-			info->next = NULL;
-			info->parent = NULL;
+			info = root_info->next_info;
+			root_info->next_info = NULL;
+			info->next_info = NULL;
+			info->parent_info = NULL;
 
-			camel_folder_info_free (root_info);
+			g_object_unref (root_info);
 		}
 	}
 
@@ -1717,7 +1705,7 @@ store_get_folder_info_thread (GTask *task,
 	} else {
 		g_task_return_pointer (
 			task, folder_info,
-			(GDestroyNotify) camel_folder_info_free);
+			(GDestroyNotify) g_object_unref);
 	}
 }
 
@@ -1779,10 +1767,10 @@ camel_store_get_folder_info (CamelStore *store,
  * @error: return location for a #GError, or %NULL
  *
  * Finishes the operation started with camel_store_get_folder_info().
- * The returned #CamelFolderInfo tree should be freed with
- * camel_folder_info_free().
+ * The returned #CamelFolderInfo tree reference should be freed with
+ * g_object_unref().
  *
- * Returns: a #CamelFolderInfo tree, or %NULL on error
+ * Returns: (transfer full) (nullable): a #CamelFolderInfo tree, or %NULL on error
  *
  * Since: 3.0
  **/
@@ -2185,10 +2173,10 @@ camel_store_get_trash_folder_finish (CamelStore *store,
  *
  * Creates a new folder as a child of an existing folder.
  * @parent_name can be %NULL to create a new top-level folder.
- * The returned #CamelFolderInfo struct should be freed with
- * camel_folder_info_free().
+ * The returned #CamelFolderInfo object should be unreferenced with
+ * g_object_unref().
  *
- * Returns: info about the created folder, or %NULL on error
+ * Returns: (transfer full) (nullable): info about the created folder, or %NULL on error
  *
  * Since: 3.0
  **/
@@ -2281,7 +2269,7 @@ store_create_folder_thread (GTask *task,
 	} else {
 		g_task_return_pointer (
 			task, folder_info,
-			(GDestroyNotify) camel_folder_info_free);
+			(GDestroyNotify) g_object_unref);
 	}
 }
 
@@ -2346,10 +2334,10 @@ camel_store_create_folder (CamelStore *store,
  * @error: return location for a #GError, or %NULL
  *
  * Finishes the operation started with camel_store_create_folder().
- * The returned #CamelFolderInfo struct should be freed with
- * camel_folder_info_free().
+ * The returned #CamelFolderInfo object should be unreferenced with
+ * g_object_unref().
  *
- * Returns: info about the created folder, or %NULL on error
+ * Returns: (transfer full) (nullable): info about the created folder, or %NULL on error
  *
  * Since: 3.0
  **/
@@ -2706,7 +2694,7 @@ store_rename_folder_thread (GTask *task,
 
 		if (folder_info != NULL) {
 			camel_store_folder_renamed (store, old_name, folder_info);
-			camel_folder_info_free (folder_info);
+			g_object_unref (folder_info);
 		}
 	} else {
 		/* Failed, just unlock our folders for re-use */

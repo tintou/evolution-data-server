@@ -53,8 +53,8 @@
 
 G_BEGIN_DECLS
 
-struct _CamelFolder;
-struct _CamelStore;
+typedef struct _CamelFolder CamelFolder;
+typedef struct _CamelStore CamelStore;
 
 typedef struct _CamelFolderSummary CamelFolderSummary;
 typedef struct _CamelFolderSummaryClass CamelFolderSummaryClass;
@@ -278,7 +278,7 @@ struct _CamelFolderSummaryClass {
 	CamelMessageInfo *
 			(*message_info_new_from_header)
 					(CamelFolderSummary *summary,
-					 struct _camel_header_raw *header);
+					 CamelHeaderRaw *header);
 	CamelMessageInfo *
 			(*message_info_new_from_parser)
 					(CamelFolderSummary *summary,
@@ -300,7 +300,7 @@ struct _CamelFolderSummaryClass {
 	CamelMessageContentInfo *
 			(*content_info_new_from_header)
 					(CamelFolderSummary *summary,
-					 struct _camel_header_raw *header);
+					 CamelHeaderRaw *header);
 	CamelMessageContentInfo *
 			(*content_info_new_from_parser)
 					(CamelFolderSummary *summary,
@@ -353,9 +353,9 @@ struct _CamelFolderSummaryClass {
 
 GType		camel_folder_summary_get_type	(void);
 CamelFolderSummary *
-		camel_folder_summary_new	(struct _CamelFolder *folder);
+		camel_folder_summary_new	(CamelFolder *folder);
 
-struct _CamelFolder *
+CamelFolder *
 		camel_folder_summary_get_folder	(CamelFolderSummary *summary);
 
 guint32		camel_folder_summary_get_saved_count
@@ -403,7 +403,7 @@ gboolean	camel_folder_summary_load_from_db
 /* only load the header */
 gboolean	camel_folder_summary_header_load_from_db
 						(CamelFolderSummary *summary,
-						 struct _CamelStore *store,
+						 CamelStore *store,
 						 const gchar *folder_name,
 						 GError **error);
 gboolean	camel_folder_summary_header_save_to_db
@@ -417,7 +417,7 @@ void		camel_folder_summary_touch	(CamelFolderSummary *summary);
 CamelMessageInfo *
 		camel_folder_summary_info_new_from_header
 						(CamelFolderSummary *summary,
-						 struct _camel_header_raw *headers);
+						 CamelHeaderRaw *headers);
 CamelMessageInfo *
 		camel_folder_summary_info_new_from_parser
 						(CamelFolderSummary *summary,
@@ -534,7 +534,7 @@ gpointer	camel_message_info_ref		(gpointer info);
 CamelMessageInfo *
 		camel_message_info_new_from_header
 						(CamelFolderSummary *summary,
-						 struct _camel_header_raw *header);
+						 CamelHeaderRaw *header);
 void		camel_message_info_unref	(gpointer info);
 gpointer	camel_message_info_clone	(gconstpointer info);
 

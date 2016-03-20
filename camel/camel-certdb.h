@@ -46,7 +46,28 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_CERTDB, CamelCertDBClass))
 
+#define CAMEL_TYPE_CERT \
+	(camel_cert_get_type ())
+#define CAMEL_CERT(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_CERT, CamelCert))
+#define CAMEL_CERT_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_CERT, CamelCertClass))
+#define CAMEL_IS_CERT(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_CERT))
+#define CAMEL_IS_CERT_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_CERT))
+#define CAMEL_CERT_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_CERT, CamelCertClass))
+
 G_BEGIN_DECLS
+
+typedef struct _CamelCert CamelCert;
+typedef struct _CamelCertClass CamelCertClass;
 
 typedef struct _CamelCertDB CamelCertDB;
 typedef struct _CamelCertDBClass CamelCertDBClass;
@@ -61,8 +82,8 @@ typedef enum {
 	CAMEL_CERT_TRUST_TEMPORARY
 } CamelCertTrust;
 
-typedef struct {
-	volatile gint refcount;
+struct _CamelCert {
+	GObject parent;
 
 	gchar *issuer;
 	gchar *subject;
@@ -71,7 +92,11 @@ typedef struct {
 
 	CamelCertTrust trust;
 	GBytes *rawcert; /* loaded on demand, with camel_cert_load_cert_file() */
-} CamelCert;
+};
+
+struct _CamelCertClass {
+	GObjectClass parent_class;
+};
 
 struct _CamelCertDB {
 	GObject parent;
@@ -95,8 +120,6 @@ struct _CamelCertDBClass {
 
 GType		camel_cert_get_type		(void) G_GNUC_CONST;
 CamelCert *	camel_cert_new			(void);
-CamelCert *	camel_cert_ref			(CamelCert *cert);
-void		camel_cert_unref		(CamelCert *cert);
 gboolean	camel_cert_load_cert_file	(CamelCert *cert,
 						 GError **error);
 gboolean	camel_cert_save_cert_file	(CamelCert *cert,

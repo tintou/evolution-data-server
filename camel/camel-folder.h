@@ -49,6 +49,23 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_FOLDER, CamelFolderClass))
 
+#define CAMEL_TYPE_FOLDER_CHANGE_INFO \
+	(camel_folder_change_info_get_type ())
+#define CAMEL_FOLDER_CHANGE_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_FOLDER_CHANGE_INFO, CamelFolderChangeInfo))
+#define CAMEL_FOLDER_CHANGE_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_FOLDER_CHANGE_INFO, CamelFolderChangeInfoClass))
+#define CAMEL_IS_FOLDER_CHANGE_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_FOLDER_CHANGE_INFO))
+#define CAMEL_IS_FOLDER_CHANGE_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_FOLDER_CHANGE_INFO))
+#define CAMEL_FOLDER_CHANGE_INFO_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_FOLDER_CHANGE_INFO, CamelFolderChangeInfoClass))
 /**
  * CAMEL_FOLDER_ERROR:
  *
@@ -62,6 +79,7 @@ G_BEGIN_DECLS
 struct _CamelStore;
 
 typedef struct _CamelFolderChangeInfo CamelFolderChangeInfo;
+typedef struct _CamelFolderChangeInfoClass CamelFolderChangeInfoClass;
 typedef struct _CamelFolderChangeInfoPrivate CamelFolderChangeInfoPrivate;
 
 typedef struct _CamelFolder CamelFolder;
@@ -95,12 +113,18 @@ typedef enum {
 } CamelFetchType;
 
 struct _CamelFolderChangeInfo {
+	GObject parent;
+
 	GPtrArray *uid_added;
 	GPtrArray *uid_removed;
 	GPtrArray *uid_changed;
 	GPtrArray *uid_recent;
 
 	CamelFolderChangeInfoPrivate *priv;
+};
+
+struct _CamelFolderChangeInfoClass {
+	GObjectClass parent_class;
 };
 
 typedef struct _CamelFolderQuotaInfo CamelFolderQuotaInfo;
@@ -533,10 +557,10 @@ gboolean	camel_folder_transfer_messages_to_finish
 						 GError **error);
 
 /* update functions for change info */
+GType		camel_folder_change_info_get_type		(void);
 CamelFolderChangeInfo *
 		camel_folder_change_info_new	(void);
 void		camel_folder_change_info_clear	(CamelFolderChangeInfo *info);
-void		camel_folder_change_info_free	(CamelFolderChangeInfo *info);
 gboolean	camel_folder_change_info_changed (CamelFolderChangeInfo *info);
 
 /* for building diff's automatically */

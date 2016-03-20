@@ -290,7 +290,7 @@ check_header (CamelSExp *sexp,
 		camel_search_t type = CAMEL_SEARCH_TYPE_ASIS;
 		struct _camel_search_words *words;
 		CamelMimeMessage *message = NULL;
-		struct _camel_header_raw *raw_header;
+		CamelHeaderRaw *raw_header;
 
 		/* only a subset of headers are supported .. */
 		headername = argv[0]->value.string;
@@ -665,7 +665,7 @@ get_full_header (CamelMimeMessage *message,
 {
 	CamelMimePart *mp = CAMEL_MIME_PART (message);
 	GString *str = g_string_new ("");
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 
 	for (h = mp->headers; h; h = h->next) {
 		if (h->value != NULL) {

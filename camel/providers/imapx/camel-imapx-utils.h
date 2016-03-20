@@ -206,7 +206,7 @@ gboolean	imapx_parse_param_list		(CamelIMAPXInputStream *stream,
 						 struct _camel_header_param **plist,
 						 GCancellable *cancellable,
 						 GError **error);
-struct _CamelContentDisposition *
+CamelContentDisposition *
 		imapx_parse_ext_optional	(CamelIMAPXInputStream *stream,
 						 GCancellable *cancellable,
 						 GError **error);

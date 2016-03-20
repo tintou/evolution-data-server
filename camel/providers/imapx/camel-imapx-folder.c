@@ -1449,7 +1449,7 @@ camel_imapx_folder_invalidate_local_cache (CamelIMAPXFolder *folder,
 
 	camel_folder_changed (CAMEL_FOLDER (folder), changes);
 
-	camel_folder_change_info_free (changes);
+	g_object_unref (changes);
 	camel_folder_summary_free_array (array);
 }
 

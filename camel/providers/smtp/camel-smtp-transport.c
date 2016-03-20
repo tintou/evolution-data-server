@@ -1640,7 +1640,7 @@ smtp_data (CamelSmtpTransport *transport,
            GCancellable *cancellable,
            GError **error)
 {
-	struct _camel_header_raw *header, *savedbcc, *n, *tail;
+	CamelHeaderRaw *header, *savedbcc, *n, *tail;
 	CamelBestencEncoding enctype = CAMEL_BESTENC_8BIT;
 	CamelStream *filtered_stream;
 	gchar *cmdbuf, *respbuf = NULL;
@@ -1697,9 +1697,9 @@ smtp_data (CamelSmtpTransport *transport,
 
 	/* unlink the bcc headers */
 	savedbcc = NULL;
-	tail = (struct _camel_header_raw *) &savedbcc;
+	tail = (CamelHeaderRaw *) &savedbcc;
 
-	header = (struct _camel_header_raw *) &CAMEL_MIME_PART (message)->headers;
+	header = (CamelHeaderRaw *) &CAMEL_MIME_PART (message)->headers;
 	n = header->next;
 	while (n != NULL) {
 		if (!g_ascii_strcasecmp (n->name, "Bcc")) {

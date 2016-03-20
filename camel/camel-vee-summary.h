@@ -47,9 +47,8 @@
 
 G_BEGIN_DECLS
 
-struct _CamelVeeMessageInfoData;
-struct _CamelVeeFolder;
-struct _CamelFolder;
+typedef struct _CamelVeeMessageInfoData CamelVeeMessageInfoData;
+typedef struct _CamelFolder CamelFolder;
 
 typedef struct _CamelVeeSummary CamelVeeSummary;
 typedef struct _CamelVeeSummaryClass CamelVeeSummaryClass;
@@ -74,10 +73,10 @@ struct _CamelVeeSummaryClass {
 
 GType		camel_vee_summary_get_type	(void);
 CamelFolderSummary *
-		camel_vee_summary_new		(struct _CamelFolder *parent);
+		camel_vee_summary_new		(CamelFolder *parent);
 CamelVeeMessageInfo *
 		camel_vee_summary_add		(CamelVeeSummary *s,
-						 struct _CamelVeeMessageInfoData *mi_data);
+						 CamelVeeMessageInfoData *mi_data);
 void		camel_vee_summary_remove	(CamelVeeSummary *summary,
 						 const gchar *vuid,
 						 CamelFolder *subfolder);

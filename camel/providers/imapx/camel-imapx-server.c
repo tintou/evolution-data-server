@@ -3291,7 +3291,7 @@ imapx_server_finalize (GObject *object)
 	g_mutex_clear (&is->priv->stream_lock);
 	g_mutex_clear (&is->priv->select_lock);
 
-	camel_folder_change_info_free (is->priv->changes);
+	g_object_unref (is->priv->changes);
 	imapx_free_status (is->priv->copyuid_status);
 
 	g_free (is->priv->context);
@@ -4321,7 +4321,7 @@ camel_imapx_server_copy_message_sync (CamelIMAPXServer *is,
 						camel_folder_changed (destination_folder, changes);
 					}
 
-					camel_folder_change_info_free (changes);
+					g_object_unref (changes);
 					g_object_unref (destination_folder);
 				}
 			}
@@ -4356,7 +4356,7 @@ camel_imapx_server_copy_message_sync (CamelIMAPXServer *is,
 				camel_folder_thaw (folder);
 
 				if (changes)
-					camel_folder_change_info_free (changes);
+					g_object_unref (changes);
 			}
 		}
 
@@ -5011,7 +5011,7 @@ camel_imapx_server_refresh_info_sync (CamelIMAPXServer *is,
 			camel_folder_changed (folder, changes);
 		}
 
-		camel_folder_change_info_free (changes);
+		g_object_unref (changes);
 		camel_folder_summary_free_array (array);
 	}
 
@@ -5559,7 +5559,7 @@ camel_imapx_server_expunge_sync (CamelIMAPXServer *is,
 				camel_folder_summary_save_to_db (folder->summary, NULL);
 
 				camel_folder_changed (folder, changes);
-				camel_folder_change_info_free (changes);
+				g_object_unref (changes);
 
 				g_list_free (removed);
 				g_ptr_array_foreach (uids, (GFunc) camel_pstring_free, NULL);
