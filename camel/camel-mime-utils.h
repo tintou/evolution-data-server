@@ -58,11 +58,55 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_CONTENT_DISPOSITION, CamelContentDispositionClass))
 
+#define CAMEL_TYPE_CONTENT_TYPE \
+	(camel_content_type_get_type ())
+#define CAMEL_CONTENT_TYPE(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_CONTENT_TYPE, CamelContentType))
+#define CAMEL_CONTENT_TYPE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_CONTENT_TYPE, CamelContentTypeClass))
+#define CAMEL_IS_CONTENT_TYPE(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_CONTENT_TYPE))
+#define CAMEL_IS_CONTENT_TYPE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_CONTENT_TYPE))
+#define CAMEL_CONTENT_TYPE_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_CONTENT_TYPE, CamelContentTypeClass))
+
+#define CAMEL_TYPE_HEADER_ADDRESS \
+	(camel_header_address_get_type ())
+#define CAMEL_HEADER_ADDRESS(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_HEADER_ADDRESS, CamelHeaderAddress))
+#define CAMEL_HEADER_ADDRESS_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_HEADER_ADDRESS, CamelHeaderAddressClass))
+#define CAMEL_IS_HEADER_ADDRESS(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_HEADER_ADDRESS))
+#define CAMEL_IS_HEADER_ADDRESS_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_HEADER_ADDRESS))
+#define CAMEL_HEADER_ADDRESS_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_HEADER_ADDRESS, CamelHeaderAddressClass))
+
 G_BEGIN_DECLS
 
 typedef struct _CamelContentDisposition CamelContentDisposition;
 typedef struct _CamelContentDispositionClass CamelContentDispositionClass;
 typedef struct _CamelContentDispositionPrivate CamelContentDispositionPrivate;
+
+typedef struct _CamelContentType CamelContentType;
+typedef struct _CamelContentTypeClass CamelContentTypeClass;
+typedef struct _CamelContentTypePrivate CamelContentTypePrivate;
+
+typedef struct _CamelHeaderAddress CamelHeaderAddress;
+typedef struct _CamelHeaderAddressClass CamelHeaderAddressClass;
+typedef struct _CamelHeaderAddressPrivate CamelHeaderAddressPrivate;
 
 typedef struct _camel_header_param {
 	struct _camel_header_param *next;
@@ -71,12 +115,16 @@ typedef struct _camel_header_param {
 } CamelHeaderParam;
 
 /* describes a content-type */
-typedef struct {
+struct _CamelContentType {
+	GObject parent;
 	gchar *type;
 	gchar *subtype;
-	struct _camel_header_param *params;
-	guint refcount;
-} CamelContentType;
+	CamelContentTypePrivate *priv;
+};
+
+struct _CamelContentTypeClass {
+	GObjectClass parent_class;
+};
 
 /* a raw rfc822 header */
 /* the value MUST be US-ASCII */
@@ -101,18 +149,22 @@ typedef enum _camel_header_address_t {
 	CAMEL_HEADER_ADDRESS_NONE,	/* uninitialised */
 	CAMEL_HEADER_ADDRESS_NAME,
 	CAMEL_HEADER_ADDRESS_GROUP
-} camel_header_address_t;
+} CamelHeaderAddressType;
 
-typedef struct _camel_header_address {
-	struct _camel_header_address *next;
-	camel_header_address_t type;
+struct _CamelHeaderAddress {
+	GObject parent;
+	struct _CamelHeaderAddress *next;
+	CamelHeaderAddressType type;
 	gchar *name;
 	union {
 		gchar *addr;
-		struct _camel_header_address *members;
+		struct _CamelHeaderAddress *members;
 	} v;
-	guint refcount;
-} CamelHeaderAddress;
+};
+
+struct _CamelHeaderAddressClass {
+	GObjectClass parent_class;
+};
 
 /* Time utilities */
 time_t		camel_mktime_utc		(struct tm *tm);
@@ -125,8 +177,6 @@ GType camel_header_address_get_type (void) G_GNUC_CONST;
 CamelHeaderAddress *camel_header_address_new (void);
 CamelHeaderAddress *camel_header_address_new_name (const gchar *name, const gchar *addr);
 CamelHeaderAddress *camel_header_address_new_group (const gchar *name);
-CamelHeaderAddress *camel_header_address_ref (CamelHeaderAddress *addrlist);
-void camel_header_address_unref (CamelHeaderAddress *addrlist);
 void camel_header_address_set_name (CamelHeaderAddress *addrlist, const gchar *name);
 void camel_header_address_set_addr (CamelHeaderAddress *addrlist, const gchar *addr);
 void camel_header_address_set_members (CamelHeaderAddress *addrlist, CamelHeaderAddress *group);
@@ -153,12 +203,11 @@ void camel_header_param_list_free (struct _camel_header_param *params);
 /* Content-Type header */
 GType camel_content_type_get_type (void) G_GNUC_CONST;
 CamelContentType *camel_content_type_new (const gchar *type, const gchar *subtype);
-CamelContentType *camel_content_type_decode (const gchar *in);
-void camel_content_type_unref (CamelContentType *content_type);
-CamelContentType *camel_content_type_ref (CamelContentType *content_type);
-const gchar *camel_content_type_param (CamelContentType *content_type, const gchar *name);
+CamelContentType *camel_content_type_new_decode (const gchar *in);
+const gchar *camel_content_type_get_param (CamelContentType *content_type, const gchar *name);
+CamelHeaderParam *camel_content_type_get_params (CamelContentType *content_type);
 void camel_content_type_set_param (CamelContentType *content_type, const gchar *name, const gchar *value);
-gint camel_content_type_is (CamelContentType *content_type, const gchar *type, const gchar *subtype);
+gboolean camel_content_type_is (CamelContentType *content_type, const gchar *type, const gchar *subtype);
 gchar *camel_content_type_format (CamelContentType *content_type);
 gchar *camel_content_type_simple (CamelContentType *content_type);
 

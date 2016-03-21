@@ -147,7 +147,7 @@ vee_folder_note_added_uid (CamelVeeFolder *vfolder,
 		if (vmi) {
 			if (changes)
 				camel_folder_change_info_add_uid (changes, vuid);
-			camel_message_info_unref (vmi);
+			g_object_unref (vmi);
 
 			if (vfolder->priv->parent_vee_store)
 				camel_vee_store_note_vuid_used (vfolder->priv->parent_vee_store, added_mi_data, vfolder);
@@ -892,9 +892,9 @@ vee_folder_get_message_sync (CamelFolder *folder,
 	mi = (CamelVeeMessageInfo *) camel_folder_summary_get (folder->summary, uid);
 	if (mi) {
 		msg = camel_folder_get_message_sync (
-			camel_folder_summary_get_folder (mi->orig_summary), camel_message_info_uid (mi) + 8,
+			camel_folder_summary_get_folder (mi->orig_summary), camel_message_info_get_uid (mi) + 8,
 			cancellable, error);
-		camel_message_info_unref (mi);
+		g_object_unref (mi);
 	} else {
 		g_set_error (
 			error, CAMEL_FOLDER_ERROR,
@@ -1636,13 +1636,13 @@ camel_vee_folder_get_location (CamelVeeFolder *vf,
 		CamelFolder *res;
 		const CamelVeeMessageInfo *vfinfo;
 
-		vfinfo = (CamelVeeMessageInfo *) camel_folder_get_message_info (folder, camel_message_info_uid (vinfo) + 8);
+		vfinfo = (CamelVeeMessageInfo *) camel_folder_get_message_info (folder, camel_message_info_get_uid (vinfo) + 8);
 		res = camel_vee_folder_get_location ((CamelVeeFolder *) folder, vfinfo, realuid);
-		camel_message_info_unref ((CamelMessageInfo *) vfinfo);
+		g_object_unref ((CamelMessageInfo *) vfinfo);
 		return res;
 	} else {
 		if (realuid)
-			*realuid = g_strdup (camel_message_info_uid (vinfo)+8);
+			*realuid = g_strdup (camel_message_info_get_uid (vinfo)+8);
 
 		return folder;
 	}

@@ -785,7 +785,7 @@ do_adjust_score (struct _CamelSExp *f,
 		gchar *value;
 		gint old;
 
-		value = (gchar *) camel_message_info_user_tag (driver->priv->info, "score");
+		value = (gchar *) camel_message_info_get_user_tag (driver->priv->info, "score");
 		old = value ? atoi (value) : 0;
 		value = g_strdup_printf ("%d", old + argv[0]->value.number);
 		camel_message_info_set_user_tag (driver->priv->info, "score", value);
@@ -1243,8 +1243,8 @@ camel_filter_driver_log (CamelFilterDriver *driver,
 
 			/* FIXME: does this need locking?  Probably */
 
-			from = camel_message_info_from (driver->priv->info);
-			subject = camel_message_info_subject (driver->priv->info);
+			from = camel_message_info_get_from (driver->priv->info);
+			subject = camel_message_info_get_subject (driver->priv->info);
 
 			time (&t);
 			strftime (date, 49, "%a, %d %b %Y %H:%M:%S", localtime (&t));
@@ -1467,7 +1467,7 @@ camel_filter_driver_filter_mbox (CamelFilterDriver *driver,
 			report_status (
 				driver, CAMEL_FILTER_STATUS_END,
 				100, _("Failed on message %d"), i);
-			camel_message_info_unref (info);
+			g_object_unref (info);
 			g_propagate_error (error, local_error);
 			goto fail;
 		}
@@ -1477,7 +1477,7 @@ camel_filter_driver_filter_mbox (CamelFilterDriver *driver,
 		/* skip over the FROM_END state */
 		camel_mime_parser_step (mp, NULL, NULL);
 
-		camel_message_info_unref (info);
+		g_object_unref (info);
 	}
 
 	camel_operation_progress (cancellable, 100);
@@ -1566,7 +1566,7 @@ camel_filter_driver_filter_folder (CamelFilterDriver *driver,
 			store_uid, store_uid, cancellable, &local_error);
 
 		if (camel_folder_has_summary_capability (folder))
-			camel_message_info_unref (info);
+			g_object_unref (info);
 
 		if (local_error != NULL || status == -1) {
 			report_status (
@@ -1636,7 +1636,7 @@ get_message_cb (gpointer data,
 		if (msgdata->priv->uid != NULL)
 			uid = msgdata->priv->uid;
 		else
-			uid = camel_message_info_uid (msgdata->priv->info);
+			uid = camel_message_info_get_uid (msgdata->priv->info);
 
 		message = camel_folder_get_message_sync (
 			msgdata->priv->source, uid, cancellable, error);
@@ -1706,10 +1706,10 @@ camel_filter_driver_filter_message (CamelFilterDriver *driver,
 		info = camel_message_info_new_from_header (NULL, h);
 		freeinfo = TRUE;
 	} else {
-		if (camel_message_info_flags (info) & CAMEL_MESSAGE_DELETED)
+		if (camel_message_info_get_flags (info) & CAMEL_MESSAGE_DELETED)
 			return 0;
 
-		uid = camel_message_info_uid (info);
+		uid = camel_message_info_get_uid (info);
 
 		if (message)
 			g_object_ref (message);
@@ -1866,7 +1866,7 @@ camel_filter_driver_filter_message (CamelFilterDriver *driver,
 		g_object_unref (driver->priv->message);
 
 	if (freeinfo)
-		camel_message_info_unref (info);
+		g_object_unref (info);
 
 	return 0;
 
@@ -1878,7 +1878,7 @@ camel_filter_driver_filter_message (CamelFilterDriver *driver,
 		g_object_unref (driver->priv->message);
 
 	if (freeinfo)
-		camel_message_info_unref (info);
+		g_object_unref (info);
 
 	g_propagate_error (error, driver->priv->error);
 	driver->priv->error = NULL;

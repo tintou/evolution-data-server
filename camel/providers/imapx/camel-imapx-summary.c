@@ -260,9 +260,9 @@ static void
 imapx_summary_emit_info_changed (CamelMessageInfo *info)
 {
 	g_return_if_fail (info != NULL);
-	g_return_if_fail (CAMEL_IS_IMAPX_SUMMARY (info->summary));
+	g_return_if_fail (CAMEL_IS_IMAPX_SUMMARY (CAMEL_MESSAGE_INFO_BASE (info)->summary));
 
-	g_signal_emit (info->summary, signals[INFO_CHANGED], 0, info);
+	g_signal_emit (CAMEL_MESSAGE_INFO_BASE (info)->summary, signals[INFO_CHANGED], 0, info);
 }
 
 static gboolean

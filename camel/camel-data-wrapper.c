@@ -69,7 +69,7 @@ data_wrapper_dispose (GObject *object)
 	CamelDataWrapper *data_wrapper = CAMEL_DATA_WRAPPER (object);
 
 	if (data_wrapper->mime_type != NULL) {
-		camel_content_type_unref (data_wrapper->mime_type);
+		g_object_unref (data_wrapper->mime_type);
 		data_wrapper->mime_type = NULL;
 	}
 
@@ -96,8 +96,8 @@ data_wrapper_set_mime_type (CamelDataWrapper *data_wrapper,
                             const gchar *mime_type)
 {
 	if (data_wrapper->mime_type)
-		camel_content_type_unref (data_wrapper->mime_type);
-	data_wrapper->mime_type = camel_content_type_decode (mime_type);
+		g_object_unref (data_wrapper->mime_type);
+	data_wrapper->mime_type = camel_content_type_new_decode (mime_type);
 }
 
 static gchar *
@@ -117,9 +117,9 @@ data_wrapper_set_mime_type_field (CamelDataWrapper *data_wrapper,
                                   CamelContentType *mime_type)
 {
 	if (mime_type)
-		camel_content_type_ref (mime_type);
+		g_object_ref (mime_type);
 	if (data_wrapper->mime_type)
-		camel_content_type_unref (data_wrapper->mime_type);
+		g_object_unref (data_wrapper->mime_type);
 	data_wrapper->mime_type = mime_type;
 }
 

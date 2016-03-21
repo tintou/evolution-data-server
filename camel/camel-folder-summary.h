@@ -51,6 +51,42 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_FOLDER_SUMMARY, CamelFolderSummaryClass))
 
+#define CAMEL_TYPE_MESSAGE_INFO \
+	(camel_message_info_get_type ())
+#define CAMEL_MESSAGE_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MESSAGE_INFO, CamelMessageInfo))
+#define CAMEL_MESSAGE_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MESSAGE_INFO, CamelMessageInfoClass))
+#define CAMEL_IS_MESSAGE_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MESSAGE_INFO))
+#define CAMEL_IS_MESSAGE_INFO_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MESSAGE_INFO))
+#define CAMEL_MESSAGE_INFO_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MESSAGE_INFO, CamelMessageInfoClass))
+
+#define CAMEL_TYPE_MESSAGE_INFO_BASE \
+	(camel_message_info_base_get_type ())
+#define CAMEL_MESSAGE_INFO_BASE(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_MESSAGE_INFO_BASE, CamelMessageInfoBase))
+#define CAMEL_MESSAGE_INFO_BASE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), CAMEL_TYPE_MESSAGE_INFO_BASE, CamelMessageInfoBaseClass))
+#define CAMEL_IS_MESSAGE_INFO_BASE(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_MESSAGE_INFO_BASE))
+#define CAMEL_IS_MESSAGE_INFO_BASE_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), CAMEL_TYPE_MESSAGE_INFO_BASE))
+#define CAMEL_MESSAGE_INFO_BASE_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), CAMEL_TYPE_MESSAGE_INFO_BASE, CamelMessageInfoBaseClass))
+
 G_BEGIN_DECLS
 
 typedef struct _CamelFolder CamelFolder;
@@ -61,7 +97,10 @@ typedef struct _CamelFolderSummaryClass CamelFolderSummaryClass;
 typedef struct _CamelFolderSummaryPrivate CamelFolderSummaryPrivate;
 
 typedef struct _CamelMessageInfo CamelMessageInfo;
+typedef struct _CamelMessageInfoClass CamelMessageInfoClass;
+
 typedef struct _CamelMessageInfoBase CamelMessageInfoBase;
+typedef struct _CamelMessageInfoBaseClass CamelMessageInfoBaseClass;
 
 typedef struct _CamelMessageContentInfo CamelMessageContentInfo;
 
@@ -140,7 +179,7 @@ typedef struct _CamelSummaryReferences {
 } CamelSummaryReferences;
 
 /* accessor id's */
-enum {
+typedef enum {
 	CAMEL_MESSAGE_INFO_SUBJECT,
 	CAMEL_MESSAGE_INFO_FROM,
 	CAMEL_MESSAGE_INFO_TO,
@@ -162,28 +201,18 @@ enum {
 	CAMEL_MESSAGE_INFO_PREVIEW,
 	CAMEL_MESSAGE_INFO_CONTENT,
 	CAMEL_MESSAGE_INFO_LAST
-};
-
-/* information about a given message, use accessors */
-struct _CamelMessageInfo {
-	CamelFolderSummary *summary;
-
-	volatile gint refcount;
-	const gchar *uid;
-	/*FIXME: Make it work with the CAMEL_MESSADE_DB_DIRTY flag instead of another 4 bytes*/
-	guint dirty : 1;
-};
+} CamelMessageInfoField;
 
 /* For classes wishing to do the provided i/o, or for anonymous users,
  * they must subclass or use this messageinfo structure */
 /* Otherwise they can do their own thing entirely */
 struct _CamelMessageInfoBase {
+	GObject parent;
 	CamelFolderSummary *summary;
 
-	volatile gint refcount;
 	const gchar *uid;
 	/*FIXME: Make it work with the CAMEL_MESSADE_DB_DIRTY flag instead of another 4 bytes*/
-	guint dirty : 1;
+	gboolean dirty : TRUE;
 
 	const gchar *subject;
 	const gchar *from;
@@ -208,6 +237,19 @@ struct _CamelMessageInfoBase {
 	struct _camel_header_param *headers;
 	gchar *preview;
 	gchar *bodystructure;
+};
+
+struct _CamelMessageInfoBaseClass {
+	GObjectClass parent_class;
+};
+
+/* information about a given message, use accessors */
+struct _CamelMessageInfo {
+	CamelMessageInfoBase parent;
+};
+
+struct _CamelMessageInfoClass {
+	CamelMessageInfoBaseClass parent_class;
 };
 
 /**
@@ -528,94 +570,93 @@ void		camel_tag_list_free		(CamelTag **list);
 
 /* Summary may be null */
 /* Use anonymous pointers to avoid tons of cast crap */
+GType		camel_message_info_base_get_type	(void) G_GNUC_CONST;
 GType		camel_message_info_get_type	(void) G_GNUC_CONST;
 gpointer	camel_message_info_new		(CamelFolderSummary *summary);
-gpointer	camel_message_info_ref		(gpointer info);
 CamelMessageInfo *
 		camel_message_info_new_from_header
 						(CamelFolderSummary *summary,
 						 CamelHeaderRaw *header);
-void		camel_message_info_unref	(gpointer info);
 gpointer	camel_message_info_clone	(gconstpointer info);
 
 /* accessors */
-gconstpointer	camel_message_info_ptr		(const CamelMessageInfo *info,
+gconstpointer	camel_message_info_get_ptr		(const CamelMessageInfo *info,
 						 gint id);
-guint32		camel_message_info_uint32	(const CamelMessageInfo *info,
+guint32		camel_message_info_get_uint32	(const CamelMessageInfo *info,
 						 gint id);
-time_t		camel_message_info_time		(const CamelMessageInfo *info,
+time_t		camel_message_info_get_time		(const CamelMessageInfo *info,
 						 gint id);
 
-#define camel_message_info_uid(mi) \
-	((const gchar *)((const CamelMessageInfo *) mi)->uid)
+#define camel_message_info_get_uid(mi) \
+	((const gchar *)CAMEL_MESSAGE_INFO_BASE (mi)->uid)
 
-#define camel_message_info_subject(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_SUBJECT))
+#define camel_message_info_get_subject(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_SUBJECT))
 
 /**
- * camel_message_info_preview:
+ * camel_message_info_get_preview:
  * @mi: a #CamelMessageInfo
  *
  * FIXME Document me!
  *
  * Since: 2.28
  **/
-#define camel_message_info_preview(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_PREVIEW))
+#define camel_message_info_get_preview(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_PREVIEW))
 
-#define camel_message_info_from(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_FROM))
-#define camel_message_info_to(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_TO))
-#define camel_message_info_cc(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_CC))
-#define camel_message_info_mlist(mi) \
-	((const gchar *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_MLIST))
+#define camel_message_info_get_from(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_FROM))
+#define camel_message_info_get_to(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_TO))
+#define camel_message_info_get_cc(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_CC))
+#define camel_message_info_get_mlist(mi) \
+	((const gchar *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_MLIST))
 
-#define camel_message_info_flags(mi) \
-	camel_message_info_uint32 ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_FLAGS)
-#define camel_message_info_size(mi) \
-	camel_message_info_uint32 ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_SIZE)
+#define camel_message_info_get_flags(mi) \
+	camel_message_info_get_uint32 ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_FLAGS)
+#define camel_message_info_get_size(mi) \
+	camel_message_info_get_uint32 ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_SIZE)
 
-#define camel_message_info_date_sent(mi) \
-	camel_message_info_time ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_DATE_SENT)
-#define camel_message_info_date_received(mi) \
-	camel_message_info_time ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_DATE_RECEIVED)
+#define camel_message_info_get_date_sent(mi) \
+	camel_message_info_get_time ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_DATE_SENT)
+#define camel_message_info_get_date_received(mi) \
+	camel_message_info_get_time ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_DATE_RECEIVED)
 
-#define camel_message_info_message_id(mi) \
-	((const CamelSummaryMessageID *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_MESSAGE_ID))
-#define camel_message_info_references(mi) \
-	((const CamelSummaryReferences *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_REFERENCES))
-#define camel_message_info_user_flags(mi) \
-	((const CamelFlag *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_USER_FLAGS))
-#define camel_message_info_user_tags(mi) \
-	((const CamelTag *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_USER_TAGS))
+#define camel_message_info_get_message_id(mi) \
+	((const CamelSummaryMessageID *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_MESSAGE_ID))
+#define camel_message_info_get_references(mi) \
+	((const CamelSummaryReferences *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_REFERENCES))
+#define camel_message_info_get_user_flags(mi) \
+	((const CamelFlag *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_USER_FLAGS))
+#define camel_message_info_get_user_tags(mi) \
+	((const CamelTag *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_USER_TAGS))
 
 /**
- * camel_message_info_headers:
+ * camel_message_info_get_headers:
  * @mi: a #CamelMessageInfo
  *
  * FIXME Document me!
  *
  * Since: 2.24
  **/
-#define camel_message_info_headers(mi) \
-	((const struct _camel_header_param *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_HEADERS))
+#define camel_message_info_get_headers(mi) \
+	((const struct _camel_header_param *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_HEADERS))
 
 /**
- * camel_message_info_content:
+ * camel_message_info_get_content:
  * @mi: a #CamelMessageInfo
  *
  * FIXME Document me!
  *
  * Since: 2.30
  **/
-#define camel_message_info_content(mi) \
-	((const CamelMessageContentInfo *) camel_message_info_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_CONTENT))
+#define camel_message_info_get_content(mi) \
+	((const CamelMessageContentInfo *) camel_message_info_get_ptr ((const CamelMessageInfo *) mi, CAMEL_MESSAGE_INFO_CONTENT))
 
-gboolean	camel_message_info_user_flag	(const CamelMessageInfo *info,
+gboolean	camel_message_info_get_user_flag	(const CamelMessageInfo *info,
 						 const gchar *id);
-const gchar *	camel_message_info_user_tag	(const CamelMessageInfo *info,
+const gchar *	camel_message_info_get_user_tag	(const CamelMessageInfo *info,
 						 const gchar *id);
 
 gboolean	camel_message_info_set_flags	(CamelMessageInfo *info,

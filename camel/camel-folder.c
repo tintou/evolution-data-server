@@ -143,7 +143,7 @@ async_context_free (AsyncContext *async_context)
 		g_object_unref (async_context->message);
 
 	if (async_context->info != NULL)
-		camel_message_info_unref (async_context->info);
+		g_object_unref (async_context->info);
 
 	if (async_context->destination != NULL)
 		g_object_unref (async_context->destination);
@@ -307,7 +307,7 @@ folder_filter (CamelSession *session,
 				continue;
 
 			camel_message_info_set_flags (info, CAMEL_MESSAGE_JUNK_LEARN, 0);
-			camel_message_info_unref (info);
+			g_object_unref (info);
 		}
 	}
 
@@ -318,7 +318,7 @@ folder_filter (CamelSession *session,
 				continue;
 
 			camel_message_info_set_flags (info, CAMEL_MESSAGE_JUNK_LEARN, 0);
-			camel_message_info_unref (info);
+			g_object_unref (info);
 		}
 	}
 
@@ -443,7 +443,7 @@ folder_filter (CamelSession *session,
 				data->driver, NULL, info, uid, data->folder,
 				store_uid, store_uid, cancellable, error);
 
-			camel_message_info_unref (info);
+			g_object_unref (info);
 		}
 
 		camel_operation_pop_message (cancellable);
@@ -493,7 +493,7 @@ folder_transfer_message_to (CamelFolder *source,
 	if ((source->folder_flags & CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY)
 			&& (minfo = camel_folder_get_message_info (source, uid))) {
 		info = camel_message_info_clone (minfo);
-		camel_message_info_unref (minfo);
+		g_object_unref (minfo);
 	} else
 		info = camel_message_info_new_from_header (NULL, ((CamelMimePart *) msg)->headers);
 
@@ -516,7 +516,7 @@ folder_transfer_message_to (CamelFolder *source,
 			source, uid, CAMEL_MESSAGE_DELETED |
 			CAMEL_MESSAGE_SEEN, ~0);
 
-	camel_message_info_unref (info);
+	g_object_unref (info);
 }
 
 static gboolean
@@ -724,8 +724,8 @@ folder_get_message_flags (CamelFolder *folder,
 	if (info == NULL)
 		return 0;
 
-	flags = camel_message_info_flags (info);
-	camel_message_info_unref (info);
+	flags = camel_message_info_get_flags (info);
+	g_object_unref (info);
 
 	return flags;
 }
@@ -746,7 +746,7 @@ folder_set_message_flags (CamelFolder *folder,
 		return FALSE;
 
 	res = camel_message_info_set_flags (info, flags, set);
-	camel_message_info_unref (info);
+	g_object_unref (info);
 
 	return res;
 }
@@ -765,8 +765,8 @@ folder_get_message_user_flag (CamelFolder *folder,
 	if (info == NULL)
 		return FALSE;
 
-	ret = camel_message_info_user_flag (info, name);
-	camel_message_info_unref (info);
+	ret = camel_message_info_get_user_flag (info, name);
+	g_object_unref (info);
 
 	return ret;
 }
@@ -786,7 +786,7 @@ folder_set_message_user_flag (CamelFolder *folder,
 		return;
 
 	camel_message_info_set_user_flag (info, name, value);
-	camel_message_info_unref (info);
+	g_object_unref (info);
 }
 
 static const gchar *
@@ -803,8 +803,8 @@ folder_get_message_user_tag (CamelFolder *folder,
 	if (info == NULL)
 		return NULL;
 
-	ret = camel_message_info_user_tag (info, name);
-	camel_message_info_unref (info);
+	ret = camel_message_info_get_user_tag (info, name);
+	g_object_unref (info);
 
 	return ret;
 }
@@ -824,7 +824,7 @@ folder_set_message_user_tag (CamelFolder *folder,
 		return;
 
 	camel_message_info_set_user_tag (info, name, value);
-	camel_message_info_unref (info);
+	g_object_unref (info);
 }
 
 static GPtrArray *
@@ -1900,7 +1900,7 @@ camel_folder_set_message_user_tag (CamelFolder *folder,
  * @uid: the uid of a message
  *
  * Retrieve the #CamelMessageInfo for the specified @uid.  This return
- * must be freed using camel_message_info_unref().
+ * must be freed using g_object_unref().
  *
  * Returns: the summary information for the indicated message, or %NULL
  * if the uid does not exist
@@ -2796,7 +2796,7 @@ camel_folder_append_message (CamelFolder *folder,
 
 	async_context = g_slice_new0 (AsyncContext);
 	async_context->message = g_object_ref (message);
-	async_context->info = camel_message_info_ref (info);
+	async_context->info = g_object_ref (info);
 
 	task = g_task_new (folder, cancellable, callback, user_data);
 	g_task_set_source_tag (task, camel_folder_append_message);

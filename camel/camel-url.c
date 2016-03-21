@@ -705,6 +705,10 @@ camel_url_decode (gchar *part)
 	} while (*s++);
 }
 
+/**
+ * camel_url_hash:
+ * @v: (type CamelURL): a URL
+ */
 guint
 camel_url_hash (gconstpointer v)
 {
@@ -741,6 +745,11 @@ check_equal (gchar *s1,
 	return strcmp (s1, s2) == 0;
 }
 
+/**
+ * camel_url_equal:
+ * @v: (type CamelURL): a URL
+ * @v2: (type CamelURL): the URL to compare
+ */
 gint
 camel_url_equal (gconstpointer v,
                  gconstpointer v2)

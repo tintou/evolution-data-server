@@ -63,9 +63,9 @@ mbox_folder_cmp_uids (CamelFolder *folder,
 	if (!a || !b) {
 		/* It's not a problem when one of the messages is not in the summary */
 		if (a)
-			camel_message_info_unref (a);
+			g_object_unref (a);
 		if (b)
-			camel_message_info_unref (b);
+			g_object_unref (b);
 
 		if (a == b)
 			return 0;
@@ -76,8 +76,8 @@ mbox_folder_cmp_uids (CamelFolder *folder,
 
 	res = a->frompos < b->frompos ? -1 : a->frompos == b->frompos ? 0 : 1;
 
-	camel_message_info_unref (a);
-	camel_message_info_unref (b);
+	g_object_unref (a);
+	g_object_unref (b);
 
 	return res;
 }
@@ -128,12 +128,12 @@ mbox_folder_get_filename (CamelFolder *folder,
 	}
 
 	if (info->frompos == -1) {
-		camel_message_info_unref (info);
+		g_object_unref (info);
 		goto fail;
 	}
 
 	frompos = info->frompos;
-	camel_message_info_unref (info);
+	g_object_unref (info);
 
 	filename = g_strdup_printf ("%s%s!%" PRId64, lf->folder_path, G_DIR_SEPARATOR_S, (gint64) frompos);
 
@@ -180,11 +180,11 @@ mbox_folder_append_message_sync (CamelFolder *folder,
 	if (mi == NULL)
 		goto fail;
 
-	d (printf ("Appending message: uid is %s\n", camel_message_info_uid (mi)));
+	d (printf ("Appending message: uid is %s\n", camel_message_info_get_uid (mi)));
 
 	has_attachment = camel_mime_message_has_attachment (message);
-	if (((camel_message_info_flags (mi) & CAMEL_MESSAGE_ATTACHMENTS) && !has_attachment) ||
-	    ((camel_message_info_flags (mi) & CAMEL_MESSAGE_ATTACHMENTS) == 0 && has_attachment)) {
+	if (((camel_message_info_get_flags (mi) & CAMEL_MESSAGE_ATTACHMENTS) && !has_attachment) ||
+	    ((camel_message_info_get_flags (mi) & CAMEL_MESSAGE_ATTACHMENTS) == 0 && has_attachment)) {
 		camel_message_info_set_flags (mi, CAMEL_MESSAGE_ATTACHMENTS, has_attachment ? CAMEL_MESSAGE_ATTACHMENTS : 0);
 	}
 
@@ -253,7 +253,7 @@ mbox_folder_append_message_sync (CamelFolder *folder,
 	}
 
 	if (appended_uid)
-		*appended_uid = g_strdup(camel_message_info_uid(mi));
+		*appended_uid = g_strdup(camel_message_info_get_uid(mi));
 
 	return TRUE;
 
@@ -341,12 +341,12 @@ retry:
 	}
 
 	if (info->frompos == -1) {
-		camel_message_info_unref (info);
+		g_object_unref (info);
 		goto fail;
 	}
 
 	frompos = info->frompos;
-	camel_message_info_unref (info);
+	g_object_unref (info);
 
 	/* we use an fd instead of a normal stream here - the reason is subtle, camel_mime_part will cache
 	 * the whole message in memory if the stream is non-seekable (which it is when built from a parser

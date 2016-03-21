@@ -315,7 +315,7 @@ mime_part_process_header (CamelMedium *medium,
 	case HEADER_DESCRIPTION: /* raw header->utf8 conversion */
 		g_free (mime_part->priv->description);
 		if (((CamelDataWrapper *) mime_part)->mime_type) {
-			charset = camel_content_type_param (((CamelDataWrapper *) mime_part)->mime_type, "charset");
+			charset = camel_content_type_get_param (((CamelDataWrapper *) mime_part)->mime_type, "charset");
 			charset = camel_iconv_charset_name (charset);
 		} else
 			charset = NULL;
@@ -343,8 +343,8 @@ mime_part_process_header (CamelMedium *medium,
 		break;
 	case HEADER_CONTENT_TYPE:
 		if (((CamelDataWrapper *) mime_part)->mime_type)
-			camel_content_type_unref (((CamelDataWrapper *) mime_part)->mime_type);
-		((CamelDataWrapper *) mime_part)->mime_type = camel_content_type_decode (value);
+			g_object_unref (((CamelDataWrapper *) mime_part)->mime_type);
+		((CamelDataWrapper *) mime_part)->mime_type = camel_content_type_new_decode (value);
 		break;
 	default:
 		return FALSE;
@@ -627,8 +627,8 @@ mime_part_write_to_stream_sync (CamelDataWrapper *dw,
 		const gchar *filename;
 
 		if (camel_content_type_is (dw->mime_type, "text", "*")) {
-			content_charset = camel_content_type_param (content->mime_type, "charset");
-			part_charset = camel_content_type_param (dw->mime_type, "charset");
+			content_charset = camel_content_type_get_param (content->mime_type, "charset");
+			part_charset = camel_content_type_get_param (dw->mime_type, "charset");
 
 			if (content_charset && part_charset) {
 				content_charset = camel_iconv_charset_name (content_charset);
@@ -827,8 +827,8 @@ mime_part_write_to_output_stream_sync (CamelDataWrapper *dw,
 			camel_content_type_is (dw->mime_type, "text", "*");
 
 		if (content_type_is_text) {
-			content_charset = camel_content_type_param (content->mime_type, "charset");
-			part_charset = camel_content_type_param (dw->mime_type, "charset");
+			content_charset = camel_content_type_get_param (content->mime_type, "charset");
+			part_charset = camel_content_type_get_param (dw->mime_type, "charset");
 
 			if (content_charset && part_charset) {
 				content_charset = camel_iconv_charset_name (content_charset);
@@ -979,8 +979,8 @@ mime_part_construct_from_parser_sync (CamelMimePart *mime_part,
 	case CAMEL_MIME_PARSER_STATE_MESSAGE:
 		/* set the default type of a message always */
 		if (dw->mime_type)
-			camel_content_type_unref (dw->mime_type);
-		dw->mime_type = camel_content_type_decode ("message/rfc822");
+			g_object_unref (dw->mime_type);
+		dw->mime_type = camel_content_type_new_decode ("message/rfc822");
 		/* coverity[fallthrough] */
 
 	case CAMEL_MIME_PARSER_STATE_HEADER:
@@ -1107,7 +1107,7 @@ camel_mime_part_init (CamelMimePart *mime_part)
 	data_wrapper = CAMEL_DATA_WRAPPER (mime_part);
 
 	if (data_wrapper->mime_type != NULL)
-		camel_content_type_unref (data_wrapper->mime_type);
+		g_object_unref (data_wrapper->mime_type);
 
 	data_wrapper->mime_type = camel_content_type_new ("text", "plain");
 }
@@ -1534,7 +1534,7 @@ camel_mime_part_get_filename (CamelMimePart *mime_part)
 			return name;
 	}
 
-	return camel_content_type_param (
+	return camel_content_type_get_param (
 		((CamelDataWrapper *) mime_part)->mime_type, "name");
 }
 

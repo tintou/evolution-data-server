@@ -339,7 +339,7 @@ multipart_get_boundary (CamelMultipart *multipart)
 	CamelDataWrapper *cdw = CAMEL_DATA_WRAPPER (multipart);
 
 	g_return_val_if_fail (cdw->mime_type != NULL, NULL);
-	return camel_content_type_param (cdw->mime_type, "boundary");
+	return camel_content_type_get_param (cdw->mime_type, "boundary");
 }
 
 static gint
@@ -357,7 +357,7 @@ multipart_construct_from_parser (CamelMultipart *multipart,
 	content_type = camel_mime_parser_content_type (mp);
 	camel_multipart_set_boundary (
 		multipart,
-		camel_content_type_param (content_type, "boundary"));
+		camel_content_type_get_param (content_type, "boundary"));
 
 	while (camel_mime_parser_step (mp, &buf, &len) != CAMEL_MIME_PARSER_STATE_MULTIPART_END) {
 		camel_mime_parser_unstep (mp);

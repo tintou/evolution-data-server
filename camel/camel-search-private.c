@@ -537,7 +537,7 @@ camel_search_message_body_contains (CamelDataWrapper *object,
 		byte_array = g_byte_array_new ();
 		stream = camel_stream_mem_new_with_byte_array (byte_array);
 
-		charset = camel_content_type_param (CAMEL_DATA_WRAPPER (containee)->mime_type, "charset");
+		charset = camel_content_type_get_param (CAMEL_DATA_WRAPPER (containee)->mime_type, "charset");
 		if (charset && *charset) {
 			CamelMimeFilter *filter = camel_mime_filter_charset_new (charset, "UTF-8");
 			if (filter) {

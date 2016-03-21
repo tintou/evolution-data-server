@@ -308,16 +308,16 @@ imapx_update_message_info_flags (CamelMessageInfo *info,
 	CamelIMAPXMessageInfo *xinfo = (CamelIMAPXMessageInfo *) info;
 
 	/* Locally made changes should not be overwritten, it'll be (re)saved later */
-	if ((camel_message_info_flags (info) & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
-		d ('?', "Skipping update of locally changed uid:'%s'\n", camel_message_info_uid (info));
+	if ((camel_message_info_get_flags (info) & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
+		d ('?', "Skipping update of locally changed uid:'%s'\n", camel_message_info_get_uid (info));
 		return FALSE;
 	}
 
 	/* This makes sure that server flags has precedence from locally stored flags,
 	 * thus a user actually sees what is stored on the server */
-	if ((camel_message_info_flags (info) & CAMEL_IMAPX_SERVER_FLAGS) != (server_flags & CAMEL_IMAPX_SERVER_FLAGS)) {
+	if ((camel_message_info_get_flags (info) & CAMEL_IMAPX_SERVER_FLAGS) != (server_flags & CAMEL_IMAPX_SERVER_FLAGS)) {
 		xinfo->server_flags = (xinfo->server_flags & ~CAMEL_IMAPX_SERVER_FLAGS) |
-				      (camel_message_info_flags (info) & CAMEL_IMAPX_SERVER_FLAGS);
+				      (camel_message_info_get_flags (info) & CAMEL_IMAPX_SERVER_FLAGS);
 	}
 
 	if (server_flags != xinfo->server_flags) {
@@ -783,7 +783,7 @@ imapx_free_body (struct _CamelMessageContentInfo *cinfo)
 	}
 
 	if (cinfo->type)
-		camel_content_type_unref (cinfo->type);
+		g_object_unref (cinfo->type);
 	g_free (cinfo->id);
 	g_free (cinfo->description);
 	g_free (cinfo->encoding);
@@ -956,6 +956,7 @@ imapx_parse_body_fields (CamelIMAPXInputStream *stream,
 	gsize type_len;
 	guint64 number;
 	struct _CamelMessageContentInfo *cinfo;
+	CamelHeaderParam *params;
 	gboolean success;
 
 	/* body_fields     ::= body_fld_param SPACE body_fld_id SPACE
@@ -982,9 +983,10 @@ imapx_parse_body_fields (CamelIMAPXInputStream *stream,
 		goto error;
 
 	cinfo->type = camel_content_type_new (type, (gchar *) token);
+	params = camel_content_type_get_params (cinfo->type);
 
 	success = imapx_parse_param_list (
-		stream, &cinfo->type->params, cancellable, error);
+		stream, &params, cancellable, error);
 
 	if (!success)
 		goto error;
@@ -1077,7 +1079,7 @@ imapx_parse_address_list (CamelIMAPXInputStream *stream,
 			addr->type = CAMEL_HEADER_ADDRESS_NAME;
 			camel_imapx_input_stream_nstring (stream, &token, cancellable, &local_error);
 			if (local_error) {
-				camel_header_address_unref (addr);
+				g_object_unref (addr);
 				goto error;
 			}
 
@@ -1085,7 +1087,7 @@ imapx_parse_address_list (CamelIMAPXInputStream *stream,
 			/* we ignore the route, nobody uses it in the real world */
 			camel_imapx_input_stream_nstring (stream, &token, cancellable, &local_error);
 			if (local_error) {
-				camel_header_address_unref (addr);
+				g_object_unref (addr);
 				goto error;
 			}
 
@@ -1101,7 +1103,7 @@ imapx_parse_address_list (CamelIMAPXInputStream *stream,
 
 			camel_imapx_input_stream_nstring (stream, (guchar **) &mbox, cancellable, &local_error);
 			if (local_error) {
-				camel_header_address_unref (addr);
+				g_object_unref (addr);
 				goto error;
 			}
 
@@ -1109,14 +1111,14 @@ imapx_parse_address_list (CamelIMAPXInputStream *stream,
 
 			camel_imapx_input_stream_nstring (stream, &host, cancellable, &local_error);
 			if (local_error) {
-				camel_header_address_unref (addr);
+				g_object_unref (addr);
 				goto error;
 			}
 
 			if (host == NULL) {
 				if (mbox == NULL) {
 					group = NULL;
-					camel_header_address_unref (addr);
+					g_object_unref (addr);
 				} else {
 					g_free (addr->name);
 					addr->name = mbox;
@@ -1182,7 +1184,7 @@ imapx_parse_envelope (CamelIMAPXInputStream *stream,
 
 	if (tok != '(') {
 		g_clear_error (&local_error);
-		camel_message_info_unref (minfo);
+		g_object_unref (minfo);
 		g_set_error (error, CAMEL_IMAPX_ERROR, CAMEL_IMAPX_ERROR_SERVER_RESPONSE_MALFORMED, "envelope: expecting '('");
 		return NULL;
 	}
@@ -1289,7 +1291,7 @@ imapx_parse_envelope (CamelIMAPXInputStream *stream,
 
 	if (tok != ')') {
 		g_clear_error (&local_error);
-		camel_message_info_unref (minfo);
+		g_object_unref (minfo);
 		g_set_error (error, CAMEL_IMAPX_ERROR, CAMEL_IMAPX_ERROR_SERVER_RESPONSE_MALFORMED, "expecting ')'");
 		return NULL;
 	}
@@ -1299,7 +1301,7 @@ imapx_parse_envelope (CamelIMAPXInputStream *stream,
 	if (local_error != NULL) {
 		g_propagate_error (error, local_error);
 		if (minfo)
-			camel_message_info_unref (minfo);
+			g_object_unref (minfo);
 		return NULL;
 	}
 
@@ -1317,6 +1319,7 @@ imapx_parse_body (CamelIMAPXInputStream *stream,
 	struct _CamelMessageContentInfo * cinfo = NULL;
 	struct _CamelMessageContentInfo *subinfo, *last;
 	CamelContentDisposition * dinfo = NULL;
+	CamelHeaderParam *params = NULL;
 	GError *local_error = NULL;
 
 	/* body            ::= "(" body_type_1part / body_type_mpart ")" */
@@ -1387,9 +1390,10 @@ imapx_parse_body (CamelIMAPXInputStream *stream,
 
 		camel_imapx_input_stream_ungettoken (stream, tok, token, len);
 
+		params = camel_content_type_get_params (cinfo->type);
 		if (tok == '(') {
 			imapx_parse_param_list (
-				stream, &cinfo->type->params,
+				stream, &params,
 				cancellable, &local_error);
 
 			if (local_error)
@@ -1453,7 +1457,7 @@ imapx_parse_body (CamelIMAPXInputStream *stream,
 
 			/* what do we do with the message content info?? */
 			//((CamelMessageInfoBase *) minfo)->content = imapx_parse_body (stream);
-			camel_message_info_unref (minfo);
+			g_object_unref (minfo);
 			minfo = NULL;
 		}
 
@@ -1678,7 +1682,7 @@ imapx_free_fetch (struct _fetch_info *finfo)
 	if (finfo->header)
 		g_bytes_unref (finfo->header);
 	if (finfo->minfo)
-		camel_message_info_unref (finfo->minfo);
+		g_object_unref (finfo->minfo);
 	if (finfo->cinfo)
 		imapx_free_body (finfo->cinfo);
 	camel_flag_list_free (&finfo->user_flags);

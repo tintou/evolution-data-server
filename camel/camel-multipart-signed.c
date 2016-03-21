@@ -678,7 +678,7 @@ multipart_signed_construct_from_parser (CamelMultipart *multipart,
 
 	/* All we do is copy it to a memstream */
 	content_type = camel_mime_parser_content_type (mp);
-	camel_multipart_set_boundary (multipart, camel_content_type_param (content_type, "boundary"));
+	camel_multipart_set_boundary (multipart, camel_content_type_get_param (content_type, "boundary"));
 
 	data_wrapper = CAMEL_DATA_WRAPPER (multipart);
 	byte_array = camel_data_wrapper_get_byte_array (data_wrapper);

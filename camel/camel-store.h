@@ -272,8 +272,6 @@ CamelFolderInfo *
 						 gchar separator,
 						 gboolean short_names);
 #endif /* CAMEL_DISABLE_DEPRECATED */
-CamelFolderInfo *
-		camel_folder_info_clone		(CamelFolderInfo *fi);
 gboolean	camel_store_can_refresh_folder	(CamelStore *store,
 						 CamelFolderInfo *info,
 						 GError **error);

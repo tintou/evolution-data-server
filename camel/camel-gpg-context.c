@@ -1845,7 +1845,7 @@ gpg_sign_sync (CamelCipherContext *context,
 		ct = camel_content_type_new ("application", "pgp-signature");
 		camel_content_type_set_param (ct, "name", "signature.asc");
 		camel_data_wrapper_set_mime_type_field (dw, ct);
-		camel_content_type_unref (ct);
+		g_object_unref (ct);
 
 		camel_medium_set_content ((CamelMedium *) sigpart, dw);
 		g_object_unref (dw);
@@ -1857,7 +1857,7 @@ gpg_sign_sync (CamelCipherContext *context,
 		camel_content_type_set_param (ct, "micalg", camel_cipher_context_hash_to_id (context, hash == CAMEL_CIPHER_HASH_DEFAULT ? gpg->hash : hash));
 		camel_content_type_set_param (ct, "protocol", class->sign_protocol);
 		camel_data_wrapper_set_mime_type_field ((CamelDataWrapper *) mps, ct);
-		camel_content_type_unref (ct);
+		g_object_unref (ct);
 		camel_multipart_set_boundary ((CamelMultipart *) mps, NULL);
 
 		camel_multipart_signed_set_signature (mps, sigpart);
@@ -1909,7 +1909,7 @@ gpg_verify_sync (CamelCipherContext *context,
 		/* PGP/Mime Signature */
 		const gchar *tmp;
 
-		tmp = camel_content_type_param (ct, "protocol");
+		tmp = camel_content_type_get_param (ct, "protocol");
 		if (!CAMEL_IS_MULTIPART_SIGNED (mps)
 		    || tmp == NULL
 		    || g_ascii_strcasecmp (tmp, class->sign_protocol) != 0) {
@@ -2195,7 +2195,7 @@ gpg_encrypt_sync (CamelCipherContext *context,
 		ct = camel_content_type_new ("application", "octet-stream");
 		camel_content_type_set_param (ct, "name", "encrypted.asc");
 		camel_data_wrapper_set_mime_type_field (dw, ct);
-		camel_content_type_unref (ct);
+		g_object_unref (ct);
 
 		camel_medium_set_content ((CamelMedium *) encpart, dw);
 		g_object_unref (dw);
@@ -2219,7 +2219,7 @@ gpg_encrypt_sync (CamelCipherContext *context,
 		ct = camel_content_type_new ("multipart", "encrypted");
 		camel_content_type_set_param (ct, "protocol", class->encrypt_protocol);
 		camel_data_wrapper_set_mime_type_field ((CamelDataWrapper *) mpe, ct);
-		camel_content_type_unref (ct);
+		g_object_unref (ct);
 		camel_multipart_set_boundary ((CamelMultipart *) mpe, NULL);
 
 		camel_multipart_add_part ((CamelMultipart *) mpe, verpart);

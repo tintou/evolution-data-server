@@ -64,7 +64,7 @@ struct _header_scan_state {
 
     /* global state */
 
-	camel_mime_parser_state_t state;
+	CamelMimeParserState state;
 
 	/* for building headers during scanning */
 	gchar *outbuf;
@@ -111,7 +111,7 @@ struct _header_scan_state {
 struct _header_scan_stack {
 	struct _header_scan_stack *parent;
 
-	camel_mime_parser_state_t savestate; /* state at invocation of this part */
+	CamelMimeParserState savestate; /* state at invocation of this part */
 
 #ifdef MEMPOOL
 	CamelMemPool *pool;	/* memory pool to keep track of headers/etc at this level */
@@ -647,7 +647,7 @@ camel_mime_parser_drop_step (CamelMimeParser *parser)
  * Returns: The current new state of the parser
  * is returned.
  **/
-camel_mime_parser_state_t
+CamelMimeParserState
 camel_mime_parser_step (CamelMimeParser *parser,
                         gchar **databuffer,
                         gsize *datalength)
@@ -864,7 +864,7 @@ camel_mime_parser_seek (CamelMimeParser *parser,
  *
  * Returns: The current parser state.
  **/
-camel_mime_parser_state_t
+CamelMimeParserState
 camel_mime_parser_state (CamelMimeParser *parser)
 {
 	struct _header_scan_state *s = _PRIVATE (parser);
@@ -883,7 +883,7 @@ camel_mime_parser_state (CamelMimeParser *parser)
  **/
 void
 camel_mime_parser_push_state (CamelMimeParser *mp,
-                              camel_mime_parser_state_t newstate,
+                              CamelMimeParserState newstate,
                               const gchar *boundary)
 {
 	struct _header_scan_stack *h;
@@ -1076,7 +1076,7 @@ folder_pull_part (struct _header_scan_state *s)
 #else
 		camel_header_raw_clear (&h->headers);
 #endif
-		camel_content_type_unref (h->content_type);
+		g_object_unref (h->content_type);
 		if (h->pretext)
 			g_byte_array_free (h->pretext, TRUE);
 		if (h->posttext)
@@ -1689,10 +1689,10 @@ tail_recurse:
 
 		type = CAMEL_MIME_PARSER_STATE_HEADER;
 		if ((content = camel_header_raw_find (&h->headers, "Content-Type", NULL))
-		     && (ct = camel_content_type_decode (content))) {
+		     && (ct = camel_content_type_new_decode (content))) {
 			if (!g_ascii_strcasecmp (ct->type, "multipart")) {
 				if (!camel_content_type_is (ct, "multipart", "signed")
-				    && (bound = camel_content_type_param (ct, "boundary"))) {
+				    && (bound = camel_content_type_get_param (ct, "boundary"))) {
 					d (printf ("multipart, boundary = %s\n", bound));
 					h->boundarylen = strlen (bound) + 2;
 					h->boundarylenfinal = h->boundarylen + 2;
@@ -1701,8 +1701,8 @@ tail_recurse:
 					g_snprintf (h->boundary, boundary_len, "--%s--", bound);
 					type = CAMEL_MIME_PARSER_STATE_MULTIPART;
 				} else {
-					/*camel_content_type_unref(ct);
-					  ct = camel_content_type_decode ("text/plain");*/
+					/*g_object_unref(ct);
+					  ct = camel_content_type_new_decode ("text/plain");*/
 /* We can't quite do this, as it will mess up all the offsets ... */
 /*					camel_header_raw_replace(&h->headers, "Content-Type", "text/plain", offset); */
 					/*g_warning("Multipart with no boundary, treating as text/plain");*/
@@ -1718,13 +1718,13 @@ tail_recurse:
 			/* make the default type for multipart/digest be message/rfc822 */
 			if ((s->parts
 			     && camel_content_type_is (s->parts->content_type, "multipart", "digest"))) {
-				ct = camel_content_type_decode ("message/rfc822");
+				ct = camel_content_type_new_decode ("message/rfc822");
 				type = CAMEL_MIME_PARSER_STATE_MESSAGE;
 				d (printf ("parent was multipart/digest, autoupgrading to message/rfc822?\n"));
 				/* maybe we should do this too?
 				 * header_raw_append_parse(&h->headers, "Content-Type: message/rfc822", -1);*/
 			} else {
-				ct = camel_content_type_decode ("text/plain");
+				ct = camel_content_type_new_decode ("text/plain");
 			}
 		}
 		h->content_type = ct;
@@ -1936,7 +1936,7 @@ gint main (gint argc, gchar **argv)
 			switch (s->state) {
 			case CAMEL_MIME_PARSER_STATE_HEADER:
 				if (s->parts->content_type
-				    && (charset = camel_content_type_param (s->parts->content_type, "charset"))) {
+				    && (charset = camel_content_type_get_param (s->parts->content_type, "charset"))) {
 					if (g_ascii_strcasecmp (charset, "us-ascii")) {
 #if 0
 						folder_push_filter_charset (s, "UTF-8", charset);

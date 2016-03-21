@@ -89,17 +89,17 @@ localtime_r (t,
 #define d(x)
 #define d2(x)
 
+#define CAMEL_CONTENT_TYPE_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), CAMEL_TYPE_CONTENT_TYPE, CamelContentTypePrivate))
+
+struct _CamelContentTypePrivate {
+	CamelHeaderParam *params;
+};
+
 G_DEFINE_TYPE (CamelContentDisposition, camel_content_disposition, G_TYPE_OBJECT)
-
-G_DEFINE_BOXED_TYPE (CamelContentType,
-		camel_content_type,
-		camel_content_type_ref,
-		camel_content_type_unref)
-
-G_DEFINE_BOXED_TYPE (CamelHeaderAddress,
-		camel_header_address,
-		camel_header_address_ref,
-		camel_header_address_unref)
+G_DEFINE_TYPE (CamelContentType, camel_content_type, G_TYPE_OBJECT)
+G_DEFINE_TYPE (CamelHeaderAddress, camel_header_address, G_TYPE_OBJECT)
 
 /**
  * camel_mktime_utc:
@@ -2367,23 +2367,38 @@ camel_header_set_param (struct _camel_header_param **l,
 }
 
 /**
- * camel_content_type_param:
+ * camel_content_type_get_param:
  * @content_type: a #CamelContentType
  * @name: name of param to find
  *
  * Searches the params on s #CamelContentType for a param named @name
  * and gets the value.
  *
- * Returns: the value of the @name param
+ * Returns: (nullable): the value of the @name param
  **/
 const gchar *
-camel_content_type_param (CamelContentType *t,
-                          const gchar *name)
+camel_content_type_get_param (CamelContentType *t,
+                              const gchar *name)
 {
-	if (t == NULL)
-		return NULL;
-	return camel_header_param (t->params, name);
+	g_return_val_if_fail (CAMEL_IS_CONTENT_TYPE (t), NULL);
+	return camel_header_param (t->priv->params, name);
 }
+
+/**
+ * camel_content_type_get_params:
+ * @content_type: a #CamelContentType
+ *
+ * Get the chained list of #CamelHeaderParam.
+ *
+ * Returns: (nullable) (transfer none): the chained list of #CamelHeaderParam
+ **/
+CamelHeaderParam *
+camel_content_type_get_params (CamelContentType *content_type)
+{
+	g_return_val_if_fail (CAMEL_IS_CONTENT_TYPE (content_type), NULL);
+	return content_type->priv->params;
+}
+
 
 /**
  * camel_content_type_set_param:
@@ -2398,7 +2413,8 @@ camel_content_type_set_param (CamelContentType *t,
                               const gchar *name,
                               const gchar *value)
 {
-	camel_header_set_param (&t->params, name, value);
+	g_return_if_fail (CAMEL_IS_CONTENT_TYPE (t));
+	camel_header_set_param (&(t->priv->params), name, value);
 }
 
 /**
@@ -2413,7 +2429,7 @@ camel_content_type_set_param (CamelContentType *t,
  * Returns: %TRUE if the content type @ct is of type @type/@subtype or
  * %FALSE otherwise
  **/
-gint
+gboolean
 camel_content_type_is (CamelContentType *ct,
                        const gchar *type,
                        const gchar *subtype)
@@ -2452,6 +2468,35 @@ camel_header_param_list_free (struct _camel_header_param *p)
 	}
 }
 
+static void
+content_type_finalize (GObject *object)
+{
+	camel_header_param_list_free (CAMEL_CONTENT_TYPE (object)->priv->params);
+	g_free (CAMEL_CONTENT_TYPE (object)->type);
+	g_free (CAMEL_CONTENT_TYPE (object)->subtype);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_content_type_parent_class)->finalize (object);
+}
+
+static void
+camel_content_type_class_init (CamelContentTypeClass *class)
+{
+	GObjectClass *object_class;
+
+	g_type_class_add_private (class, sizeof (CamelContentTypePrivate));
+
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = content_type_finalize;
+}
+
+static void
+camel_content_type_init (CamelContentType *ct)
+{
+	ct->priv = CAMEL_CONTENT_TYPE_GET_PRIVATE (ct);
+	ct->priv->params = NULL;
+}
+
 /**
  * camel_content_type_new:
  * @type: the major type of the new content-type
@@ -2467,50 +2512,11 @@ camel_content_type_new (const gchar *type,
 {
 	CamelContentType *t;
 
-	t = g_slice_new (CamelContentType);
+	t = g_object_new (CAMEL_TYPE_CONTENT_TYPE, NULL);
 	t->type = g_strdup (type);
 	t->subtype = g_strdup (subtype);
-	t->params = NULL;
-	t->refcount = 1;
 
 	return t;
-}
-
-/**
- * camel_content_type_ref:
- * @content_type: a #CamelContentType
- *
- * Refs the content type.
- **/
-CamelContentType *
-camel_content_type_ref (CamelContentType *ct)
-{
-	if (ct)
-		ct->refcount++;
-
-	return ct;
-}
-
-/**
- * camel_content_type_unref:
- * @content_type: a #CamelContentType
- *
- * Unrefs, and potentially frees, the content type.
- **/
-void
-camel_content_type_unref (CamelContentType *ct)
-{
-	if (ct) {
-		if (ct->refcount <= 1) {
-			camel_header_param_list_free (ct->params);
-			g_free (ct->type);
-			g_free (ct->subtype);
-			g_slice_free (CamelContentType, ct);
-			ct = NULL;
-		} else {
-			ct->refcount--;
-		}
-	}
 }
 
 /* for decoding email addresses, canonically */
@@ -3633,11 +3639,12 @@ camel_header_param_list_format (struct _camel_header_param *p)
 }
 
 CamelContentType *
-camel_content_type_decode (const gchar *in)
+camel_content_type_new_decode (const gchar *in)
 {
 	const gchar *inptr = in;
 	gchar *type, *subtype = NULL;
 	CamelContentType *t = NULL;
+	CamelContentTypePrivate *p = NULL;
 
 	if (in == NULL)
 		return NULL;
@@ -3658,7 +3665,8 @@ camel_content_type_decode (const gchar *in)
 		}
 
 		t = camel_content_type_new (type, subtype);
-		t->params = header_decode_param_list (&inptr);
+		p = CAMEL_CONTENT_TYPE_GET_PRIVATE (t);
+		p->params = header_decode_param_list (&inptr);
 		g_free (type);
 		g_free (subtype);
 	} else {
@@ -3679,7 +3687,7 @@ camel_content_type_dump (CamelContentType *ct)
 		return;
 	}
 	printf ("%s / %s", ct->type, ct->subtype);
-	p = ct->params;
+	p = ct->priv->params;
 	if (p) {
 		while (p) {
 			printf (";\n\t%s=\"%s\"", p->name, p->value);
@@ -3711,7 +3719,7 @@ camel_content_type_format (CamelContentType *ct)
 	} else {
 		g_string_append_printf (out, "%s/%s", ct->type, ct->subtype);
 	}
-	camel_header_param_list_format_append (out, ct->params);
+	camel_header_param_list_format_append (out, ct->priv->params);
 
 	ret = out->str;
 	g_string_free (out, FALSE);
@@ -4812,15 +4820,40 @@ camel_header_raw_check_mailing_list (CamelHeaderRaw **list)
 	return NULL;
 }
 
+static void
+header_address_finalize (GObject *object)
+{
+	CamelHeaderAddress *h = CAMEL_HEADER_ADDRESS (object);
+	if (h->type == CAMEL_HEADER_ADDRESS_GROUP) {
+		camel_header_address_list_clear (&h->v.members);
+	} else if (h->type == CAMEL_HEADER_ADDRESS_NAME) {
+		g_free (h->v.addr);
+	}
+	g_free (h->name);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_header_address_parent_class)->finalize (object);
+}
+
+static void
+camel_header_address_class_init (CamelHeaderAddressClass *class)
+{
+	GObjectClass *object_class;
+	object_class = G_OBJECT_CLASS (class);
+	object_class->finalize = header_address_finalize;
+}
+
+static void
+camel_header_address_init (CamelHeaderAddress *h)
+{
+	h->type = CAMEL_HEADER_ADDRESS_NONE;
+}
+
 /* ok, here's the address stuff, what a mess ... */
 CamelHeaderAddress *
 camel_header_address_new (void)
 {
-	CamelHeaderAddress *h;
-	h = g_malloc0 (sizeof (*h));
-	h->type = CAMEL_HEADER_ADDRESS_NONE;
-	h->refcount = 1;
-	return h;
+	return g_object_new (CAMEL_TYPE_HEADER_ADDRESS, NULL);
 }
 
 CamelHeaderAddress *
@@ -4844,33 +4877,6 @@ camel_header_address_new_group (const gchar *name)
 	h->type = CAMEL_HEADER_ADDRESS_GROUP;
 	h->name = g_strdup (name);
 	return h;
-}
-
-CamelHeaderAddress *
-camel_header_address_ref (CamelHeaderAddress *h)
-{
-	if (h)
-		h->refcount++;
-
-	return h;
-}
-
-void
-camel_header_address_unref (CamelHeaderAddress *h)
-{
-	if (h) {
-		if (h->refcount <= 1) {
-			if (h->type == CAMEL_HEADER_ADDRESS_GROUP) {
-				camel_header_address_list_clear (&h->v.members);
-			} else if (h->type == CAMEL_HEADER_ADDRESS_NAME) {
-				g_free (h->v.addr);
-			}
-			g_free (h->name);
-			g_free (h);
-		} else {
-			h->refcount--;
-		}
-	}
 }
 
 void
@@ -4959,7 +4965,7 @@ camel_header_address_list_clear (CamelHeaderAddress **l)
 	a = *l;
 	while (a) {
 		n = a->next;
-		camel_header_address_unref (a);
+		g_object_unref (a);
 		a = n;
 	}
 	*l = NULL;

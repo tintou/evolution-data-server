@@ -123,7 +123,7 @@ process_header (CamelMedium *medium,
 	case HEADER_SUBJECT:
 		g_free (message->subject);
 		if (((CamelDataWrapper *) message)->mime_type) {
-			charset = camel_content_type_param (((CamelDataWrapper *) message)->mime_type, "charset");
+			charset = camel_content_type_get_param (((CamelDataWrapper *) message)->mime_type, "charset");
 			charset = camel_iconv_charset_name (charset);
 		} else
 			charset = NULL;
@@ -973,7 +973,7 @@ find_best_encoding (CamelMimePart *part,
 
 	/* if we're looking for the best charset, then we need to convert to UTF-8 */
 	if (istext && (required & CAMEL_BESTENC_GET_CHARSET) != 0
-	    && (charsetin = camel_content_type_param (content->mime_type, "charset"))) {
+	    && (charsetin = camel_content_type_get_param (content->mime_type, "charset"))) {
 		charenc = camel_mime_filter_charset_new (charsetin, "UTF-8");
 		if (charenc != NULL)
 			idc = camel_stream_filter_add (
@@ -999,7 +999,7 @@ find_best_encoding (CamelMimePart *part,
 		d (printf ("best charset = %s\n", charsetin ? charsetin : "(null)"));
 		charset = g_strdup (charsetin);
 
-		charsetin = camel_content_type_param (content->mime_type, "charset");
+		charsetin = camel_content_type_get_param (content->mime_type, "charset");
 	} else {
 		charset = NULL;
 	}
@@ -1239,7 +1239,7 @@ camel_mime_message_build_mbox_from (CamelMimeMessage *message)
 				g_string_append (out, addr->v.addr);
 				tmp = "";
 			}
-			camel_header_address_unref (addr);
+			g_object_unref (addr);
 		}
 	}
 

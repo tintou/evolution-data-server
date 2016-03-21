@@ -500,7 +500,7 @@ imapx_expunge_sync (CamelFolder *folder,
 				info = camel_folder_summary_get (folder->summary, g_ptr_array_index (known_uids, ii));
 				if (info) {
 					camel_message_info_set_flags (info, CAMEL_MESSAGE_DELETED, CAMEL_MESSAGE_DELETED);
-					camel_message_info_unref (info);
+					g_object_unref (info);
 				}
 			}
 
@@ -642,7 +642,7 @@ imapx_get_message_sync (CamelFolder *folder,
 			CamelMessageFlags flags;
 			gboolean has_attachment;
 
-			flags = camel_message_info_flags (mi);
+			flags = camel_message_info_get_flags (mi);
 			has_attachment = camel_mime_message_has_attachment (msg);
 			if (((flags & CAMEL_MESSAGE_ATTACHMENTS) && !has_attachment) ||
 			    ((flags & CAMEL_MESSAGE_ATTACHMENTS) == 0 && has_attachment)) {
@@ -651,7 +651,7 @@ imapx_get_message_sync (CamelFolder *folder,
 					has_attachment ? CAMEL_MESSAGE_ATTACHMENTS : 0);
 			}
 
-			camel_message_info_unref (mi);
+			g_object_unref (mi);
 		}
 	}
 
