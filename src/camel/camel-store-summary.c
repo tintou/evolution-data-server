@@ -31,8 +31,8 @@
 #include <glib/gstdio.h>
 
 #include "camel-file-utils.h"
-#include "camel-store-summary.h"
 #include "camel-folder-summary.h"
+#include "camel-store-summary.h"
 #include "camel-url.h"
 #include "camel-win32.h"
 

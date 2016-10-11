@@ -95,7 +95,7 @@ void		camel_vee_folder_construct		(CamelVeeFolder *vf,
 							 guint32 flags);
 
 CamelFolder *	camel_vee_folder_get_location		(CamelVeeFolder *vf,
-							 const struct _CamelVeeMessageInfo *vinfo,
+							 const CamelVeeMessageInfo *vinfo,
 							 gchar **realuid);
 CamelFolder *	camel_vee_folder_get_vee_uid_folder	(CamelVeeFolder *vf,
 							 const gchar *vee_message_uid);

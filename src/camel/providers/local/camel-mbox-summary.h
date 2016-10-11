@@ -45,12 +45,6 @@ G_BEGIN_DECLS
 typedef struct _CamelMboxSummary CamelMboxSummary;
 typedef struct _CamelMboxSummaryClass CamelMboxSummaryClass;
 
-typedef struct _CamelMboxMessageInfo {
-	CamelLocalMessageInfo info;
-
-	goffset frompos;
-} CamelMboxMessageInfo;
-
 struct _CamelMboxSummary {
 	CamelLocalSummary parent;
 

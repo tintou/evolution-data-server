@@ -498,7 +498,7 @@ imapx_expunge_sync (CamelFolder *folder,
 				info = camel_folder_summary_get (folder->summary, g_ptr_array_index (known_uids, ii));
 				if (info) {
 					camel_message_info_set_flags (info, CAMEL_MESSAGE_DELETED, CAMEL_MESSAGE_DELETED);
-					camel_message_info_unref (info);
+					g_clear_object (&info);
 				}
 			}
 
@@ -649,7 +649,7 @@ imapx_get_message_sync (CamelFolder *folder,
 					has_attachment ? CAMEL_MESSAGE_ATTACHMENTS : 0);
 			}
 
-			camel_message_info_unref (mi);
+			g_clear_object (&mi);
 		}
 	}
 

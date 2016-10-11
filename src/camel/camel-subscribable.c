@@ -157,7 +157,7 @@ camel_subscribable_default_init (CamelSubscribableInterface *iface)
 			folder_subscribed),
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 1,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_INFO);
 
 	signals[FOLDER_UNSUBSCRIBED] = g_signal_new (
 		"folder-unsubscribed",
@@ -168,7 +168,7 @@ camel_subscribable_default_init (CamelSubscribableInterface *iface)
 			folder_unsubscribed),
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 1,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_INFO);
 }
 
 /**

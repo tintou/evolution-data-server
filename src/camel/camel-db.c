@@ -1418,104 +1418,6 @@ camel_db_get_folder_deleted_uids (CamelDB *db,
 	 return array;
 }
 
-struct ReadPreviewData
-{
-	GHashTable *columns_hash;
-	GHashTable *hash;
-};
-
-static gint
-read_preview_callback (gpointer ref,
-                       gint ncol,
-                       gchar **cols,
-                       gchar **name)
-{
-	struct ReadPreviewData *rpd = ref;
-	const gchar *uid = NULL;
-	gchar *msg = NULL;
-	gint i;
-
-	for (i = 0; i < ncol; ++i) {
-		if (!name[i] || !cols[i])
-			continue;
-
-		switch (camel_db_get_column_ident (&rpd->columns_hash, i, ncol, name)) {
-			case CAMEL_DB_COLUMN_UID:
-				uid = camel_pstring_strdup (cols[i]);
-				break;
-			case CAMEL_DB_COLUMN_PREVIEW:
-				msg = g_strdup (cols[i]);
-				break;
-			default:
-				g_warn_if_reached ();
-				break;
-		}
-	}
-
-	g_hash_table_insert (rpd->hash, (gchar *) uid, msg);
-
-	return 0;
-}
-
-/**
- * camel_db_get_folder_preview:
- *
- * Returns: (element-type utf8 utf8) (transfer full):
- *
- * Since: 2.28
- **/
-GHashTable *
-camel_db_get_folder_preview (CamelDB *db,
-                             const gchar *folder_name,
-                             GError **error)
-{
-	gchar *sel_query;
-	gint ret;
-	struct ReadPreviewData rpd;
-	GHashTable *hash = g_hash_table_new (g_str_hash, g_str_equal);
-
-	sel_query = sqlite3_mprintf ("SELECT uid, preview FROM '%q_preview'", folder_name);
-
-	rpd.columns_hash = NULL;
-	rpd.hash = hash;
-
-	ret = camel_db_select (db, sel_query, read_preview_callback, &rpd, error);
-	sqlite3_free (sel_query);
-
-	if (rpd.columns_hash)
-		g_hash_table_destroy (rpd.columns_hash);
-
-	if (!g_hash_table_size (hash) || ret != 0) {
-		g_hash_table_destroy (hash);
-		hash = NULL;
-	}
-
-	return hash;
-}
-
-/**
- * camel_db_write_preview_record:
- *
- * Since: 2.28
- **/
-gint
-camel_db_write_preview_record (CamelDB *db,
-                               const gchar *folder_name,
-                               const gchar *uid,
-                               const gchar *msg,
-                               GError **error)
-{
-	gchar *query;
-	gint ret;
-
-	query = sqlite3_mprintf ("INSERT OR REPLACE INTO '%q_preview' VALUES(%Q,%Q)", folder_name, uid, msg);
-
-	ret = camel_db_add_to_transaction (db, query, error);
-	sqlite3_free (query);
-
-	return ret;
-}
-
 /**
  * camel_db_create_folders_table:
  *
@@ -1598,29 +1500,9 @@ camel_db_create_message_info_table (CamelDB *cdb,
 	ret = camel_db_add_to_transaction (cdb, table_creation_query, error);
 	sqlite3_free (table_creation_query);
 
-	table_creation_query = sqlite3_mprintf (
-		"CREATE TABLE IF NOT EXISTS '%q_bodystructure' ( "
-			"uid TEXT PRIMARY KEY , "
-			"bodystructure TEXT )",
-			folder_name);
-	ret = camel_db_add_to_transaction (cdb, table_creation_query, error);
-	sqlite3_free (table_creation_query);
-
-	/* Create message preview table. */
-	table_creation_query = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS '%q_preview' (  uid TEXT PRIMARY KEY , preview TEXT)", folder_name);
-	ret = camel_db_add_to_transaction (cdb, table_creation_query, error);
-	sqlite3_free (table_creation_query);
-
 	/* FIXME: sqlize folder_name before you create the index */
 	safe_index = g_strdup_printf ("SINDEX-%s", folder_name);
 	table_creation_query = sqlite3_mprintf ("DROP INDEX IF EXISTS %Q", safe_index);
-	ret = camel_db_add_to_transaction (cdb, table_creation_query, error);
-	g_free (safe_index);
-	sqlite3_free (table_creation_query);
-
-	/* INDEX on preview */
-	safe_index = g_strdup_printf ("SINDEX-%s-preview", folder_name);
-	table_creation_query = sqlite3_mprintf ("CREATE INDEX IF NOT EXISTS %Q ON '%q_preview' (uid, preview)", safe_index, folder_name);
 	ret = camel_db_add_to_transaction (cdb, table_creation_query, error);
 	g_free (safe_index);
 	sqlite3_free (table_creation_query);
@@ -1974,8 +1856,8 @@ write_mir (CamelDB *cdb,
 		record->attachment,
 		record->dirty,
 		record->size,
-		(gint64) record->dsent,
-		(gint64) record->dreceived,
+		record->dsent,
+		record->dreceived,
 		record->subject,
 		record->from,
 		record->to,
@@ -1993,15 +1875,6 @@ write_mir (CamelDB *cdb,
 	ret = camel_db_add_to_transaction (cdb, ins_query, error);
 
 	sqlite3_free (ins_query);
-
-	if (ret == 0) {
-		ins_query = sqlite3_mprintf (
-			"INSERT OR REPLACE INTO "
-			"'%q_bodystructure' VALUES (%Q, %Q )",
-			folder_name, record->uid, record->bodystructure);
-		ret = camel_db_add_to_transaction (cdb, ins_query, error);
-		sqlite3_free (ins_query);
-	}
 
 	return ret;
 }
@@ -2242,10 +2115,6 @@ camel_db_delete_uid (CamelDB *cdb,
 
 	camel_db_begin_transaction (cdb, error);
 
-	tab = sqlite3_mprintf ("DELETE FROM '%q_bodystructure' WHERE uid = %Q", folder, uid);
-	ret = camel_db_add_to_transaction (cdb, tab, error);
-	sqlite3_free (tab);
-
 	tab = sqlite3_mprintf ("DELETE FROM %Q WHERE uid = %Q", folder, uid);
 	ret = camel_db_add_to_transaction (cdb, tab, error);
 	sqlite3_free (tab);
@@ -2342,23 +2211,19 @@ camel_db_clear_folder_summary (CamelDB *cdb,
 	gint ret;
 	gchar *folders_del;
 	gchar *msginfo_del;
-	gchar *bstruct_del;
 
 	folders_del = sqlite3_mprintf ("DELETE FROM folders WHERE folder_name = %Q", folder);
 	msginfo_del = sqlite3_mprintf ("DELETE FROM %Q ", folder);
-	bstruct_del = sqlite3_mprintf ("DELETE FROM '%q_bodystructure' ", folder);
 
 	camel_db_begin_transaction (cdb, error);
 
 	camel_db_add_to_transaction (cdb, msginfo_del, error);
 	camel_db_add_to_transaction (cdb, folders_del, error);
-	camel_db_add_to_transaction (cdb, bstruct_del, error);
 
 	ret = camel_db_end_transaction (cdb, error);
 
 	sqlite3_free (folders_del);
 	sqlite3_free (msginfo_del);
-	sqlite3_free (bstruct_del);
 
 	return ret;
 }
@@ -2383,10 +2248,6 @@ camel_db_delete_folder (CamelDB *cdb,
 	sqlite3_free (del);
 
 	del = sqlite3_mprintf ("DROP TABLE %Q ", folder);
-	ret = camel_db_add_to_transaction (cdb, del, error);
-	sqlite3_free (del);
-
-	del = sqlite3_mprintf ("DROP TABLE '%q_bodystructure' ", folder);
 	ret = camel_db_add_to_transaction (cdb, del, error);
 	sqlite3_free (del);
 
@@ -2444,20 +2305,19 @@ camel_db_camel_mir_free (CamelMIRecord *record)
 {
 	if (record) {
 		camel_pstring_free (record->uid);
-		camel_pstring_free (record->subject);
-		camel_pstring_free (record->from);
-		camel_pstring_free (record->to);
-		camel_pstring_free (record->cc);
-		camel_pstring_free (record->mlist);
-		camel_pstring_free (record->followup_flag);
-		camel_pstring_free (record->followup_completed_on);
-		camel_pstring_free (record->followup_due_by);
+		g_free (record->subject);
+		g_free (record->from);
+		g_free (record->to);
+		g_free (record->cc);
+		g_free (record->mlist);
+		g_free (record->followup_flag);
+		g_free (record->followup_completed_on);
+		g_free (record->followup_due_by);
 		g_free (record->part);
 		g_free (record->labels);
 		g_free (record->usertags);
 		g_free (record->cinfo);
 		g_free (record->bdata);
-		g_free (record->bodystructure);
 
 		g_free (record);
 	}
@@ -2624,7 +2484,6 @@ static struct _known_column_names {
 } known_column_names[] = {
 	{ "attachment",			CAMEL_DB_COLUMN_ATTACHMENT },
 	{ "bdata",			CAMEL_DB_COLUMN_BDATA },
-	{ "bodystructure",		CAMEL_DB_COLUMN_BODYSTRUCTURE },
 	{ "cinfo",			CAMEL_DB_COLUMN_CINFO },
 	{ "deleted",			CAMEL_DB_COLUMN_DELETED },
 	{ "deleted_count",		CAMEL_DB_COLUMN_DELETED_COUNT },
@@ -2646,7 +2505,6 @@ static struct _known_column_names {
 	{ "mlist",			CAMEL_DB_COLUMN_MLIST },
 	{ "nextuid",			CAMEL_DB_COLUMN_NEXTUID },
 	{ "part",			CAMEL_DB_COLUMN_PART },
-	{ "preview",			CAMEL_DB_COLUMN_PREVIEW },
 	{ "read",			CAMEL_DB_COLUMN_READ },
 	{ "replied",			CAMEL_DB_COLUMN_REPLIED },
 	{ "saved_count",		CAMEL_DB_COLUMN_SAVED_COUNT },

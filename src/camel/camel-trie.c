@@ -331,13 +331,13 @@ camel_trie_add (CamelTrie *trie,
 /**
  * camel_trie_search:
  * @trie: The #CamelTrie to search in.
- * @buffer: The string to match against a pattern in @trie.
+ * @buffer: (array length=buflen) (type gchar): The string to match against a pattern in @trie.
  * @buflen: The length of @buffer.
- * @matched_id: An integer address to store the matched pattern id in.
+ * @matched_id: (out): An integer address to store the matched pattern id in.
  *
  * Try to match the string @buffer with a pattern in @trie.
  *
- * Returns: The matched pattern, or %NULL if no pattern is matched.
+ * Returns: (nullable): The matched pattern, or %NULL if no pattern is matched.
  *
  * Since: 2.24
  **/

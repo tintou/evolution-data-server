@@ -91,6 +91,7 @@ struct _CamelSExpResult {
 
 /**
  * CamelSExpFunc:
+ * @argv: (inout) (array length=argc):
  *
  * Since: 3.4
  **/
@@ -98,17 +99,18 @@ typedef CamelSExpResult *
 			(*CamelSExpFunc)	(CamelSExp *sexp,
 						 gint argc,
 						 CamelSExpResult **argv,
-						 gpointer data);
+						 gpointer user_data);
 
 /**
  * CamelSExpIFunc:
+ * @argv: (inout) (array length=argc):
  *
  * Since: 3.4
  **/
 typedef CamelSExpResult *
 			(*CamelSExpIFunc)	(CamelSExp *sexp, gint argc,
 						 CamelSExpTerm **argv,
-						 gpointer data);
+						 gpointer user_data);
 
 /**
  * CamelSExpTermType:

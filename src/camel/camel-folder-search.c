@@ -272,8 +272,7 @@ get_current_message (CamelFolderSearch *search)
 	if (!search || !search->folder || !search->current)
 		return NULL;
 
-	return camel_folder_get_message_sync (
-		search->folder, search->current->uid, search->priv->cancellable, NULL);
+	return camel_folder_get_message_sync (search->folder, camel_message_info_get_uid (search->current), search->priv->cancellable, NULL);
 }
 
 static CamelSExpResult *
@@ -299,7 +298,7 @@ check_header (CamelSExp *sexp,
 		camel_search_t type = CAMEL_SEARCH_TYPE_ASIS;
 		struct _camel_search_words *words;
 		CamelMimeMessage *message = NULL;
-		struct _camel_header_raw *raw_header;
+		CamelHeaderRaw *raw_header;
 
 		/* only a subset of headers are supported .. */
 		headername = argv[0]->value.string;
@@ -910,7 +909,7 @@ folder_search_match_all (CamelSExp *sexp,
 		} else {
 			g_ptr_array_add (r->value.ptrarray, (gchar *) uid);
 		}
-		camel_message_info_unref (search->current);
+		g_clear_object (&search->current);
 	}
 	search->current = NULL;
 	return r;

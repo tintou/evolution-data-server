@@ -41,6 +41,7 @@
 #include "camel-iconv.h"
 #include "camel-mime-utils.h"
 #include "camel-net-utils.h"
+#include "camel-string-utils.h"
 #ifdef G_OS_WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -4469,7 +4470,7 @@ camel_header_location_decode (const gchar *in)
 
 #ifdef CHECKS
 static void
-check_header (struct _camel_header_raw *header)
+check_header (CamelHeaderRaw *header)
 {
 	guchar *cp;
 
@@ -4484,8 +4485,16 @@ check_header (struct _camel_header_raw *header)
 }
 #endif
 
+/**
+ * camel_header_raw_append_parse:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @header: an unparsed header
+ * @offset: the given offset
+ *
+ * Appends the parsed header to the list with the given offset.
+ **/
 void
-camel_header_raw_append_parse (struct _camel_header_raw **list,
+camel_header_raw_append_parse (CamelHeaderRaw **list,
                                const gchar *header,
                                gint offset)
 {
@@ -4510,13 +4519,22 @@ camel_header_raw_append_parse (struct _camel_header_raw **list,
 	camel_header_raw_append (list, name, in, offset);
 }
 
+/**
+ * camel_header_raw_append:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the given name
+ * @value: the given value
+ * @offset: the given offset
+ *
+ * Appends a value with the given name and the given value to the list.
+ **/
 void
-camel_header_raw_append (struct _camel_header_raw **list,
+camel_header_raw_append (CamelHeaderRaw **list,
                          const gchar *name,
                          const gchar *value,
                          gint offset)
 {
-	struct _camel_header_raw *l, *n;
+	CamelHeaderRaw *l, *n;
 
 	d (printf ("Header: %s: %s\n", name, value));
 
@@ -4528,7 +4546,7 @@ camel_header_raw_append (struct _camel_header_raw **list,
 #ifdef CHECKS
 	check_header (n);
 #endif
-	l = (struct _camel_header_raw *) list;
+	l = (CamelHeaderRaw *) list;
 	while (l->next) {
 		l = l->next;
 	}
@@ -4549,11 +4567,20 @@ camel_header_raw_append (struct _camel_header_raw **list,
 #endif
 }
 
-static struct _camel_header_raw *
-header_raw_find_node (struct _camel_header_raw **list,
+/**
+ * header_raw_find_node:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the name to find
+ *
+ * Searches for the node with a given name.
+ *
+ * Returns: (transfer none) (nullable): the found #CamelHeaderRaw or NULL.
+ **/
+static CamelHeaderRaw *
+header_raw_find_node (CamelHeaderRaw **list,
                       const gchar *name)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	l = *list;
 	while (l) {
@@ -4564,12 +4591,22 @@ header_raw_find_node (struct _camel_header_raw **list,
 	return l;
 }
 
+/**
+ * camel_header_raw_find:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the name to find
+ * @offset: (out) (nullable): the offset corresponding to the name
+ *
+ * Searches for the first node with a given name and returns its value.
+ *
+ * Returns: (transfer none) (nullable): the value associated with the name
+ **/
 const gchar *
-camel_header_raw_find (struct _camel_header_raw **list,
+camel_header_raw_find (CamelHeaderRaw **list,
                        const gchar *name,
                        gint *offset)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	l = header_raw_find_node (list, name);
 	if (l) {
@@ -4580,13 +4617,24 @@ camel_header_raw_find (struct _camel_header_raw **list,
 		return NULL;
 }
 
+/**
+ * camel_header_raw_find_next:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the name to find
+ * @offset: (out) (nullable): the offset corresponding to the name
+ * @last: the last found value
+ *
+ * Searches for the next node with a given name and returns its value.
+ *
+ * Returns: (transfer none) (nullable): the value associated with the name
+ **/
 const gchar *
-camel_header_raw_find_next (struct _camel_header_raw **list,
+camel_header_raw_find_next (CamelHeaderRaw **list,
                             const gchar *name,
                             gint *offset,
                             const gchar *last)
 {
-	struct _camel_header_raw *l;
+	CamelHeaderRaw *l;
 
 	if (last == NULL || name == NULL)
 		return NULL;
@@ -4598,21 +4646,28 @@ camel_header_raw_find_next (struct _camel_header_raw **list,
 }
 
 static void
-header_raw_free (struct _camel_header_raw *l)
+header_raw_free (CamelHeaderRaw *l)
 {
 	g_free (l->name);
 	g_free (l->value);
 	g_free (l);
 }
 
+/**
+ * camel_header_raw_remove:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the name to remove
+ *
+ * Remove all values associated with the given name
+ **/
 void
-camel_header_raw_remove (struct _camel_header_raw **list,
+camel_header_raw_remove (CamelHeaderRaw **list,
                          const gchar *name)
 {
-	struct _camel_header_raw *l, *p;
+	CamelHeaderRaw *l, *p;
 
 	/* the next pointer is at the head of the structure, so this is safe */
-	p = (struct _camel_header_raw *) list;
+	p = (CamelHeaderRaw *) list;
 	l = *list;
 	while (l) {
 		if (!g_ascii_strcasecmp (l->name, name)) {
@@ -4626,8 +4681,17 @@ camel_header_raw_remove (struct _camel_header_raw **list,
 	}
 }
 
+/**
+ * camel_header_raw_replace:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * @name: the name to remove
+ * @value: the new value
+ * @offset: the new offset
+ *
+ * Replace the row associated with the given name by another value and offset.
+ **/
 void
-camel_header_raw_replace (struct _camel_header_raw **list,
+camel_header_raw_replace (CamelHeaderRaw **list,
                           const gchar *name,
                           const gchar *value,
                           gint offset)
@@ -4636,10 +4700,17 @@ camel_header_raw_replace (struct _camel_header_raw **list,
 	camel_header_raw_append (list, name, value, offset);
 }
 
+
+/**
+ * camel_header_raw_clear:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ *
+ * Removes all the raws of the list.
+ **/
 void
-camel_header_raw_clear (struct _camel_header_raw **list)
+camel_header_raw_clear (CamelHeaderRaw **list)
 {
-	struct _camel_header_raw *l, *n;
+	CamelHeaderRaw *l, *n;
 	l = *list;
 	while (l) {
 		n = l->next;
@@ -4775,8 +4846,16 @@ mailing_list_init (gpointer param)
 	return NULL;
 }
 
+/**
+ * camel_header_raw_check_mailing_list:
+ * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ *
+ * TODO: Document me.
+ *
+ * Returns: (transfer full) (nullable):
+ **/
 gchar *
-camel_header_raw_check_mailing_list (struct _camel_header_raw **list)
+camel_header_raw_check_mailing_list (CamelHeaderRaw **list)
 {
 	static GOnce once = G_ONCE_INIT;
 	const gchar *v;

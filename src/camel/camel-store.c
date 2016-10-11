@@ -606,7 +606,7 @@ camel_store_class_init (CamelStoreClass *class)
 		G_STRUCT_OFFSET (CamelStoreClass, folder_created),
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 1,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_INFO);
 
 	signals[FOLDER_DELETED] = g_signal_new (
 		"folder-deleted",
@@ -615,7 +615,7 @@ camel_store_class_init (CamelStoreClass *class)
 		G_STRUCT_OFFSET (CamelStoreClass, folder_deleted),
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 1,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_INFO);
 
 	/**
 	 * CamelStore::folder-info-stale:
@@ -660,7 +660,7 @@ camel_store_class_init (CamelStoreClass *class)
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 2,
 		G_TYPE_STRING,
-		G_TYPE_POINTER);
+		CAMEL_TYPE_FOLDER_INFO);
 }
 
 static void

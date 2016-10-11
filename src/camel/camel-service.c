@@ -35,8 +35,8 @@
 #include "camel-network-service.h"
 #include "camel-network-settings.h"
 #include "camel-operation.h"
-#include "camel-service.h"
 #include "camel-session.h"
+#include "camel-service.h"
 
 #define d(x)
 #define w(x)
@@ -1560,14 +1560,14 @@ camel_service_set_proxy_resolver (CamelService *service,
 
 /**
  * camel_service_ref_session:
- * @service: (type CamelService): a #CamelService
+ * @service: a #CamelService
  *
  * Returns the #CamelSession associated with the service.
  *
  * The returned #CamelSession is referenced for thread-safety.  Unreference
  * the #CamelSession with g_object_unref() when finished with it.
  *
- * Returns: (transfer full): the #CamelSession
+ * Returns: (transfer full) (type CamelSession): the #CamelSession
  *
  * Since: 3.8
  **/

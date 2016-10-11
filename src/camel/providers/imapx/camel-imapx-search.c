@@ -258,8 +258,7 @@ imapx_search_match_all (CamelSExp *sexp,
 		if (search->current) {
 			result = camel_sexp_term_eval (sexp, argv[0]);
 			camel_sexp_result_free (sexp, result);
-			camel_message_info_unref (search->current);
-			search->current = NULL;
+			g_clear_object (&search->current);
 			break;
 		}
 	}

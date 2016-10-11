@@ -1232,7 +1232,7 @@ camel_cipher_validity_add_certinfo_ex (CamelCipherValidity *vin,
  *
  * Gets a named property @name value for the given @info_index of the @mode validity part.
  *
- * Returns: Value of a named property of a #CamelCipherCertInfo, or %NULL when no such
+ * Returns: (transfer none) (nullable): Value of a named property of a #CamelCipherCertInfo, or %NULL when no such
  *    property exists. The returned value is owned by the associated #CamelCipherCertInfo
  *    and is valid until the cert info is freed.
  *
@@ -1399,9 +1399,9 @@ camel_cipher_validity_free (CamelCipherValidity *validity)
  *
  * Gets a named property @name value for the given @cert_info.
  *
- * Returns: Value of a named property of the @cert_info, or %NULL when no such
- *    property exists. The returned value is owned by the @cert_info
- *    and is valid until the @cert_info is freed.
+ * Returns: (transfer none) (nullable): Value of a named property of the @cert_info,
+ *    or %NULL when no such property exists. The returned value is owned by
+ *    the @cert_info and is valid until the @cert_info is freed.
  *
  * Since: 3.22
  **/

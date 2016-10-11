@@ -175,10 +175,10 @@ const gchar *	camel_store_info_name		(CamelStoreSummary *summary,
 gboolean	camel_store_summary_connect_folder_summary
 						(CamelStoreSummary *summary,
 						 const gchar *path,
-						 struct _CamelFolderSummary *folder_summary);
+						 CamelFolderSummary *folder_summary);
 gboolean	camel_store_summary_disconnect_folder_summary
 						(CamelStoreSummary *summary,
-						 struct _CamelFolderSummary *folder_summary);
+						 CamelFolderSummary *folder_summary);
 
 G_END_DECLS
 

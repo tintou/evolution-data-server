@@ -479,12 +479,12 @@ camel_stream_set_base_stream (CamelStream *stream,
 /**
  * camel_stream_read:
  * @stream: a #CamelStream object.
- * @buffer: output buffer
+ * @buffer: (array length=n) (type gchar): output buffer
  * @n: max number of bytes to read.
  * @cancellable: optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL
  *
- * Attempts to read up to @len bytes from @stream into @buf.
+ * Attempts to read up to @n bytes from @stream into @buffer.
  *
  * Returns: the number of bytes actually read, or %-1 on error and set
  * errno.
@@ -514,7 +514,7 @@ camel_stream_read (CamelStream *stream,
 /**
  * camel_stream_write:
  * @stream: a #CamelStream object
- * @buffer: buffer to write.
+ * @buffer: (array length=n) (type gchar): buffer to write.
  * @n: number of bytes to write
  * @cancellable: optional #GCancellable object, or %NULL
  * @error: return location for a #GError, or %NULL

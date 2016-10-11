@@ -161,7 +161,6 @@ struct _CamelDB {
  *	content info string - composite string
  * @bdata:
  *	provider specific data
- * @bodystructure:
  *
  * The extensive DB format, supporting basic searching and sorting.
  *
@@ -179,8 +178,8 @@ typedef struct _CamelMIRecord {
 	gboolean junk;
 	gboolean attachment;
 	guint32 size;
-	time_t dsent;
-	time_t dreceived;
+	gint64 dsent; /* time_t */
+	gint64 dreceived; /* time_t */
 	gchar *subject;
 	gchar *from;
 	gchar *to;
@@ -194,7 +193,6 @@ typedef struct _CamelMIRecord {
 	gchar *usertags;
 	gchar *cinfo;
 	gchar *bdata;
-	gchar *bodystructure;
 } CamelMIRecord;
 
 /**
@@ -228,7 +226,6 @@ typedef enum {
 	CAMEL_DB_COLUMN_UNKNOWN = -1,
 	CAMEL_DB_COLUMN_ATTACHMENT,
 	CAMEL_DB_COLUMN_BDATA,
-	CAMEL_DB_COLUMN_BODYSTRUCTURE,
 	CAMEL_DB_COLUMN_CINFO,
 	CAMEL_DB_COLUMN_DELETED,
 	CAMEL_DB_COLUMN_DELETED_COUNT,
@@ -250,7 +247,6 @@ typedef enum {
 	CAMEL_DB_COLUMN_MLIST,
 	CAMEL_DB_COLUMN_NEXTUID,
 	CAMEL_DB_COLUMN_PART,
-	CAMEL_DB_COLUMN_PREVIEW,
 	CAMEL_DB_COLUMN_READ,
 	CAMEL_DB_COLUMN_REPLIED,
 	CAMEL_DB_COLUMN_SAVED_COUNT,
@@ -272,7 +268,7 @@ CamelDBKnownColumnNames camel_db_get_column_ident (GHashTable **hash, gint index
  *
  * Since: 2.24
  **/
-typedef gint (*CamelDBSelectCB) (gpointer data, gint ncol, gchar **colvalues, gchar **colnames);
+typedef gint (*CamelDBSelectCB) (gpointer user_data, gint ncol, gchar **colvalues, gchar **colnames);
 
 CamelDB * camel_db_open (const gchar *path, GError **error);
 CamelDB * camel_db_clone (CamelDB *cdb, GError **error);
@@ -331,10 +327,6 @@ gint camel_db_set_collate (CamelDB *cdb, const gchar *col, const gchar *collate,
 
 gint camel_db_start_in_memory_transactions (CamelDB *cdb, GError **error);
 gint camel_db_flush_in_memory_transactions (CamelDB *cdb, const gchar * folder_name, GError **error);
-
-GHashTable *
-camel_db_get_folder_preview (CamelDB *db, const gchar *folder_name, GError **error);
-gint camel_db_write_preview_record (CamelDB *db, const gchar *folder_name, const gchar *uid, const gchar *msg, GError **error);
 
 gint
 camel_db_reset_folder_version (CamelDB *cdb, const gchar *folder_name, gint reset_version, GError **error);

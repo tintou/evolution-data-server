@@ -577,7 +577,7 @@ camel_vee_store_new (void)
  *
  * FIXME Document me!
  *
- * Returns: (transfer none):
+ * Returns: (type CamelVeeFolder) (transfer none):
  *
  * Since: 3.6
  **/
@@ -686,6 +686,9 @@ add_to_unmatched_folder_cb (CamelVeeMessageInfoData *mi_data,
 
 /**
  * camel_vee_store_note_subfolder_used:
+ * @vstore:
+ * @subfolder:
+ * @used_by: (type CamelVeeFolder):
  *
  * FIXME Document me!
  *
@@ -765,6 +768,9 @@ remove_vuid_count_record_cb (CamelVeeMessageInfoData *mi_data,
 
 /**
  * camel_vee_store_note_subfolder_unused:
+ * @vstore:
+ * @subfolder:
+ * @unused_by: (type CamelVeeFolder):
  *
  * FIXME Document me!
  *
@@ -814,6 +820,9 @@ camel_vee_store_note_subfolder_unused (CamelVeeStore *vstore,
 
 /**
  * camel_vee_store_note_vuid_used:
+ * @vstore:
+ * @mi_data:
+ * @used_by: (type CamelVeeFolder):
  *
  * FIXME Document me!
  *
@@ -871,6 +880,9 @@ camel_vee_store_note_vuid_used (CamelVeeStore *vstore,
 
 /**
  * camel_vee_store_note_vuid_unused:
+ * @vstore:
+ * @mi_data:
+ * @unused_by: (type CamelVeeFolder):
  *
  * FIXME Document me!
  *

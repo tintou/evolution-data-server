@@ -94,7 +94,7 @@ typedef struct _CamelIndexCursor CamelIndexCursor;
 typedef struct _CamelIndexCursorClass CamelIndexCursorClass;
 typedef struct _CamelIndexCursorPrivate CamelIndexCursorPrivate;
 
-typedef gchar * (*CamelIndexNorm)(CamelIndex *index, const gchar *word, gpointer data);
+typedef gchar * (*CamelIndexNorm)(CamelIndex *index, const gchar *word, gpointer user_data);
 
 /* ********************************************************************** */
 

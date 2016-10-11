@@ -55,20 +55,6 @@ G_BEGIN_DECLS
 typedef struct _CamelIMAPXSummary CamelIMAPXSummary;
 typedef struct _CamelIMAPXSummaryClass CamelIMAPXSummaryClass;
 
-typedef struct _CamelIMAPXMessageInfo CamelIMAPXMessageInfo;
-typedef struct _CamelIMAPXMessageContentInfo CamelIMAPXMessageContentInfo;
-
-struct _CamelIMAPXMessageContentInfo {
-	CamelMessageContentInfo info;
-};
-
-struct _CamelIMAPXMessageInfo {
-	CamelMessageInfoBase info;
-
-	guint32 server_flags;
-	CamelFlag *server_user_flags;
-};
-
 struct _CamelIMAPXSummary {
 	CamelFolderSummary parent;
 

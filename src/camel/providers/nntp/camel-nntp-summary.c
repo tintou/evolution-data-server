@@ -51,7 +51,7 @@ struct _CamelNNTPSummaryPrivate {
 	gint xover_setup;
 };
 
-static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, struct _camel_header_raw *);
+static CamelMessageInfo * message_info_new_from_header (CamelFolderSummary *, CamelHeaderRaw *);
 static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
 static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
 
@@ -65,8 +65,6 @@ camel_nntp_summary_class_init (CamelNNTPSummaryClass *class)
 	g_type_class_add_private (class, sizeof (CamelNNTPSummaryPrivate));
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (class);
-	folder_summary_class->message_info_size = sizeof (CamelMessageInfoBase);
-	folder_summary_class->content_info_size = sizeof (CamelMessageContentInfo);
 	folder_summary_class->message_info_new_from_header = message_info_new_from_header;
 	folder_summary_class->summary_header_from_db = summary_header_from_db;
 	folder_summary_class->summary_header_to_db = summary_header_to_db;
@@ -90,31 +88,28 @@ camel_nntp_summary_new (CamelFolder *folder)
 
 	cns = g_object_new (CAMEL_TYPE_NNTP_SUMMARY, "folder", folder, NULL);
 
-	camel_folder_summary_set_build_content ((CamelFolderSummary *) cns, FALSE);
-
 	return cns;
 }
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              struct _camel_header_raw *h)
+                              CamelHeaderRaw *h)
 {
-	CamelMessageInfoBase *mi;
+	CamelMessageInfo *mi;
 	CamelNNTPSummary *cns = (CamelNNTPSummary *) s;
 
 	/* error to call without this setup */
 	if (cns->priv->uid == NULL)
 		return NULL;
 
-	mi = (CamelMessageInfoBase *) CAMEL_FOLDER_SUMMARY_CLASS (camel_nntp_summary_parent_class)->message_info_new_from_header (s, h);
+	mi = CAMEL_FOLDER_SUMMARY_CLASS (camel_nntp_summary_parent_class)->message_info_new_from_header (s, h);
 	if (mi) {
-		camel_pstring_free (mi->uid);
-		mi->uid = camel_pstring_strdup (cns->priv->uid);
+		camel_message_info_set_uid (mi, cns->priv->uid);
 		g_free (cns->priv->uid);
 		cns->priv->uid = NULL;
 	}
 
-	return (CamelMessageInfo *) mi;
+	return mi;
 }
 
 static gboolean
@@ -129,9 +124,9 @@ summary_header_from_db (CamelFolderSummary *s,
 
 	part = mir->bdata;
 
-	cns->version = bdata_extract_digit (&part);
-	cns->high = bdata_extract_digit (&part);
-	cns->low = bdata_extract_digit (&part);
+	cns->version = camel_util_bdata_get_number (&part, 0);
+	cns->high = camel_util_bdata_get_number (&part, 0);
+	cns->low = camel_util_bdata_get_number (&part, 0);
 
 	return TRUE;
 }
@@ -169,7 +164,7 @@ add_range_xover (CamelNNTPSummary *cns,
 	CamelSettings *settings;
 	CamelService *service;
 	CamelFolderSummary *s;
-	struct _camel_header_raw *headers = NULL;
+	CamelHeaderRaw *headers = NULL;
 	gchar *line, *tab;
 	gchar *host;
 	guint len;
@@ -268,13 +263,14 @@ add_range_xover (CamelNNTPSummary *cns,
 				CamelMessageInfo *mi;
 
 				mi = camel_folder_summary_info_new_from_header (s, headers);
-				((CamelMessageInfoBase *) mi)->size = size;
-				camel_folder_summary_add (s, mi);
+				camel_message_info_set_size (mi, size);
+				camel_folder_summary_add (s, mi, FALSE);
 
 				cns->high = n;
 				camel_folder_change_info_add_uid (changes, camel_message_info_get_uid (mi));
 				if (folder_filter_recent)
 					camel_folder_change_info_recent_uid (changes, camel_message_info_get_uid (mi));
+				g_clear_object (&mi);
 			}
 		}
 
@@ -370,7 +366,7 @@ add_range_head (CamelNNTPSummary *cns,
 				if (camel_mime_parser_init_with_stream (mp, CAMEL_STREAM (nntp_stream), error) == -1)
 					goto error;
 				mi = camel_folder_summary_info_new_from_parser (s, mp);
-				camel_folder_summary_add (s, mi);
+				camel_folder_summary_add (s, mi, FALSE);
 				while (camel_mime_parser_step (mp, NULL, NULL) != CAMEL_MIME_PARSER_STATE_EOF)
 					;
 				if (mi == NULL) {
@@ -380,6 +376,7 @@ add_range_head (CamelNNTPSummary *cns,
 				camel_folder_change_info_add_uid (changes, camel_message_info_get_uid (mi));
 				if (folder_filter_recent)
 					camel_folder_change_info_recent_uid (changes, camel_message_info_get_uid (mi));
+				g_clear_object (&mi);
 			}
 			if (cns->priv->uid) {
 				g_free (cns->priv->uid);
@@ -504,7 +501,7 @@ camel_nntp_summary_check (CamelNNTPSummary *cns,
 					mi = camel_folder_summary_peek_loaded (s, uid);
 					if (mi) {
 						camel_folder_summary_remove (s, mi);
-						camel_message_info_unref (mi);
+						g_clear_object (&mi);
 					} else {
 						camel_folder_summary_remove_uid (s, uid);
 					}

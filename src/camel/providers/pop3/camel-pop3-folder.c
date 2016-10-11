@@ -90,7 +90,7 @@ cmd_builduid (CamelPOP3Engine *pe,
 {
 	GChecksum *checksum;
 	CamelPOP3FolderInfo *fi = data;
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 	CamelMimeParser *mp;
 	guint8 *digest;
 	gsize length;
@@ -372,8 +372,8 @@ pop3_folder_get_filename (CamelFolder *folder,
 static gboolean
 pop3_folder_set_message_flags (CamelFolder *folder,
                                const gchar *uid,
-                               CamelMessageFlags flags,
-                               CamelMessageFlags set)
+                               guint32 flags,
+                               guint32 set)
 {
 	CamelPOP3Folder *pop3_folder = CAMEL_POP3_FOLDER (folder);
 	CamelPOP3FolderInfo *fi;

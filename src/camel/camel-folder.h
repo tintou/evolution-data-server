@@ -125,7 +125,7 @@ struct _CamelFolder {
 	CamelFolderSummary *summary;
 
 	CamelFolderFlags folder_flags;
-	CamelMessageFlags permanent_flags;
+	guint32 permanent_flags; /* bit-or of CamelMessageFlags */
 
 	/* Future ABI expansion */
 	gpointer later[4];
@@ -136,15 +136,13 @@ struct _CamelFolderClass {
 
 	/* Non-Blocking Methods */
 	gint		(*get_message_count)	(CamelFolder *folder);
-	CamelMessageFlags
-			(*get_permanent_flags)	(CamelFolder *folder);
-	CamelMessageFlags
-			(*get_message_flags)	(CamelFolder *folder,
+	guint32		(*get_permanent_flags)	(CamelFolder *folder);
+	guint32		(*get_message_flags)	(CamelFolder *folder,
 						 const gchar *uid);
 	gboolean	(*set_message_flags)	(CamelFolder *folder,
 						 const gchar *uid,
-						 CamelMessageFlags flags,
-						 CamelMessageFlags set);
+						 guint32 mask,
+						 guint32 set);
 	gboolean	(*get_message_user_flag)(CamelFolder *folder,
 						 const gchar *uid,
 						 const gchar *name);
@@ -283,17 +281,15 @@ const gchar *	camel_folder_get_description	(CamelFolder *folder);
 gchar *		camel_folder_dup_description	(CamelFolder *folder);
 void		camel_folder_set_description	(CamelFolder *folder,
 						 const gchar *description);
-CamelMessageFlags
-		camel_folder_get_permanent_flags
+guint32		camel_folder_get_permanent_flags
 						(CamelFolder *folder);
 #ifndef CAMEL_DISABLE_DEPRECATED
-CamelMessageFlags
-		camel_folder_get_message_flags	(CamelFolder *folder,
+guint32		camel_folder_get_message_flags	(CamelFolder *folder,
 						 const gchar *uid);
 gboolean	camel_folder_set_message_flags	(CamelFolder *folder,
 						 const gchar *uid,
-						 CamelMessageFlags flags,
-						 CamelMessageFlags set);
+						 guint32 mask,
+						 guint32 set);
 gboolean	camel_folder_get_message_user_flag
 						(CamelFolder *folder,
 						 const gchar *uid,

@@ -56,9 +56,9 @@ maildir_folder_cmp_uids (CamelFolder *folder,
 	if (!a || !b) {
 		/* It's not a problem when one of the messages is not in the summary */
 		if (a)
-			camel_message_info_unref (a);
+			g_object_unref (a);
 		if (b)
-			camel_message_info_unref (b);
+			g_object_unref (b);
 
 		if (a == b)
 			return 0;
@@ -70,8 +70,8 @@ maildir_folder_cmp_uids (CamelFolder *folder,
 	tma = camel_message_info_get_date_received (a);
 	tmb = camel_message_info_get_date_received (b);
 
-	camel_message_info_unref (a);
-	camel_message_info_unref (b);
+	g_clear_object (&a);
+	g_clear_object (&b);
 
 	return tma < tmb ? -1 : tma == tmb ? 0 : 1;
 }
@@ -108,13 +108,13 @@ maildir_folder_get_filename (CamelFolder *folder,
 		return NULL;
 	}
 
-	mdi = (CamelMaildirMessageInfo *) info;
+	mdi = CAMEL_MAILDIR_MESSAGE_INFO (info);
 
 	/* If filename is NULL, it means folder_summary_check is not yet executed.
 	 * Try to find the file in the folder and use it, otherwise construct its
 	 * name based on actual flags.
 	*/
-	if (!camel_maildir_info_filename (mdi)) {
+	if (!camel_maildir_message_info_get_filename (mdi)) {
 		const gchar *uid = camel_message_info_get_uid (info);
 
 		if (uid) {
@@ -131,7 +131,7 @@ maildir_folder_get_filename (CamelFolder *folder,
 
 				while (filename = g_dir_read_name (dir), filename) {
 					if (g_str_has_prefix (filename, uid) && (filename[uid_len] == '\0' || filename[uid_len] == CAMEL_MAILDIR_FLAG_SEP)) {
-						camel_maildir_info_set_filename (mdi, g_strdup (filename));
+						camel_maildir_message_info_take_filename (mdi, g_strdup (filename));
 						break;
 					}
 				}
@@ -140,14 +140,14 @@ maildir_folder_get_filename (CamelFolder *folder,
 			}
 		}
 
-		if (!camel_maildir_info_filename (mdi)) {
-			camel_maildir_info_set_filename (mdi, camel_maildir_summary_info_to_name (mdi));
+		if (!camel_maildir_message_info_get_filename (mdi)) {
+			camel_maildir_message_info_take_filename (mdi, camel_maildir_summary_info_to_name (info));
 		}
 	}
 
-	res = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_info_filename (mdi));
+	res = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_message_info_get_filename (mdi));
 
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 
 	return res;
 }
@@ -203,7 +203,7 @@ maildir_folder_append_message_sync (CamelFolder *folder,
 		goto fail_write;
 
 	/* now move from tmp to cur (bypass new, does it matter?) */
-	dest = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_info_filename (mdi));
+	dest = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_message_info_get_filename (mdi));
 	if (g_rename (name, dest) == -1) {
 		g_set_error (
 			error, G_IO_ERROR,
@@ -249,6 +249,8 @@ maildir_folder_append_message_sync (CamelFolder *folder,
 		camel_folder_changed (folder, lf->changes);
 		camel_folder_change_info_clear (lf->changes);
 	}
+
+	g_clear_object (&mi);
 
 	return success;
 }
@@ -344,10 +346,10 @@ maildir_folder_transfer_messages_to_sync (CamelFolder *source,
 			}
 
 			mdi = (CamelMaildirMessageInfo *) info;
-			new_filename = camel_maildir_summary_info_to_name (mdi);
+			new_filename = camel_maildir_summary_info_to_name (info);
 
 			d_filename = g_strdup_printf ("%s/cur/%s", df->folder_path, new_filename);
-			s_filename = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_info_filename (mdi));
+			s_filename = g_strdup_printf ("%s/cur/%s", lf->folder_path, camel_maildir_message_info_get_filename (mdi));
 
 			if (g_rename (s_filename, d_filename) != 0) {
 				if (errno == EXDEV) {
@@ -359,7 +361,7 @@ maildir_folder_transfer_messages_to_sync (CamelFolder *source,
 						g_io_error_from_errno (errno),
 						_("Cannot transfer message to destination folder: %s"),
 						g_strerror (errno));
-					camel_message_info_unref (info);
+					g_clear_object (&info);
 					g_free (s_filename);
 					g_free (d_filename);
 					g_free (new_filename);
@@ -367,22 +369,17 @@ maildir_folder_transfer_messages_to_sync (CamelFolder *source,
 				}
 			} else {
 				CamelMessageInfo *clone;
-				CamelMaildirMessageInfo *mclone;
 
-				clone = camel_message_info_clone (info);
-				clone->summary = dest->summary;
+				clone = camel_message_info_clone (info, dest->summary);
 
-				mclone = (CamelMaildirMessageInfo *) clone;
-				/* preserve also UID, as it matches the file name */
-				mclone->info.info.uid = camel_pstring_strdup (camel_message_info_get_uid (info));
-				camel_maildir_info_set_filename (clone, g_strdup (new_filename));
+				camel_maildir_message_info_set_filename (CAMEL_MAILDIR_MESSAGE_INFO (clone), new_filename);
 				/* unset deleted flag when transferring from trash folder */
 				if ((source->folder_flags & CAMEL_FOLDER_IS_TRASH) != 0)
 					camel_message_info_set_flags (info, CAMEL_MESSAGE_DELETED, 0);
 				/* unset junk flag when transferring from junk folder */
 				if ((source->folder_flags & CAMEL_FOLDER_IS_JUNK) != 0)
 					camel_message_info_set_flags (info, CAMEL_MESSAGE_JUNK, 0);
-				camel_folder_summary_add (dest->summary, clone);
+				camel_folder_summary_add (dest->summary, clone, FALSE);
 
 				camel_folder_change_info_add_uid (df->changes, camel_message_info_get_uid (clone));
 
@@ -391,9 +388,10 @@ maildir_folder_transfer_messages_to_sync (CamelFolder *source,
 					CAMEL_MESSAGE_SEEN, ~0);
 				camel_folder_change_info_remove_uid (lf->changes, camel_message_info_get_uid (info));
 				camel_folder_summary_remove (source->summary, info);
+				g_clear_object (&clone);
 			}
 
-			camel_message_info_unref (info);
+			g_clear_object (&info);
 			g_free (s_filename);
 			g_free (d_filename);
 			g_free (new_filename);

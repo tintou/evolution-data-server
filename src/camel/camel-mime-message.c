@@ -1217,7 +1217,7 @@ static const gchar tz_days[][4] = {
 gchar *
 camel_mime_message_build_mbox_from (CamelMimeMessage *message)
 {
-	struct _camel_header_raw *header = ((CamelMimePart *) message)->headers;
+	CamelHeaderRaw *header = ((CamelMimePart *) message)->headers;
 	GString *out = g_string_new ("From ");
 	gchar *ret;
 	const gchar *tmp;

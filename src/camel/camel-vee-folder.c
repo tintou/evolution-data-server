@@ -145,7 +145,7 @@ vee_folder_note_added_uid (CamelVeeFolder *vfolder,
 		if (vmi) {
 			if (changes)
 				camel_folder_change_info_add_uid (changes, vuid);
-			camel_message_info_unref (vmi);
+			g_clear_object (&vmi);
 
 			if (vfolder->priv->parent_vee_store)
 				camel_vee_store_note_vuid_used (vfolder->priv->parent_vee_store, added_mi_data, vfolder);
@@ -905,9 +905,9 @@ vee_folder_get_message_sync (CamelFolder *folder,
 	mi = (CamelVeeMessageInfo *) camel_folder_summary_get (folder->summary, uid);
 	if (mi) {
 		msg = camel_folder_get_message_sync (
-			camel_folder_summary_get_folder (mi->orig_summary), camel_message_info_get_uid (mi) + 8,
+			camel_vee_message_info_get_original_folder (mi), camel_message_info_get_uid (CAMEL_MESSAGE_INFO (mi)) + 8,
 			cancellable, error);
-		camel_message_info_unref (mi);
+		g_clear_object (&mi);
 	} else {
 		g_set_error (
 			error, CAMEL_FOLDER_ERROR,
@@ -1531,6 +1531,9 @@ camel_vee_folder_set_folders (CamelVeeFolder *vf,
 
 /**
  * camel_vee_folder_add_vuid:
+ * @vfolder:
+ * @mi_data: (type CamelVeeMessageInfoData):
+ * @changes:
  *
  * FIXME Document me!
  *
@@ -1582,6 +1585,9 @@ camel_vee_folder_add_vuid (CamelVeeFolder *vfolder,
 
 /**
  * camel_vee_folder_remove_vuid:
+ * @vfolder:
+ * @mi_data: (type CamelVeeMessageInfoData):
+ * @changes:
  *
  * FIXME Document me!
  *
@@ -1653,25 +1659,29 @@ camel_vee_folder_get_location (CamelVeeFolder *vf,
                                gchar **realuid)
 {
 	CamelFolder *folder;
+	const gchar *uid;
 
 	g_return_val_if_fail (CAMEL_IS_VEE_FOLDER (vf), NULL);
 	g_return_val_if_fail (vinfo != NULL, NULL);
 
-	folder = camel_folder_summary_get_folder (vinfo->orig_summary);
+	folder = camel_vee_message_info_get_original_folder (vinfo);
+	uid = camel_message_info_get_uid (CAMEL_MESSAGE_INFO (vinfo));
+
+	g_return_val_if_fail (uid != NULL && strlen (uid) > 8, NULL);
 
 	/* locking?  yes?  no?  although the vfolderinfo is valid when obtained
 	 * the folder in it might not necessarily be so ...? */
 	if (CAMEL_IS_VEE_FOLDER (folder)) {
 		CamelFolder *res;
-		const CamelVeeMessageInfo *vfinfo;
+		CamelMessageInfo *vfinfo;
 
-		vfinfo = (CamelVeeMessageInfo *) camel_folder_get_message_info (folder, camel_message_info_get_uid (vinfo) + 8);
-		res = camel_vee_folder_get_location ((CamelVeeFolder *) folder, vfinfo, realuid);
-		camel_message_info_unref ((CamelMessageInfo *) vfinfo);
+		vfinfo = camel_folder_get_message_info (folder, uid + 8);
+		res = camel_vee_folder_get_location ((CamelVeeFolder *) folder, CAMEL_VEE_MESSAGE_INFO (vfinfo), realuid);
+		g_clear_object (&vfinfo);
 		return res;
 	} else {
 		if (realuid)
-			*realuid = g_strdup (camel_message_info_get_uid (vinfo)+8);
+			*realuid = g_strdup (uid + 8);
 
 		return folder;
 	}

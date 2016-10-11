@@ -53,6 +53,14 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_STORE, CamelStoreClass))
 
+#define CAMEL_TYPE_FOLDER_INFO \
+	(camel_folder_info_get_type ())
+#define CAMEL_FOLDER_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), CAMEL_TYPE_FOLDER_INFO, CamelFolderInfo))
+#define CAMEL_IS_FOLDER_INFO(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), CAMEL_TYPE_FOLDER_INFO))
 /**
  * CAMEL_STORE_ERROR:
  *

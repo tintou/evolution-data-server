@@ -304,6 +304,7 @@ camel_msgport_fd (CamelMsgPort *msgport)
 /**
  * camel_msgport_prfd:
  *
+ * Returns: (transfer none):
  * Since: 2.24
  **/
 PRFileDesc *

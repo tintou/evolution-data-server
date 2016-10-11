@@ -189,14 +189,8 @@ unset_flagged_flag (const gchar *uid,
 
 	info = camel_folder_summary_get (summary, uid);
 	if (info) {
-		CamelMessageInfoBase *base = (CamelMessageInfoBase *) info;
-
-		if ((base->flags & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
-			base->flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
-			base->dirty = TRUE;
-		}
-
-		camel_message_info_unref (info);
+		camel_message_info_set_folder_flagged (info, FALSE);
+		g_clear_object (&info);
 	}
 }
 
@@ -411,7 +405,7 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 	CamelMimeFilter *crlffilter;
 	gint ret;
 	guint u;
-	struct _camel_header_raw *header, *savedhdrs, *n, *tail;
+	CamelHeaderRaw *header, *savedhdrs, *n, *tail;
 	const gchar *full_name;
 	gchar *group, *line;
 	gboolean success = TRUE;
@@ -447,9 +441,9 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 
 	/* remove mail 'To', 'CC', and 'BCC' headers */
 	savedhdrs = NULL;
-	tail = (struct _camel_header_raw *) &savedhdrs;
+	tail = (CamelHeaderRaw *) &savedhdrs;
 
-	header = (struct _camel_header_raw *) &CAMEL_MIME_PART (message)->headers;
+	header = (CamelHeaderRaw *) &CAMEL_MIME_PART (message)->headers;
 	n = header->next;
 	while (n != NULL) {
 		if (!g_ascii_strcasecmp (n->name, "To") || !g_ascii_strcasecmp (n->name, "Cc") || !g_ascii_strcasecmp (n->name, "Bcc")) {
@@ -549,7 +543,7 @@ nntp_folder_expunge_sync (CamelFolder *folder,
 			camel_folder_summary_remove (summary, info);
 		}
 
-		camel_message_info_unref (info);
+		g_clear_object (&info);
 	}
 
 	camel_folder_summary_save_to_db (summary, NULL);

@@ -31,9 +31,10 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
-#include "camel-spool-summary.h"
 #include "camel-local-private.h"
 #include "camel-win32.h"
+
+#include "camel-spool-summary.h"
 
 #define io(x)
 #define d(x) /*(printf("%s(%d): ", __FILE__, __LINE__),(x))*/
@@ -332,10 +333,10 @@ spool_summary_check (CamelLocalSummary *cls,
 	camel_folder_summary_prepare_fetch_all (s, error);
 	known_uids = camel_folder_summary_get_array (s);
 	for (i = 0; !work && known_uids && i < known_uids->len; i++) {
-		CamelMboxMessageInfo *info = (CamelMboxMessageInfo *) camel_folder_summary_get (s, g_ptr_array_index (known_uids, i));
+		CamelMessageInfo *info = camel_folder_summary_get (s, g_ptr_array_index (known_uids, i));
 		g_return_val_if_fail (info, -1);
-		work = (info->info.info.flags & (CAMEL_MESSAGE_FOLDER_NOXEV)) != 0;
-		camel_message_info_unref (info);
+		work = (camel_message_info_get_flags (info) & (CAMEL_MESSAGE_FOLDER_NOXEV)) != 0;
+		g_clear_object (&info);
 	}
 	camel_folder_summary_free_array (known_uids);
 

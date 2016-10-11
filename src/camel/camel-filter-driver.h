@@ -74,7 +74,7 @@ enum camel_filter_status_t {
 };
 
 typedef CamelFolder * (*CamelFilterGetFolderFunc) (CamelFilterDriver *driver, const gchar *uri,
-						   gpointer data, GError **error);
+						   gpointer user_data, GError **error);
 /* report status */
 typedef void (*CamelFilterStatusFunc) (CamelFilterDriver *driver, enum camel_filter_status_t status,
 				      gint pc, const gchar *desc, gpointer user_data);

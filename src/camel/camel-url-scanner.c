@@ -64,6 +64,17 @@ camel_url_scanner_add (CamelUrlScanner *scanner,
 	g_ptr_array_add (scanner->patterns, pattern);
 }
 
+/**
+ * camel_url_scanner_scan:
+ * @scanner: a #CamelUrlScanner object.
+ * @in: (array length=inlen) (type gchar): the url to scan.
+ * @inlen: length of the in array.
+ * @match: the #CamelUrlMatch structure containing the criterias.
+ *
+ * Scan the @in string with the @match criterias.
+ *
+ * Returns: %TRUE if there is a result.
+ **/
 gboolean
 camel_url_scanner_scan (CamelUrlScanner *scanner,
                         const gchar *in,

@@ -135,7 +135,7 @@ async_context_free (AsyncContext *async_context)
 		g_object_unref (async_context->message);
 
 	if (async_context->info != NULL)
-		camel_message_info_unref (async_context->info);
+		g_clear_object (&async_context->info);
 
 	if (async_context->destination != NULL)
 		g_object_unref (async_context->destination);
@@ -299,7 +299,7 @@ folder_filter (CamelSession *session,
 				continue;
 
 			camel_message_info_set_flags (info, CAMEL_MESSAGE_JUNK_LEARN, 0);
-			camel_message_info_unref (info);
+			g_clear_object (&info);
 		}
 	}
 
@@ -310,7 +310,7 @@ folder_filter (CamelSession *session,
 				continue;
 
 			camel_message_info_set_flags (info, CAMEL_MESSAGE_JUNK_LEARN, 0);
-			camel_message_info_unref (info);
+			g_clear_object (&info);
 		}
 	}
 
@@ -444,7 +444,7 @@ folder_filter (CamelSession *session,
 				data->driver, NULL, info, uid, data->folder,
 				store_uid, store_uid, cancellable, error);
 
-			camel_message_info_unref (info);
+			g_clear_object (&info);
 		}
 
 		camel_operation_pop_message (cancellable);
@@ -493,8 +493,8 @@ folder_transfer_message_to (CamelFolder *source,
 	/* if its deleted we poke the flags, so we need to copy the messageinfo */
 	if ((source->folder_flags & CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY)
 			&& (minfo = camel_folder_get_message_info (source, uid))) {
-		info = camel_message_info_clone (minfo);
-		camel_message_info_unref (minfo);
+		info = camel_message_info_clone (minfo, NULL);
+		g_clear_object (&minfo);
 	} else
 		info = camel_message_info_new_from_header (NULL, ((CamelMimePart *) msg)->headers);
 
@@ -517,7 +517,7 @@ folder_transfer_message_to (CamelFolder *source,
 			source, uid, CAMEL_MESSAGE_DELETED |
 			CAMEL_MESSAGE_SEEN, ~0);
 
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 }
 
 static gboolean
@@ -706,18 +706,18 @@ folder_get_message_count (CamelFolder *folder)
 	return camel_folder_summary_count (folder->summary);
 }
 
-static CamelMessageFlags
+static guint32
 folder_get_permanent_flags (CamelFolder *folder)
 {
 	return folder->permanent_flags;
 }
 
-static CamelMessageFlags
+static guint32
 folder_get_message_flags (CamelFolder *folder,
                           const gchar *uid)
 {
 	CamelMessageInfo *info;
-	CamelMessageFlags flags;
+	guint32 flags;
 
 	g_return_val_if_fail (folder->summary != NULL, 0);
 
@@ -726,7 +726,7 @@ folder_get_message_flags (CamelFolder *folder,
 		return 0;
 
 	flags = camel_message_info_get_flags (info);
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 
 	return flags;
 }
@@ -734,8 +734,8 @@ folder_get_message_flags (CamelFolder *folder,
 static gboolean
 folder_set_message_flags (CamelFolder *folder,
                           const gchar *uid,
-                          CamelMessageFlags flags,
-                          CamelMessageFlags set)
+                          guint32 mask,
+                          guint32 set)
 {
 	CamelMessageInfo *info;
 	gint res;
@@ -746,8 +746,8 @@ folder_set_message_flags (CamelFolder *folder,
 	if (info == NULL)
 		return FALSE;
 
-	res = camel_message_info_set_flags (info, flags, set);
-	camel_message_info_unref (info);
+	res = camel_message_info_set_flags (info, mask, set);
+	g_clear_object (&info);
 
 	return res;
 }
@@ -767,7 +767,7 @@ folder_get_message_user_flag (CamelFolder *folder,
 		return FALSE;
 
 	ret = camel_message_info_get_user_flag (info, name);
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 
 	return ret;
 }
@@ -787,7 +787,7 @@ folder_set_message_user_flag (CamelFolder *folder,
 		return;
 
 	camel_message_info_set_user_flag (info, name, value);
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 }
 
 static const gchar *
@@ -805,7 +805,7 @@ folder_get_message_user_tag (CamelFolder *folder,
 		return NULL;
 
 	ret = camel_message_info_get_user_tag (info, name);
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 
 	return ret;
 }
@@ -825,7 +825,7 @@ folder_set_message_user_tag (CamelFolder *folder,
 		return;
 
 	camel_message_info_set_user_tag (info, name, value);
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 }
 
 static GPtrArray *
@@ -1113,7 +1113,7 @@ folder_changed (CamelFolder *folder,
 	junk_filter = camel_session_get_junk_filter (session);
 
 	if (junk_filter != NULL && info->uid_changed->len) {
-		CamelMessageFlags flags;
+		guint32 flags;
 
 		for (i = 0; i < info->uid_changed->len; i++) {
 			flags = camel_folder_summary_get_info_flags (folder->summary, info->uid_changed->pdata[i]);
@@ -1704,7 +1704,7 @@ camel_folder_get_deleted_message_count (CamelFolder *folder)
  * stored on a message between sessions. If it includes
  * #CAMEL_FLAG_USER, then user-defined flags will be remembered.
  **/
-CamelMessageFlags
+guint32
 camel_folder_get_permanent_flags (CamelFolder *folder)
 {
 	CamelFolderClass *class;
@@ -1727,7 +1727,7 @@ camel_folder_get_permanent_flags (CamelFolder *folder)
  * Returns: the #CamelMessageFlags that are set on the indicated
  * message.
  **/
-CamelMessageFlags
+guint32
 camel_folder_get_message_flags (CamelFolder *folder,
                                 const gchar *uid)
 {
@@ -1746,10 +1746,10 @@ camel_folder_get_message_flags (CamelFolder *folder,
  * camel_folder_set_message_flags:
  * @folder: a #CamelFolder
  * @uid: the UID of a message in @folder
- * @flags: a set of #CamelMessageFlag values to set
- * @set: the mask of values in @flags to use.
+ * @mask: a mask of #CamelMessageFlag bit-or values to use
+ * @set: the flags to ser, also bit-or of #CamelMessageFlag
  *
- * Sets those flags specified by @flags to the values specified by @set
+ * Sets those flags specified by @mask to the values specified by @set
  * on the indicated message. (This may or may not persist after the
  * folder or store is closed. See camel_folder_get_permanent_flags())
  *
@@ -1764,8 +1764,8 @@ camel_folder_get_message_flags (CamelFolder *folder,
 gboolean
 camel_folder_set_message_flags (CamelFolder *folder,
                                 const gchar *uid,
-                                CamelMessageFlags flags,
-                                CamelMessageFlags set)
+                                guint32 mask,
+                                guint32 set)
 {
 	CamelFolderClass *class;
 
@@ -1775,12 +1775,7 @@ camel_folder_set_message_flags (CamelFolder *folder,
 	class = CAMEL_FOLDER_GET_CLASS (folder);
 	g_return_val_if_fail (class->set_message_flags != NULL, FALSE);
 
-	if ((flags & (CAMEL_MESSAGE_JUNK | CAMEL_MESSAGE_JUNK_LEARN)) == CAMEL_MESSAGE_JUNK) {
-		flags |= CAMEL_MESSAGE_JUNK_LEARN;
-		set &= ~CAMEL_MESSAGE_JUNK_LEARN;
-	}
-
-	return class->set_message_flags (folder, uid, flags, set);
+	return class->set_message_flags (folder, uid, mask, set);
 }
 
 /**
@@ -1910,11 +1905,11 @@ camel_folder_set_message_user_tag (CamelFolder *folder,
  * @folder: a #CamelFolder
  * @uid: the uid of a message
  *
- * Retrieve the #CamelMessageInfo for the specified @uid.  This return
- * must be freed using camel_message_info_unref().
+ * Retrieve the #CamelMessageInfo for the specified @uid.
  *
- * Returns: the summary information for the indicated message, or %NULL
- * if the uid does not exist
+ * Returns: (transfer full): The summary information for the indicated message, or %NULL
+ *   if the uid does not exist. Free the returned object with g_object_unref(),
+ *   when done with it.
  **/
 CamelMessageInfo *
 camel_folder_get_message_info (CamelFolder *folder,
@@ -2807,7 +2802,7 @@ camel_folder_append_message (CamelFolder *folder,
 
 	async_context = g_slice_new0 (AsyncContext);
 	async_context->message = g_object_ref (message);
-	async_context->info = camel_message_info_ref (info);
+	async_context->info = g_object_ref (info);
 
 	task = g_task_new (folder, cancellable, callback, user_data);
 	g_task_set_source_tag (task, camel_folder_append_message);

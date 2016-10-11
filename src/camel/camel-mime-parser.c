@@ -116,7 +116,7 @@ struct _header_scan_stack {
 #ifdef MEMPOOL
 	CamelMemPool *pool;	/* memory pool to keep track of headers/etc at this level */
 #endif
-	struct _camel_header_raw *headers;	/* headers for this part */
+	CamelHeaderRaw *headers;	/* headers for this part */
 
 	CamelContentType *content_type;
 
@@ -335,7 +335,7 @@ camel_mime_parser_header (CamelMimeParser *m,
  *
  * Since: 2.22
  **/
-struct _camel_header_raw *
+CamelHeaderRaw *
 camel_mime_parser_headers_raw (CamelMimeParser *m)
 {
 	struct _header_scan_state *s = _PRIVATE (m);
@@ -1180,7 +1180,7 @@ header_append_mempool (struct _header_scan_state *s,
                        gchar *header,
                        gint offset)
 {
-	struct _camel_header_raw *l, *n;
+	CamelHeaderRaw *l, *n;
 	gchar *content;
 
 	content = strchr (header, ':');
@@ -1203,7 +1203,7 @@ header_append_mempool (struct _header_scan_state *s,
 
 		n->offset = offset;
 
-		l = (struct _camel_header_raw *) &h->headers;
+		l = (CamelHeaderRaw *) &h->headers;
 		while (l->next) {
 			l = l->next;
 		}

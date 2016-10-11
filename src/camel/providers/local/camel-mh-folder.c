@@ -128,6 +128,8 @@ mh_folder_append_message_sync (CamelFolder *folder,
 		camel_folder_change_info_clear (lf->changes);
 	}
 
+	g_clear_object (&mi);
+
 	return TRUE;
 }
 
@@ -157,7 +159,7 @@ mh_folder_get_message_sync (CamelFolder *folder,
 	}
 
 	/* we only need it to check the message exists */
-	camel_message_info_unref (info);
+	g_clear_object (&info);
 
 	name = g_strdup_printf ("%s/%s", lf->folder_path, uid);
 	message_stream = camel_stream_fs_new_with_name (

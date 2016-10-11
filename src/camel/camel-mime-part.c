@@ -520,7 +520,7 @@ mime_part_get_headers (CamelMedium *medium)
 	CamelMimePart *part = (CamelMimePart *) medium;
 	GArray *headers;
 	CamelMediumHeader header;
-	struct _camel_header_raw *h;
+	CamelHeaderRaw *h;
 
 	headers = g_array_new (FALSE, FALSE, sizeof (CamelMediumHeader));
 	for (h = part->headers; h; h = h->next) {
@@ -581,7 +581,7 @@ mime_part_write_to_stream_sync (CamelDataWrapper *dw,
 	/* TODO: content-languages header? */
 
 	if (mp->headers) {
-		struct _camel_header_raw *h = mp->headers;
+		CamelHeaderRaw *h = mp->headers;
 		gchar *val;
 		gssize (*writefn) (
 			gpointer stream,
@@ -774,7 +774,7 @@ mime_part_write_to_output_stream_sync (CamelDataWrapper *dw,
 	/* TODO: content-languages header? */
 
 	if (mp->headers) {
-		struct _camel_header_raw *h = mp->headers;
+		CamelHeaderRaw *h = mp->headers;
 		gchar *val;
 		gssize (*writefn) (
 			gpointer stream,
@@ -972,7 +972,7 @@ mime_part_construct_from_parser_sync (CamelMimePart *mime_part,
                                       GError **error)
 {
 	CamelDataWrapper *dw = (CamelDataWrapper *) mime_part;
-	struct _camel_header_raw *headers;
+	CamelHeaderRaw *headers;
 	const gchar *content;
 	gchar *buf;
 	gsize len;
