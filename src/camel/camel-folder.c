@@ -4170,6 +4170,8 @@ camel_folder_prepare_content_refresh (CamelFolder *folder)
 		klass->prepare_content_refresh (folder);
 }
 
+G_DEFINE_BOXED_TYPE (CamelFolderChangeInfo, camel_folder_change_info, camel_folder_change_info_copy, camel_folder_change_info_free)
+
 /**
  * camel_folder_change_info_new:
  *
@@ -4178,7 +4180,7 @@ camel_folder_prepare_content_refresh (CamelFolder *folder)
  * Change info structures are not MT-SAFE and must be
  * locked for exclusive access externally.
  *
- * Returns: a new #CamelFolderChangeInfo
+ * Returns: (transfer full): a new #CamelFolderChangeInfo
  **/
 CamelFolderChangeInfo *
 camel_folder_change_info_new (void)
@@ -4197,6 +4199,30 @@ camel_folder_change_info_new (void)
 	info->priv->uid_pool = camel_mempool_new (512, 256, CAMEL_MEMPOOL_ALIGN_BYTE);
 
 	return info;
+}
+
+/**
+ * camel_folder_change_info_copy:
+ * @src: a #CamelFolderChangeInfo to make copy of
+ *
+ * Creates a copy of the @src.
+ *
+ * Returns: (transfer full): Copy of the @src.
+ *
+ * Since: 3.24
+ **/
+CamelFolderChangeInfo *
+camel_folder_change_info_copy (CamelFolderChangeInfo *src)
+{
+	CamelFolderChangeInfo *copy;
+
+	if (!src)
+		return NULL;
+
+	copy = camel_folder_change_info_new ();
+	camel_folder_change_info_cat (copy, src);
+
+	return copy;
 }
 
 /**
@@ -4404,21 +4430,21 @@ change_info_cat (CamelFolderChangeInfo *info,
  * @info: a #CamelFolderChangeInfo to append to
  * @src: a #CamelFolderChangeInfo to append from
  *
- * Concatenate one change info onto antoher.  Can be used to copy them
+ * Concatenate one change info onto antoher. Can be used to copy them
  * too.
  **/
 void
 camel_folder_change_info_cat (CamelFolderChangeInfo *info,
-                              CamelFolderChangeInfo *source)
+                              CamelFolderChangeInfo *src)
 {
 	g_return_if_fail (info != NULL);
-	g_return_if_fail (source != NULL);
+	g_return_if_fail (src != NULL);
 
-	change_info_cat (info, source->uid_added, camel_folder_change_info_add_uid);
-	change_info_cat (info, source->uid_removed, camel_folder_change_info_remove_uid);
-	change_info_cat (info, source->uid_changed, camel_folder_change_info_change_uid);
-	change_info_cat (info, source->uid_recent, change_info_recent_uid);
-	change_info_cat (info, source->priv->uid_filter, change_info_filter_uid);
+	change_info_cat (info, src->uid_added, camel_folder_change_info_add_uid);
+	change_info_cat (info, src->uid_removed, camel_folder_change_info_remove_uid);
+	change_info_cat (info, src->uid_changed, camel_folder_change_info_change_uid);
+	change_info_cat (info, src->uid_recent, change_info_recent_uid);
+	change_info_cat (info, src->priv->uid_filter, change_info_filter_uid);
 }
 
 /**
@@ -4557,6 +4583,82 @@ camel_folder_change_info_changed (CamelFolderChangeInfo *info)
 	g_return_val_if_fail (info != NULL, FALSE);
 
 	return (info->uid_added->len || info->uid_removed->len || info->uid_changed->len || info->uid_recent->len);
+}
+
+/**
+ * camel_folder_change_info_get_added_uids:
+ * @info: a #CamelFolderChangeInfo
+ *
+ * Returns an array of added messages UIDs. The returned array, the same as its content,
+ * is owned by the @info.
+ *
+ * Returns: (element-type utf8) (transfer none): An array of added UIDs.
+ *
+ * Since: 3.24
+ **/
+GPtrArray *
+camel_folder_change_info_get_added_uids (CamelFolderChangeInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->uid_added;
+}
+
+/**
+ * camel_folder_change_info_get_removed_uids:
+ * @info: a #CamelFolderChangeInfo
+ *
+ * Returns an array of removed messages UIDs. The returned array, the same as its content,
+ * is owned by the @info.
+ *
+ * Returns: (element-type utf8) (transfer none): An array of removed UIDs.
+ *
+ * Since: 3.24
+ **/
+GPtrArray *
+camel_folder_change_info_get_removed_uids (CamelFolderChangeInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->uid_removed;
+}
+
+/**
+ * camel_folder_change_info_get_changed_uids:
+ * @info: a #CamelFolderChangeInfo
+ *
+ * Returns an array of changed messages UIDs. The returned array, the same as its content,
+ * is owned by the @info.
+ *
+ * Returns: (element-type utf8) (transfer none): An array of changed UIDs.
+ *
+ * Since: 3.24
+ **/
+GPtrArray *
+camel_folder_change_info_get_changed_uids (CamelFolderChangeInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->uid_changed;
+}
+
+/**
+ * camel_folder_change_info_get_recent_uids:
+ * @info: a #CamelFolderChangeInfo
+ *
+ * Returns an array of recent messages UIDs. The returned array, the same as its content,
+ * is owned by the @info.
+ *
+ * Returns: (element-type utf8) (transfer none): An array of recent UIDs.
+ *
+ * Since: 3.24
+ **/
+GPtrArray *
+camel_folder_change_info_get_recent_uids (CamelFolderChangeInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->uid_recent;
 }
 
 /**

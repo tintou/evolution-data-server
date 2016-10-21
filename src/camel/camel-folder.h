@@ -533,11 +533,23 @@ void		camel_folder_prepare_content_refresh
 						(CamelFolder *folder);
 
 /* update functions for change info */
+GType		camel_folder_change_info_get_type
+						(void) G_GNUC_CONST;
 CamelFolderChangeInfo *
 		camel_folder_change_info_new	(void);
+CamelFolderChangeInfo *
+		camel_folder_change_info_copy	(CamelFolderChangeInfo *src);
 void		camel_folder_change_info_clear	(CamelFolderChangeInfo *info);
 void		camel_folder_change_info_free	(CamelFolderChangeInfo *info);
 gboolean	camel_folder_change_info_changed (CamelFolderChangeInfo *info);
+GPtrArray *	camel_folder_change_info_get_added_uids
+						(CamelFolderChangeInfo *info);
+GPtrArray *	camel_folder_change_info_get_removed_uids
+						(CamelFolderChangeInfo *info);
+GPtrArray *	camel_folder_change_info_get_changed_uids
+						(CamelFolderChangeInfo *info);
+GPtrArray *	camel_folder_change_info_get_recent_uids
+						(CamelFolderChangeInfo *info);
 
 /* for building diff's automatically */
 void		camel_folder_change_info_add_source
