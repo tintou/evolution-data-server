@@ -121,6 +121,7 @@ static void	service_task_dispatch		(CamelService *service,
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (
 	CamelService, camel_service, CAMEL_TYPE_OBJECT,
 	G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, camel_service_initable_init))
+G_DEFINE_BOXED_TYPE (CamelServiceAuthType, camel_service_auth_type, camel_service_auth_type_copy, camel_service_auth_type_free);
 
 static void
 async_context_free (AsyncContext *async_context)
@@ -2378,3 +2379,39 @@ camel_service_query_auth_types_finish (CamelService *service,
 	return g_task_propagate_pointer (G_TASK (result), error);
 }
 
+/**
+ * camel_service_auth_type_free:
+ * @service_auth_type: an #CamelServiceAuthType
+ *
+ * Frees the @service_auth_type struct and its contents.
+ **/
+void
+camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
+{
+	if (!service_auth_type)
+		return;
+
+	g_free (service_auth_type->name);
+	g_free (service_auth_type->description);
+	g_free (service_auth_type->authproto);
+	g_free (service_auth_type);
+}
+
+/**
+ * camel_service_auth_type_copy:
+ * @service_auth_type: an #CamelServiceAuthType
+ *
+ * Copies the @service_auth_type struct.
+ * Returns: (transfer full): the copy of @service_auth_type
+ **/
+CamelServiceAuthType *
+camel_service_auth_type_copy		(const CamelServiceAuthType* service_auth_type)
+{
+	CamelServiceAuthType *new_service_auth_type = g_new0 (CamelServiceAuthType, 1);
+	new_service_auth_type->name = g_strdup (service_auth_type->name);
+	new_service_auth_type->description = g_strdup (service_auth_type->description);
+	new_service_auth_type->authproto = g_strdup (service_auth_type->authproto);
+	new_service_auth_type->need_password = service_auth_type->need_password;
+
+	return new_service_auth_type;
+}
