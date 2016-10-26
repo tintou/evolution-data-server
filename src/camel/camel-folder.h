@@ -100,6 +100,7 @@ struct _CamelFolderChangeInfo {
 	GPtrArray *uid_changed;
 	GPtrArray *uid_recent;
 
+	/*< private >*/
 	CamelFolderChangeInfoPrivate *priv;
 };
 
