@@ -2383,18 +2383,14 @@ camel_service_query_auth_types_finish (CamelService *service,
  * camel_service_auth_type_free:
  * @service_auth_type: an #CamelServiceAuthType
  *
- * Frees the @service_auth_type struct and its contents.
+ * Frees the @service_auth_type struct.
+ * Does nothing in reality, needed for the introspection.
  **/
 void
 camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
 {
-	if (!service_auth_type)
-		return;
-
-	g_free (service_auth_type->name);
-	g_free (service_auth_type->description);
-	g_free (service_auth_type->authproto);
-	g_free (service_auth_type);
+	// This is needed for the introspection.
+	// In the reality, each CamelSasl subclass has a static reference of it.
 }
 
 /**
@@ -2402,16 +2398,14 @@ camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
  * @service_auth_type: an #CamelServiceAuthType
  *
  * Copies the @service_auth_type struct.
+ * Does nothing and returns the given object in reality, needed for the introspection.
+ *
  * Returns: (transfer full): the copy of @service_auth_type
  **/
 CamelServiceAuthType *
 camel_service_auth_type_copy		(const CamelServiceAuthType* service_auth_type)
 {
-	CamelServiceAuthType *new_service_auth_type = g_new0 (CamelServiceAuthType, 1);
-	new_service_auth_type->name = g_strdup (service_auth_type->name);
-	new_service_auth_type->description = g_strdup (service_auth_type->description);
-	new_service_auth_type->authproto = g_strdup (service_auth_type->authproto);
-	new_service_auth_type->need_password = service_auth_type->need_password;
-
-	return new_service_auth_type;
+	// This is needed for the introspection.
+	// In the reality, each CamelSasl subclass has a static reference of it.
+	return service_auth_type;
 }
