@@ -271,7 +271,7 @@ mime_message_write_to_output_stream_sync (CamelDataWrapper *data_wrapper,
 static void
 mime_message_add_header (CamelMedium *medium,
                          const gchar *name,
-                         gconstpointer value)
+                         const gchar *value)
 {
 	CamelMediumClass *medium_class;
 
@@ -287,7 +287,7 @@ mime_message_add_header (CamelMedium *medium,
 static void
 mime_message_set_header (CamelMedium *medium,
                          const gchar *name,
-                         gconstpointer value)
+                         const gchar *value)
 {
 	process_header (medium, name, value);
 

@@ -462,7 +462,7 @@ mime_part_finalize (GObject *object)
 static void
 mime_part_add_header (CamelMedium *medium,
                       const gchar *name,
-                      gconstpointer value)
+                      const gchar *value)
 {
 	CamelMimePart *part = CAMEL_MIME_PART (medium);
 
@@ -480,7 +480,7 @@ mime_part_add_header (CamelMedium *medium,
 static void
 mime_part_set_header (CamelMedium *medium,
                       const gchar *name,
-                      gconstpointer value)
+                      const gchar *value)
 {
 	CamelMimePart *part = CAMEL_MIME_PART (medium);
 
@@ -498,7 +498,7 @@ mime_part_remove_header (CamelMedium *medium,
 	camel_header_raw_remove (&part->headers, name);
 }
 
-static gconstpointer
+static const gchar *
 mime_part_get_header (CamelMedium *medium,
                       const gchar *name)
 {
@@ -514,29 +514,19 @@ mime_part_get_header (CamelMedium *medium,
 	return value;
 }
 
-static GArray *
+static CamelNameValueArray *
 mime_part_get_headers (CamelMedium *medium)
 {
 	CamelMimePart *part = (CamelMimePart *) medium;
-	GArray *headers;
-	CamelMediumHeader header;
+	CamelNameValueArray *headers;
 	CamelHeaderRaw *h;
 
-	headers = g_array_new (FALSE, FALSE, sizeof (CamelMediumHeader));
+	headers = camel_name_value_array_new ();
 	for (h = part->headers; h; h = h->next) {
-		header.name = h->name;
-		header.value = h->value;
-		g_array_append_val (headers, header);
+		camel_name_value_array_append (headers, h->name, h->value);
 	}
 
 	return headers;
-}
-
-static void
-mime_part_free_headers (CamelMedium *medium,
-                        GArray *headers)
-{
-	g_array_free (headers, TRUE);
 }
 
 static void
@@ -1046,7 +1036,6 @@ camel_mime_part_class_init (CamelMimePartClass *class)
 	medium_class->remove_header = mime_part_remove_header;
 	medium_class->get_header = mime_part_get_header;
 	medium_class->get_headers = mime_part_get_headers;
-	medium_class->free_headers = mime_part_free_headers;
 	medium_class->set_content = mime_part_set_content;
 
 	data_wrapper_class = CAMEL_DATA_WRAPPER_CLASS (class);

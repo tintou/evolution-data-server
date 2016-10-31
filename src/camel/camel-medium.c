@@ -178,7 +178,7 @@ camel_medium_init (CamelMedium *medium)
 void
 camel_medium_add_header (CamelMedium *medium,
                          const gchar *name,
-                         gconstpointer value)
+                         const gchar *value)
 {
 	CamelMediumClass *class;
 
@@ -205,7 +205,7 @@ camel_medium_add_header (CamelMedium *medium,
 void
 camel_medium_set_header (CamelMedium *medium,
                          const gchar *name,
-                         gconstpointer value)
+                         const gchar *value)
 {
 	CamelMediumClass *class;
 
@@ -258,9 +258,9 @@ camel_medium_remove_header (CamelMedium *medium,
  * instance of the header.  For multi-occuring headers, use
  * :get_headers().
  *
- * Returns: (transfer none) (nullable): the value of the named header, or %NULL
+ * Returns: (nullable): the value of the named header, or %NULL
  **/
-gconstpointer
+const gchar *
 camel_medium_get_header (CamelMedium *medium,
                          const gchar *name)
 {
@@ -279,15 +279,12 @@ camel_medium_get_header (CamelMedium *medium,
  * camel_medium_get_headers:
  * @medium: a #CamelMedium object
  *
- * Gets an array of all header name/value pairs (as
- * CamelMediumHeader structures). The values will be decoded
- * to UTF-8 for any headers that are recognized by Camel. The
- * caller should not modify the returned data.
+ * Gets an array of all header name/value pairs. The values will be
+ * decoded to UTF-8 for any headers that are recognized by Camel.
  *
- * Returns: (element-type CamelMediumHeader) (transfer full): the array of
- * headers, which must be freed with camel_medium_free_headers().
+ * Returns: (transfer full): the array of headers, which must be freed with camel_name_value_array_free().
  **/
-GArray *
+CamelNameValueArray *
 camel_medium_get_headers (CamelMedium *medium)
 {
 	CamelMediumClass *class;
@@ -298,29 +295,6 @@ camel_medium_get_headers (CamelMedium *medium)
 	g_return_val_if_fail (class->get_headers != NULL, NULL);
 
 	return class->get_headers (medium);
-}
-
-/**
- * camel_medium_free_headers:
- * @medium: a #CamelMedium object
- * @headers: (element-type CamelMediumHeader): an array of headers returned
- * from camel_medium_get_headers()
- *
- * Frees @headers.
- **/
-void
-camel_medium_free_headers (CamelMedium *medium,
-                           GArray *headers)
-{
-	CamelMediumClass *class;
-
-	g_return_if_fail (CAMEL_IS_MEDIUM (medium));
-	g_return_if_fail (headers != NULL);
-
-	class = CAMEL_MEDIUM_GET_CLASS (medium);
-	g_return_if_fail (class->free_headers != NULL);
-
-	class->free_headers (medium, headers);
 }
 
 /**
