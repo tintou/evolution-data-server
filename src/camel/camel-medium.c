@@ -256,7 +256,7 @@ camel_medium_remove_header (CamelMedium *medium,
  *
  * If the header occurs more than once, only retrieve the first
  * instance of the header.  For multi-occuring headers, use
- * :get_headers().
+ * camel_medium_dup_headers().
  *
  * Returns: (nullable): the value of the named header, or %NULL
  **/
@@ -276,7 +276,7 @@ camel_medium_get_header (CamelMedium *medium,
 }
 
 /**
- * camel_medium_get_headers:
+ * camel_medium_dup_headers:
  * @medium: a #CamelMedium object
  *
  * Gets an array of all header name/value pairs. The values will be
@@ -285,16 +285,16 @@ camel_medium_get_header (CamelMedium *medium,
  * Returns: (transfer full): the array of headers, which must be freed with camel_name_value_array_free().
  **/
 CamelNameValueArray *
-camel_medium_get_headers (CamelMedium *medium)
+camel_medium_dup_headers (CamelMedium *medium)
 {
 	CamelMediumClass *class;
 
 	g_return_val_if_fail (CAMEL_IS_MEDIUM (medium), NULL);
 
 	class = CAMEL_MEDIUM_GET_CLASS (medium);
-	g_return_val_if_fail (class->get_headers != NULL, NULL);
+	g_return_val_if_fail (class->dup_headers != NULL, NULL);
 
-	return class->get_headers (medium);
+	return class->dup_headers (medium);
 }
 
 /**

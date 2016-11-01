@@ -838,7 +838,7 @@ camel_search_get_all_headers_decoded (CamelMimeMessage *message)
 	g_return_val_if_fail (CAMEL_IS_MIME_MESSAGE (message), NULL);
 
 	medium = CAMEL_MEDIUM (message);
-	headers = camel_medium_get_headers (medium);
+	headers = camel_medium_dup_headers (medium);
 	if (!headers)
 		return NULL;
 

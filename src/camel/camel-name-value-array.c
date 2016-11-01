@@ -53,7 +53,7 @@ free_name_value_content (gpointer ptr)
 /**
  * camel_name_value_array_new:
  *
- * Created a new #CamelNameValueArray. The returned pointer should be freed
+ * Creates a new #CamelNameValueArray. The returned pointer should be freed
  * with camel_name_value_array_free() when no longer needed.
  *
  * Returns: (transfer full): A new #CamelNameValueArray.
@@ -77,7 +77,7 @@ camel_name_value_array_new (void)
  * camel_name_value_array_new_sized:
  * @reserve_size: an array size to reserve
  *
- * Created a new #CamelNameValueArray, which has reserved @reserve_size
+ * Creates a new #CamelNameValueArray, which has reserved @reserve_size
  * elements. This value doesn't influence the camel_name_value_array_get_length(),
  * which returns zero on the array returned from this function. The returned
  * pointer should be freed with camel_name_value_array_free() when no longer needed.
@@ -103,7 +103,7 @@ camel_name_value_array_new_sized (guint reserve_size)
  * camel_name_value_array_copy:
  * @array: (nullable): a #CamelNameValueArray
  *
- * Created a new copy of the @array. The returned pointer should be freed
+ * Creates a new copy of the @array. The returned pointer should be freed
  * with camel_name_value_array_free() when no longer needed.
  *
  * Returns: (transfer full): A new copy of the @array.

@@ -515,7 +515,7 @@ mime_part_get_header (CamelMedium *medium,
 }
 
 static CamelNameValueArray *
-mime_part_get_headers (CamelMedium *medium)
+mime_part_dup_headers (CamelMedium *medium)
 {
 	CamelMimePart *part = (CamelMimePart *) medium;
 	CamelNameValueArray *headers;
@@ -1035,7 +1035,7 @@ camel_mime_part_class_init (CamelMimePartClass *class)
 	medium_class->set_header = mime_part_set_header;
 	medium_class->remove_header = mime_part_remove_header;
 	medium_class->get_header = mime_part_get_header;
-	medium_class->get_headers = mime_part_get_headers;
+	medium_class->dup_headers = mime_part_dup_headers;
 	medium_class->set_content = mime_part_set_content;
 
 	data_wrapper_class = CAMEL_DATA_WRAPPER_CLASS (class);
