@@ -2380,21 +2380,6 @@ camel_service_query_auth_types_finish (CamelService *service,
 }
 
 /**
- * camel_service_auth_type_free:
- * @service_auth_type: an #CamelServiceAuthType
- *
- * Frees the @service_auth_type struct.
- * Does nothing in reality, needed for the introspection.
- **/
-void
-camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
-{
-	/* This is needed for the introspection.
-	 * In the reality, each CamelSasl subclass has a static reference of it.
-	 */
-}
-
-/**
  * camel_service_auth_type_copy:
  * @service_auth_type: an #CamelServiceAuthType
  *
@@ -2402,12 +2387,31 @@ camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
  * Does nothing and returns the given object in reality, needed for the introspection.
  *
  * Returns: (transfer full): the copy of @service_auth_type
+ *
+ * Since: 3.24
  **/
 CamelServiceAuthType *
-camel_service_auth_type_copy		(const CamelServiceAuthType* service_auth_type)
+camel_service_auth_type_copy (const CamelServiceAuthType *service_auth_type)
 {
 	/* This is needed for the introspection.
 	 * In the reality, each CamelSasl subclass has a static reference of it.
 	 */
-	return service_auth_type;
+	return (CamelServiceAuthType *) service_auth_type;
+}
+
+/**
+ * camel_service_auth_type_free:
+ * @service_auth_type: an #CamelServiceAuthType
+ *
+ * Frees the @service_auth_type struct.
+ * Does nothing in reality, needed for the introspection.
+ *
+ * Since: 3.24
+ **/
+void
+camel_service_auth_type_free (CamelServiceAuthType *service_auth_type)
+{
+	/* This is needed for the introspection.
+	 * In the reality, each CamelSasl subclass has a static reference of it.
+	 */
 }

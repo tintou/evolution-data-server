@@ -218,9 +218,11 @@ GList *		camel_service_query_auth_types_finish
 						 GAsyncResult *result,
 						 GError **error);
 
-GType					camel_service_auth_type_get_type	(void);
-CamelServiceAuthType*	camel_service_auth_type_copy		(const CamelServiceAuthType* service_auth_type);
-void					camel_service_auth_type_free		(CamelServiceAuthType* service_auth_type);
+GType		camel_service_auth_type_get_type(void);
+CamelServiceAuthType *
+		camel_service_auth_type_copy	(const CamelServiceAuthType *service_auth_type);
+void		camel_service_auth_type_free	(CamelServiceAuthType *service_auth_type);
+
 G_END_DECLS
 
 #endif /* CAMEL_SERVICE_H */
