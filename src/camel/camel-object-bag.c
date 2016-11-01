@@ -530,7 +530,7 @@ camel_object_bag_rekey (CamelObjectBag *bag,
  *
  * <informalexample>
  *   <programlisting>
- *     g_ptr_array_foreach (array, g_object_unref, NULL);
+ *     g_ptr_array_foreach (array, (GFunc) g_object_unref, NULL);
  *     g_ptr_array_free (array, TRUE);
  *   </programlisting>
  * </informalexample>

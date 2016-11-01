@@ -164,7 +164,7 @@ camel_mbox_summary_new (CamelFolder *folder,
 		parent_store = camel_folder_get_parent_store (folder);
 
 		/* Set the functions for db sorting */
-		camel_db_set_collate (parent_store->cdb_r, "bdata", "mbox_frompos_sort", (CamelDBCollate) camel_local_frompos_sort);
+		camel_db_set_collate (camel_store_get_db (parent_store), "bdata", "mbox_frompos_sort", (CamelDBCollate) camel_local_frompos_sort);
 		summary->sort_by = "bdata";
 		summary->collate = "mbox_frompos_sort";
 
@@ -461,7 +461,7 @@ summary_update (CamelLocalSummary *cls,
 	/* Delete all in one transaction */
 	full_name = camel_folder_get_full_name (camel_folder_summary_get_folder (s));
 	parent_store = camel_folder_get_parent_store (camel_folder_summary_get_folder (s));
-	camel_db_delete_uids (parent_store->cdb_w, full_name, del, NULL);
+	camel_db_delete_uids (camel_store_get_db (parent_store), full_name, del, NULL);
 	g_list_foreach (del, (GFunc) camel_pstring_free, NULL);
 	g_list_free (del);
 
@@ -943,7 +943,7 @@ mbox_summary_sync (CamelLocalSummary *cls,
 	if (quick && expunge) {
 		guint32 dcount =0;
 
-		if (camel_db_count_deleted_message_info (parent_store->cdb_w, full_name, &dcount, error) == -1) {
+		if (camel_db_count_deleted_message_info (camel_store_get_db (parent_store), full_name, &dcount, error) == -1) {
 			camel_folder_summary_unlock (s);
 			return -1;
 		}
@@ -1187,7 +1187,7 @@ camel_mbox_summary_sync_mbox (CamelMboxSummary *cls,
 
 	full_name = camel_folder_get_full_name (camel_folder_summary_get_folder (s));
 	parent_store = camel_folder_get_parent_store (camel_folder_summary_get_folder (s));
-	camel_db_delete_uids (parent_store->cdb_w, full_name, del, NULL);
+	camel_db_delete_uids (camel_store_get_db (parent_store), full_name, del, NULL);
 	g_list_foreach (del, (GFunc) camel_pstring_free, NULL);
 	g_list_free (del);
 

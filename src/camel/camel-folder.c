@@ -2292,7 +2292,7 @@ camel_folder_delete (CamelFolder *folder)
 	/* Delete the references of the folder from the DB.*/
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
-	camel_db_delete_folder (parent_store->cdb_w, full_name, NULL);
+	camel_db_delete_folder (camel_store_get_db (parent_store), full_name, NULL);
 
 	service = CAMEL_SERVICE (parent_store);
 	session = camel_service_ref_session (service);
@@ -2347,7 +2347,7 @@ camel_folder_rename (CamelFolder *folder,
 	class->rename (folder, new_name);
 
 	parent_store = camel_folder_get_parent_store (folder);
-	camel_db_rename_folder (parent_store->cdb_w, old_name, new_name, NULL);
+	camel_db_rename_folder (camel_store_get_db (parent_store), old_name, new_name, NULL);
 
 	service = CAMEL_SERVICE (parent_store);
 	session = camel_service_ref_session (service);

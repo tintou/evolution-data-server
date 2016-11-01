@@ -106,46 +106,6 @@ subscribable_emit_folder_unsubscribed_cb (gpointer user_data)
 }
 
 static void
-subscribable_delete_cached_folder (CamelStore *store,
-                                   const gchar *folder_name)
-{
-	CamelFolder *folder;
-	CamelVeeFolder *vfolder;
-
-	/* XXX Copied from camel-store.c.  Should this be public? */
-
-	if (store->folders == NULL)
-		return;
-
-	folder = camel_object_bag_get (store->folders, folder_name);
-	if (folder == NULL)
-		return;
-
-	if (store->flags & CAMEL_STORE_VTRASH) {
-		folder_name = CAMEL_VTRASH_NAME;
-		vfolder = camel_object_bag_get (store->folders, folder_name);
-		if (vfolder != NULL) {
-			camel_vee_folder_remove_folder (vfolder, folder, NULL);
-			g_object_unref (vfolder);
-		}
-	}
-
-	if (store->flags & CAMEL_STORE_VJUNK) {
-		folder_name = CAMEL_VJUNK_NAME;
-		vfolder = camel_object_bag_get (store->folders, folder_name);
-		if (vfolder != NULL) {
-			camel_vee_folder_remove_folder (vfolder, folder, NULL);
-			g_object_unref (vfolder);
-		}
-	}
-
-	camel_folder_delete (folder);
-
-	camel_object_bag_remove (store->folders, folder);
-	g_object_unref (folder);
-}
-
-static void
 camel_subscribable_default_init (CamelSubscribableInterface *iface)
 {
 	signals[FOLDER_SUBSCRIBED] = g_signal_new (
@@ -449,8 +409,7 @@ subscribable_unsubscribe_folder_thread (GTask *task,
 		subscribable, unsubscribe_folder_sync, success, local_error);
 
 	if (success)
-		subscribable_delete_cached_folder (
-			CAMEL_STORE (subscribable), folder_name);
+		camel_store_delete_cached_folder (CAMEL_STORE (subscribable), folder_name);
 
 	camel_operation_pop_message (cancellable);
 

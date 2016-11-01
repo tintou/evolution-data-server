@@ -153,23 +153,27 @@ imapx_store_update_store_flags (CamelStore *store)
 	CamelService *service;
 	CamelSettings *settings;
 	CamelIMAPXSettings *imapx_settings;
+	guint32 store_flags;
 
 	service = CAMEL_SERVICE (store);
 	settings = camel_service_ref_settings (service);
 	imapx_settings = CAMEL_IMAPX_SETTINGS (settings);
+	store_flags = camel_store_get_flags (store);
 
 	if (camel_imapx_settings_get_use_real_junk_path (imapx_settings)) {
-		store->flags &= ~CAMEL_STORE_VJUNK;
-		store->flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
+		store_flags &= ~CAMEL_STORE_VJUNK;
+		store_flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
 	} else {
-		store->flags |= CAMEL_STORE_VJUNK;
-		store->flags &= ~CAMEL_STORE_REAL_JUNK_FOLDER;
+		store_flags |= CAMEL_STORE_VJUNK;
+		store_flags &= ~CAMEL_STORE_REAL_JUNK_FOLDER;
 	}
 
 	if (camel_imapx_settings_get_use_real_trash_path (imapx_settings))
-		store->flags &= ~CAMEL_STORE_VTRASH;
+		store_flags &= ~CAMEL_STORE_VTRASH;
 	else
-		store->flags |= CAMEL_STORE_VTRASH;
+		store_flags |= CAMEL_STORE_VTRASH;
+
+	camel_store_set_flags (store, store_flags);
 
 	g_object_unref (settings);
 }
@@ -226,7 +230,7 @@ imapx_store_build_folder_info (CamelIMAPXStore *imapx_store,
 		fi->display_name = g_strdup (name);
 	}
 
-	if ((store->flags & CAMEL_STORE_VTRASH) == 0) {
+	if ((camel_store_get_flags (store) & CAMEL_STORE_VTRASH) == 0) {
 		const gchar *trash_path;
 
 		trash_path = camel_imapx_settings_get_real_trash_path (
@@ -235,7 +239,7 @@ imapx_store_build_folder_info (CamelIMAPXStore *imapx_store,
 			fi->flags |= CAMEL_FOLDER_TYPE_TRASH;
 	}
 
-	if ((store->flags & CAMEL_STORE_REAL_JUNK_FOLDER) != 0) {
+	if ((camel_store_get_flags (store) & CAMEL_STORE_REAL_JUNK_FOLDER) != 0) {
 		const gchar *junk_path;
 
 		junk_path = camel_imapx_settings_get_real_junk_path (
@@ -351,8 +355,7 @@ imapx_store_add_mailbox_to_folder (CamelIMAPXStore *store,
 
 	folder_path = camel_imapx_mailbox_dup_folder_path (mailbox);
 
-	folder = camel_object_bag_get (
-		CAMEL_STORE (store)->folders, folder_path);
+	folder = camel_object_bag_get (camel_store_get_folders_bag (CAMEL_STORE (store)), folder_path);
 
 	if (folder != NULL) {
 		camel_imapx_folder_set_mailbox (folder, mailbox);
@@ -557,7 +560,7 @@ imapx_store_process_mailbox_status (CamelIMAPXStore *imapx_store,
 	store = CAMEL_STORE (imapx_store);
 
 	/* Update only already opened folders */
-	folder = camel_object_bag_reserve (store->folders, folder_path);
+	folder = camel_object_bag_reserve (camel_store_get_folders_bag (store), folder_path);
 	if (folder != NULL) {
 		CamelIMAPXFolder *imapx_folder;
 		CamelIMAPXSummary *imapx_summary;
@@ -574,7 +577,7 @@ imapx_store_process_mailbox_status (CamelIMAPXStore *imapx_store,
 
 		g_object_unref (folder);
 	} else {
-		camel_object_bag_abort (store->folders, folder_path);
+		camel_object_bag_abort (camel_store_get_folders_bag (store), folder_path);
 	}
 
 	g_free (folder_path);
@@ -945,7 +948,7 @@ fill_fi (CamelStore *store,
 {
 	CamelFolder *folder;
 
-	folder = camel_object_bag_peek (store->folders, fi->full_name);
+	folder = camel_object_bag_peek (camel_store_get_folders_bag (store), fi->full_name);
 	if (folder) {
 		CamelIMAPXFolder *imapx_folder;
 		CamelIMAPXSummary *ims;
@@ -997,8 +1000,7 @@ imapx_delete_folder_from_cache (CamelIMAPXStore *imapx_store,
 	g_unlink (state_file);
 	g_free (state_file);
 
-	camel_db_delete_folder (
-		CAMEL_STORE (imapx_store)->cdb_w, folder_path, NULL);
+	camel_db_delete_folder (camel_store_get_db (CAMEL_STORE (imapx_store)), folder_path, NULL);
 	g_rmdir (folder_dir);
 
 	state_file = g_build_filename (folder_dir, "subfolders", NULL);
@@ -2603,7 +2605,7 @@ imapx_store_initable_init (GInitable *initable,
 	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
 
-	store->flags |= CAMEL_STORE_USE_CACHE_DIR | CAMEL_STORE_SUPPORTS_INITIAL_SETUP;
+	camel_store_set_flags (store, camel_store_get_flags (store) | CAMEL_STORE_USE_CACHE_DIR | CAMEL_STORE_SUPPORTS_INITIAL_SETUP);
 	imapx_migrate_to_user_cache_dir (service);
 
 	/* Chain up to parent interface's init() method. */

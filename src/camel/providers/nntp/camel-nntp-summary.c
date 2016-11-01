@@ -514,7 +514,7 @@ camel_nntp_summary_check (CamelNNTPSummary *cns,
 		g_clear_object (&nntp_cache);
 	}
 
-	camel_db_delete_uids (parent_store->cdb_w, full_name, del, NULL);
+	camel_db_delete_uids (camel_store_get_db (parent_store), full_name, del, NULL);
 	g_list_foreach (del, (GFunc) camel_pstring_free, NULL);
 	g_list_free (del);
 
@@ -551,8 +551,7 @@ update:
 		guint32 unread = 0;
 
 		count = camel_folder_summary_count (s);
-		camel_db_count_unread_message_info (
-			parent_store->cdb_r, full_name, &unread, NULL);
+		camel_db_count_unread_message_info (camel_store_get_db (parent_store), full_name, &unread, NULL);
 
 		if (si->info.unread != unread
 		    || si->info.total != count

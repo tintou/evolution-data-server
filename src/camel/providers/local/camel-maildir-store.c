@@ -441,7 +441,7 @@ fill_fi (CamelStore *store,
 {
 	CamelFolder *folder;
 
-	folder = camel_object_bag_peek (store->folders, fi->full_name);
+	folder = camel_object_bag_peek (camel_store_get_folders_bag (store), fi->full_name);
 	if (folder) {
 		if ((flags & CAMEL_STORE_FOLDER_INFO_FAST) == 0)
 			camel_folder_refresh_info_sync (folder, cancellable, NULL);

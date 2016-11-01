@@ -169,7 +169,7 @@ camel_imapx_summary_new (CamelFolder *folder)
 
 	/* Don't do DB sort. Its pretty slow to load */
 	if (folder && 0) {
-		camel_db_set_collate (parent_store->cdb_r, "uid", "imapx_uid_sort", (CamelDBCollate) sort_uid_cmp);
+		camel_db_set_collate (camel_store_get_db (parent_store), "uid", "imapx_uid_sort", (CamelDBCollate) sort_uid_cmp);
 		summary->sort_by = "uid";
 		summary->collate = "imapx_uid_sort";
 	}

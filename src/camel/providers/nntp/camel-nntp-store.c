@@ -1471,7 +1471,7 @@ nntp_store_initable_init (GInitable *initable,
 	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
 
-	store->flags |= CAMEL_STORE_USE_CACHE_DIR;
+	camel_store_set_flags (store, camel_store_get_flags (store) | CAMEL_STORE_USE_CACHE_DIR);
 	nntp_migrate_to_user_cache_dir (service);
 
 	/* Chain up to parent interface's init() method. */
@@ -1783,7 +1783,7 @@ camel_nntp_store_init (CamelNNTPStore *nntp_store)
 
 	/* Clear the default flags.  We don't want a virtual Junk or Trash
 	 * folder and the user can't create/delete/rename newsgroup folders. */
-	CAMEL_STORE (nntp_store)->flags = 0;
+	camel_store_set_flags (CAMEL_STORE (nntp_store), 0);
 }
 
 /**

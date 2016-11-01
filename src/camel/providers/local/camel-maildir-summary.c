@@ -178,7 +178,7 @@ CamelMaildirSummary
 		CamelStore *parent_store;
 
 		parent_store = camel_folder_get_parent_store (folder);
-		camel_db_set_collate (parent_store->cdb_r, "dreceived", NULL, NULL);
+		camel_db_set_collate (camel_store_get_db (parent_store), "dreceived", NULL, NULL);
 		((CamelFolderSummary *) o)->sort_by = "dreceived";
 		((CamelFolderSummary *) o)->collate = NULL;
 	}

@@ -189,7 +189,7 @@ fill_fi (CamelStore *store,
 	CamelFolder *folder;
 
 	local_store = CAMEL_LOCAL_STORE (store);
-	folder = camel_object_bag_peek (store->folders, fi->full_name);
+	folder = camel_object_bag_peek (camel_store_get_folders_bag (store), fi->full_name);
 
 	if (folder != NULL) {
 		fi->unread = camel_folder_get_unread_message_count (folder);

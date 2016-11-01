@@ -1968,7 +1968,7 @@ camel_folder_search_count (CamelFolderSearch *search,
 		g_free (sql_query);
 		dd (printf ("Equivalent sql %s\n", tmp));
 
-		cdb = (CamelDB *) (parent_store->cdb_r);
+		cdb = camel_store_get_db (parent_store);
 		camel_db_count_message_info  (cdb, tmp, &count, &local_error);
 		if (local_error != NULL) {
 			const gchar *message = local_error->message;
@@ -2143,7 +2143,7 @@ camel_folder_search_search (CamelFolderSearch *search,
 		dd (printf ("Equivalent sql %s\n", tmp));
 
 		matches = g_ptr_array_new ();
-		cdb = (CamelDB *) (parent_store->cdb_r);
+		cdb = camel_store_get_db (parent_store);
 		camel_db_select (
 			cdb, tmp, (CamelDBSelectCB)
 			read_uid_callback, matches, &local_error);

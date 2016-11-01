@@ -475,7 +475,7 @@ imapx_expunge_sync (CamelFolder *folder,
 	if (mailbox == NULL)
 		goto exit;
 
-	if ((store->flags & CAMEL_STORE_VTRASH) == 0) {
+	if ((camel_store_get_flags (store) & CAMEL_STORE_VTRASH) == 0) {
 		CamelFolder *trash;
 		const gchar *full_name;
 

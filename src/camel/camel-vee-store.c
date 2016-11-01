@@ -233,11 +233,11 @@ vee_store_get_folder_sync (CamelStore *store,
 		while ( (p = strchr (p, '/'))) {
 			*p = 0;
 
-			folder = camel_object_bag_reserve (store->folders, name);
+			folder = camel_object_bag_reserve (camel_store_get_folders_bag (store), name);
 			if (folder == NULL) {
 				/* create a dummy vFolder for this, makes get_folder_info simpler */
 				folder = camel_vee_folder_new (store, name, flags);
-				camel_object_bag_add (store->folders, name, folder);
+				camel_object_bag_add (camel_store_get_folders_bag (store), name, folder);
 				change_folder (store, name, CHANGE_ADD | CHANGE_NOSELECT, 0);
 				/* FIXME: this sort of leaks folder, nobody owns a ref to it but us */
 			} else {
@@ -285,7 +285,7 @@ vee_store_get_folder_info_sync (CamelStore *store,
 	d (printf ("Get folder info '%s'\n", top ? top:"<null>"));
 
 	infos_hash = g_hash_table_new (g_str_hash, g_str_equal);
-	folders = camel_object_bag_list (store->folders);
+	folders = camel_store_dup_opened_folders (store);
 	qsort (folders->pdata, folders->len, sizeof (folders->pdata[0]), vee_folder_cmp);
 	for (i = 0; i < folders->len; i++) {
 		CamelVeeFolder *folder = folders->pdata[i];
@@ -366,8 +366,8 @@ vee_store_get_folder_info_sync (CamelStore *store,
 		}
 
 		g_free (pname);
-		g_object_unref (folder);
 	}
+	g_ptr_array_foreach (folders, (GFunc) g_object_unref, NULL);
 	g_ptr_array_free (folders, TRUE);
 	g_hash_table_destroy (infos_hash);
 
@@ -422,7 +422,7 @@ vee_store_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	folder = camel_object_bag_get (store->folders, folder_name);
+	folder = camel_object_bag_get (camel_store_get_folders_bag (store), folder_name);
 	if (folder) {
 		CamelObject *object = CAMEL_OBJECT (folder);
 		const gchar *state_filename;
@@ -473,7 +473,7 @@ vee_store_rename_folder_sync (CamelStore *store,
 	}
 
 	/* See if it exists, for vfolders, all folders are in the folders hash */
-	oldfolder = camel_object_bag_get (store->folders, old);
+	oldfolder = camel_object_bag_get (camel_store_get_folders_bag (store), old);
 	if (oldfolder == NULL) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
@@ -490,11 +490,11 @@ vee_store_rename_folder_sync (CamelStore *store,
 	while ( (p = strchr (p, '/'))) {
 		*p = 0;
 
-		folder = camel_object_bag_reserve (store->folders, name);
+		folder = camel_object_bag_reserve (camel_store_get_folders_bag (store), name);
 		if (folder == NULL) {
 			/* create a dummy vFolder for this, makes get_folder_info simpler */
 			folder = camel_vee_folder_new (store, name, ((CamelVeeFolder *) oldfolder)->flags);
-			camel_object_bag_add (store->folders, name, folder);
+			camel_object_bag_add (camel_store_get_folders_bag (store), name, folder);
 			change_folder (store, name, CHANGE_ADD | CHANGE_NOSELECT, 0);
 			/* FIXME: this sort of leaks folder, nobody owns a ref to it but us */
 		} else {
@@ -556,7 +556,7 @@ camel_vee_store_init (CamelVeeStore *vee_store)
 	vee_store->priv->unmatched_enabled = TRUE;
 
 	/* we dont want a vtrash/vjunk on this one */
-	store->flags &= ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK);
+	camel_store_set_flags (store, camel_store_get_flags (store) & ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK));
 }
 
 /**

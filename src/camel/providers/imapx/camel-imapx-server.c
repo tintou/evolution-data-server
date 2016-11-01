@@ -5688,7 +5688,7 @@ camel_imapx_server_expunge_sync (CamelIMAPXServer *is,
 			camel_folder_summary_lock (folder->summary);
 
 			camel_folder_summary_save_to_db (folder->summary, NULL);
-			uids = camel_db_get_folder_deleted_uids (parent_store->cdb_r, full_name, NULL);
+			uids = camel_db_get_folder_deleted_uids (camel_store_get_db (parent_store), full_name, NULL);
 
 			if (uids && uids->len) {
 				CamelFolderChangeInfo *changes;

@@ -103,7 +103,7 @@ camel_mh_summary_new (CamelFolder *folder,
 		CamelStore *parent_store;
 
 		parent_store = camel_folder_get_parent_store (folder);
-		camel_db_set_collate (parent_store->cdb_r, "uid", "mh_uid_sort", (CamelDBCollate) camel_local_frompos_sort);
+		camel_db_set_collate (camel_store_get_db (parent_store), "uid", "mh_uid_sort", (CamelDBCollate) camel_local_frompos_sort);
 		((CamelFolderSummary *) o)->sort_by = "uid";
 		((CamelFolderSummary *) o)->collate = "mh_uid_sort";
 	}
