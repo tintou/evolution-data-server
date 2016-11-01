@@ -1403,7 +1403,7 @@ remove_cache (CamelSession *session,
 {
 	GSList *to_remove_infos = NULL;
 
-	CAMEL_DB_RELEASE_SQLITE_MEMORY;
+	camel_db_release_cache_memory ();
 
 	if (time (NULL) - summary->priv->cache_load_time < SUMMARY_CACHE_DROP)
 		return;

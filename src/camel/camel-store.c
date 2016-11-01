@@ -349,8 +349,7 @@ store_finalize (GObject *object)
 		camel_object_bag_destroy (store->folders);
 
 	if (store->cdb_r != NULL) {
-		camel_db_close (store->cdb_r);
-		store->cdb_r = NULL;
+		g_clear_object (&store->cdb_r);
 		store->cdb_w = NULL;
 	}
 
@@ -559,7 +558,7 @@ store_initable_init (GInitable *initable,
 
 	/* This is for reading from the store */
 	filename = g_build_filename (user_dir, CAMEL_DB_FILE, NULL);
-	store->cdb_r = camel_db_open (filename, error);
+	store->cdb_r = camel_db_new (filename, error);
 	g_free (filename);
 
 	if (store->cdb_r == NULL)
