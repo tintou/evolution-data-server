@@ -49,7 +49,7 @@
 
 static CamelMessageInfo *
 		message_info_new_from_header	(CamelFolderSummary *,
-						 CamelHeaderRaw *);
+						 CamelNameValueArray *);
 static gint	maildir_summary_load		(CamelLocalSummary *cls,
 						 gint forceindex,
 						 GError **error);
@@ -307,7 +307,7 @@ maildir_summary_add (CamelLocalSummary *cls,
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              CamelHeaderRaw *h)
+                              CamelNameValueArray *h)
 {
 	CamelMessageInfo *mi, *info;
 	CamelMaildirSummary *mds = (CamelMaildirSummary *) s;

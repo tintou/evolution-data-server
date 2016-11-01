@@ -29,6 +29,7 @@
 #include <camel/camel-medium.h>
 #include <camel/camel-mime-utils.h>
 #include <camel/camel-mime-parser.h>
+#include <camel/camel-name-value-array.h>
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_MIME_PART \
@@ -58,8 +59,6 @@ typedef struct _CamelMimePartPrivate CamelMimePartPrivate;
 struct _CamelMimePart {
 	CamelMedium parent;
 	CamelMimePartPrivate *priv;
-
-	CamelHeaderRaw *headers; /* mime headers */
 };
 
 struct _CamelMimePartClass {

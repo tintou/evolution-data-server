@@ -100,7 +100,7 @@ gchar *camel_local_summary_encode_x_evolution (CamelLocalSummary *cls, const Cam
 gint camel_local_summary_decode_x_evolution (CamelLocalSummary *cls, const gchar *xev, CamelMessageInfo *info);
 
 /* utility functions - write headers to a file with optional X-Evolution header and/or status header */
-gint camel_local_summary_write_headers (gint fd, CamelHeaderRaw *header, const gchar *xevline, const gchar *status, const gchar *xstatus);
+gint camel_local_summary_write_headers (gint fd, CamelNameValueArray *header, const gchar *xevline, const gchar *status, const gchar *xstatus);
 
 G_END_DECLS
 

@@ -30,6 +30,7 @@
 #include <glib-object.h>
 #include <camel/camel-enums.h>
 #include <camel/camel-utils.h>
+#include <camel/camel-name-value-array.h>
 
 G_BEGIN_DECLS
 
@@ -60,15 +61,6 @@ typedef struct {
 	guint refcount;
 } CamelContentType;
 
-/* a raw rfc822 header */
-/* the value MUST be US-ASCII */
-typedef struct _camel_header_raw {
-	struct _camel_header_raw *next;
-	gchar *name;
-	gchar *value;
-	gint offset;		/* in file, if known */
-} CamelHeaderRaw;
-
 typedef struct _CamelContentDisposition {
 	gchar *disposition;
 	struct _camel_header_param *params;
@@ -82,6 +74,7 @@ typedef enum _camel_header_address_t {
 } CamelHeaderAddressType;
 
 typedef struct _camel_header_address {
+	/* < private > */
 	struct _camel_header_address *next;
 	CamelHeaderAddressType type;
 	gchar *name;
@@ -103,22 +96,22 @@ GType camel_header_address_get_type (void) G_GNUC_CONST;
 CamelHeaderAddress *camel_header_address_new (void);
 CamelHeaderAddress *camel_header_address_new_name (const gchar *name, const gchar *addr);
 CamelHeaderAddress *camel_header_address_new_group (const gchar *name);
-CamelHeaderAddress *camel_header_address_ref (CamelHeaderAddress *addrlist);
-void camel_header_address_unref (CamelHeaderAddress *addrlist);
-void camel_header_address_set_name (CamelHeaderAddress *addrlist, const gchar *name);
-void camel_header_address_set_addr (CamelHeaderAddress *addrlist, const gchar *addr);
-void camel_header_address_set_members (CamelHeaderAddress *addrlist, CamelHeaderAddress *group);
-void camel_header_address_add_member (CamelHeaderAddress *addrlist, CamelHeaderAddress *member);
-void camel_header_address_list_append_list (CamelHeaderAddress **addrlistp, CamelHeaderAddress **addrs);
-void camel_header_address_list_append (CamelHeaderAddress **addrlistp, CamelHeaderAddress *addr);
-void camel_header_address_list_clear (CamelHeaderAddress **addrlistp);
+CamelHeaderAddress *camel_header_address_ref (CamelHeaderAddress *h);
+void camel_header_address_unref (CamelHeaderAddress *h);
+void camel_header_address_set_name (CamelHeaderAddress *h, const gchar *name);
+void camel_header_address_set_addr (CamelHeaderAddress *h, const gchar *addr);
+void camel_header_address_set_members (CamelHeaderAddress *h, CamelHeaderAddress *group);
+void camel_header_address_add_member (CamelHeaderAddress *h, CamelHeaderAddress *member);
+void camel_header_address_list_append_list (CamelHeaderAddress **l, CamelHeaderAddress **h);
+void camel_header_address_list_append (CamelHeaderAddress **l, CamelHeaderAddress *h);
+void camel_header_address_list_clear (CamelHeaderAddress **l);
 
 CamelHeaderAddress *camel_header_address_decode (const gchar *in, const gchar *charset);
 CamelHeaderAddress *camel_header_mailbox_decode (const gchar *in, const gchar *charset);
 /* for mailing */
-gchar *camel_header_address_list_encode (CamelHeaderAddress *addrlist);
+gchar *camel_header_address_list_encode (CamelHeaderAddress *a);
 /* for display */
-gchar *camel_header_address_list_format (CamelHeaderAddress *addrlist);
+gchar *camel_header_address_list_format (CamelHeaderAddress *a);
 
 /* structured header prameters */
 struct _camel_header_param *camel_header_param_list_decode (const gchar *in);
@@ -153,21 +146,12 @@ gchar *camel_content_disposition_format (CamelContentDisposition *disposition);
 /* decode the contents of a content-encoding header */
 gchar *camel_content_transfer_encoding_decode (const gchar *in);
 
-/* raw headers */
-void camel_header_raw_append (CamelHeaderRaw **list, const gchar *name, const gchar *value, gint offset);
-void camel_header_raw_append_parse (CamelHeaderRaw **list, const gchar *header, gint offset);
-const gchar *camel_header_raw_find (CamelHeaderRaw **list, const gchar *name, gint *offset);
-const gchar *camel_header_raw_find_next (CamelHeaderRaw **list, const gchar *name, gint *offset, const gchar *last);
-void camel_header_raw_replace (CamelHeaderRaw **list, const gchar *name, const gchar *value, gint offset);
-void camel_header_raw_remove (CamelHeaderRaw **list, const gchar *name);
-void camel_header_raw_clear (CamelHeaderRaw **list);
-
-gchar *camel_header_raw_check_mailing_list (CamelHeaderRaw **list);
-
 /* fold a header */
 gchar *camel_header_address_fold (const gchar *in, gsize headerlen);
 gchar *camel_header_fold (const gchar *in, gsize headerlen);
 gchar *camel_header_unfold (const gchar *in);
+
+gchar *camel_header_get_mailing_list (CamelNameValueArray *header);
 
 /* decode a header which is a simple token */
 gchar *camel_header_token_decode (const gchar *in);

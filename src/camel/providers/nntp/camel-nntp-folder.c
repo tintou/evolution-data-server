@@ -404,8 +404,9 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 	CamelStream *filtered_stream;
 	CamelMimeFilter *crlffilter;
 	gint ret;
-	guint u;
-	CamelHeaderRaw *header, *savedhdrs, *n, *tail;
+	guint u, ii;
+	CamelNameValueArray *previous_header = NULL;
+	const gchar *header_name = NULL, *header_value = NULL;
 	const gchar *full_name;
 	gchar *group, *line;
 	gboolean success = TRUE;
@@ -439,24 +440,11 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 	/* the 'Newsgroups: ' header */
 	group = g_strdup_printf ("Newsgroups: %s\r\n", full_name);
 
-	/* remove mail 'To', 'CC', and 'BCC' headers */
-	savedhdrs = NULL;
-	tail = (CamelHeaderRaw *) &savedhdrs;
-
-	header = (CamelHeaderRaw *) &CAMEL_MIME_PART (message)->headers;
-	n = header->next;
-	while (n != NULL) {
-		if (!g_ascii_strcasecmp (n->name, "To") || !g_ascii_strcasecmp (n->name, "Cc") || !g_ascii_strcasecmp (n->name, "Bcc")) {
-			header->next = n->next;
-			tail->next = n;
-			n->next = NULL;
-			tail = n;
-		} else {
-			header = n;
-		}
-
-		n = header->next;
-	}
+	/* remove mail 'To', 'Cc', and 'Bcc' headers */
+	previous_header = camel_medium_dup_headers (CAMEL_MEDIUM (message));
+	camel_medium_remove_header (CAMEL_MEDIUM (message), "To");
+	camel_medium_remove_header (CAMEL_MEDIUM (message), "Cc");
+	camel_medium_remove_header (CAMEL_MEDIUM (message), "Bcc");
 
 	nntp_stream = camel_nntp_store_ref_stream (nntp_store);
 
@@ -503,7 +491,16 @@ nntp_folder_append_message_sync (CamelFolder *folder,
 
 	g_object_unref (filtered_stream);
 	g_free (group);
-	header->next = savedhdrs;
+	/* restore the bcc headers */
+	for (ii = 0; camel_name_value_array_get (previous_header, ii, &header_name, &header_value); ii++) {
+		if (!g_ascii_strcasecmp (header_name, "To") ||
+		    !g_ascii_strcasecmp (header_name, "Cc") ||
+		    !g_ascii_strcasecmp (header_name, "Bcc")) {
+			camel_medium_add_header (CAMEL_MEDIUM (message), header_name, header_value);
+		}
+	}
+
+	camel_name_value_array_free (previous_header);
 
 exit:
 	g_clear_object (&nntp_stream);

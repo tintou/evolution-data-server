@@ -4465,261 +4465,6 @@ camel_header_location_decode (const gchar *in)
 	return res;
 }
 
-/* extra rfc checks */
-#define CHECKS
-
-#ifdef CHECKS
-static void
-check_header (CamelHeaderRaw *header)
-{
-	guchar *cp;
-
-	cp = (guchar *) header->value;
-	while (cp && *cp) {
-		if (!isascii (*cp)) {
-			w (g_warning ("Appending header violates rfc: %s: %s", header->name, header->value));
-			return;
-		}
-		cp++;
-	}
-}
-#endif
-
-/**
- * camel_header_raw_append_parse:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @header: an unparsed header
- * @offset: the given offset
- *
- * Appends the parsed header to the list with the given offset.
- **/
-void
-camel_header_raw_append_parse (CamelHeaderRaw **list,
-                               const gchar *header,
-                               gint offset)
-{
-	register const gchar *in;
-	gsize fieldlen;
-	gchar *name;
-
-	in = header;
-	while (camel_mime_is_fieldname (*in) || *in == ':')
-		in++;
-	fieldlen = in - header - 1;
-	while (camel_mime_is_lwsp (*in))
-		in++;
-	if (fieldlen == 0 || header[fieldlen] != ':') {
-		printf ("Invalid header line: '%s'\n", header);
-		return;
-	}
-	name = g_alloca (fieldlen + 1);
-	memcpy (name, header, fieldlen);
-	name[fieldlen] = 0;
-
-	camel_header_raw_append (list, name, in, offset);
-}
-
-/**
- * camel_header_raw_append:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the given name
- * @value: the given value
- * @offset: the given offset
- *
- * Appends a value with the given name and the given value to the list.
- **/
-void
-camel_header_raw_append (CamelHeaderRaw **list,
-                         const gchar *name,
-                         const gchar *value,
-                         gint offset)
-{
-	CamelHeaderRaw *l, *n;
-
-	d (printf ("Header: %s: %s\n", name, value));
-
-	n = g_malloc (sizeof (*n));
-	n->next = NULL;
-	n->name = g_strdup (name);
-	n->value = g_strdup (value);
-	n->offset = offset;
-#ifdef CHECKS
-	check_header (n);
-#endif
-	l = (CamelHeaderRaw *) list;
-	while (l->next) {
-		l = l->next;
-	}
-	l->next = n;
-
-	/* debug */
-#if 0
-	if (!g_ascii_strcasecmp (name, "To")) {
-		printf ("- Decoding To\n");
-		camel_header_to_decode (value);
-	} else if (!g_ascii_strcasecmp (name, "Content-type")) {
-		printf ("- Decoding content-type\n");
-		camel_content_type_dump (camel_content_type_decode (value));
-	} else if (!g_ascii_strcasecmp (name, "MIME-Version")) {
-		printf ("- Decoding mime version\n");
-		camel_header_mime_decode (value);
-	}
-#endif
-}
-
-/**
- * header_raw_find_node:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the name to find
- *
- * Searches for the node with a given name.
- *
- * Returns: (transfer none) (nullable): the found #CamelHeaderRaw or NULL.
- **/
-static CamelHeaderRaw *
-header_raw_find_node (CamelHeaderRaw **list,
-                      const gchar *name)
-{
-	CamelHeaderRaw *l;
-
-	l = *list;
-	while (l) {
-		if (!g_ascii_strcasecmp (l->name, name))
-			break;
-		l = l->next;
-	}
-	return l;
-}
-
-/**
- * camel_header_raw_find:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the name to find
- * @offset: (out) (nullable): the offset corresponding to the name
- *
- * Searches for the first node with a given name and returns its value.
- *
- * Returns: (transfer none) (nullable): the value associated with the name
- **/
-const gchar *
-camel_header_raw_find (CamelHeaderRaw **list,
-                       const gchar *name,
-                       gint *offset)
-{
-	CamelHeaderRaw *l;
-
-	l = header_raw_find_node (list, name);
-	if (l) {
-		if (offset)
-			*offset = l->offset;
-		return l->value;
-	} else
-		return NULL;
-}
-
-/**
- * camel_header_raw_find_next:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the name to find
- * @offset: (out) (nullable): the offset corresponding to the name
- * @last: the last found value
- *
- * Searches for the next node with a given name and returns its value.
- *
- * Returns: (transfer none) (nullable): the value associated with the name
- **/
-const gchar *
-camel_header_raw_find_next (CamelHeaderRaw **list,
-                            const gchar *name,
-                            gint *offset,
-                            const gchar *last)
-{
-	CamelHeaderRaw *l;
-
-	if (last == NULL || name == NULL)
-		return NULL;
-
-	l = *list;
-	while (l && l->value != last)
-		l = l->next;
-	return camel_header_raw_find (&l, name, offset);
-}
-
-static void
-header_raw_free (CamelHeaderRaw *l)
-{
-	g_free (l->name);
-	g_free (l->value);
-	g_free (l);
-}
-
-/**
- * camel_header_raw_remove:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the name to remove
- *
- * Remove all values associated with the given name
- **/
-void
-camel_header_raw_remove (CamelHeaderRaw **list,
-                         const gchar *name)
-{
-	CamelHeaderRaw *l, *p;
-
-	/* the next pointer is at the head of the structure, so this is safe */
-	p = (CamelHeaderRaw *) list;
-	l = *list;
-	while (l) {
-		if (!g_ascii_strcasecmp (l->name, name)) {
-			p->next = l->next;
-			header_raw_free (l);
-			l = p->next;
-		} else {
-			p = l;
-			l = l->next;
-		}
-	}
-}
-
-/**
- * camel_header_raw_replace:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- * @name: the name to remove
- * @value: the new value
- * @offset: the new offset
- *
- * Replace the row associated with the given name by another value and offset.
- **/
-void
-camel_header_raw_replace (CamelHeaderRaw **list,
-                          const gchar *name,
-                          const gchar *value,
-                          gint offset)
-{
-	camel_header_raw_remove (list, name);
-	camel_header_raw_append (list, name, value, offset);
-}
-
-
-/**
- * camel_header_raw_clear:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
- *
- * Removes all the raws of the list.
- **/
-void
-camel_header_raw_clear (CamelHeaderRaw **list)
-{
-	CamelHeaderRaw *l, *n;
-	l = *list;
-	while (l) {
-		n = l->next;
-		header_raw_free (l);
-		l = n;
-	}
-	*list = NULL;
-}
-
 /**
  * camel_header_msgid_generate:
  * @domain: domain to use (like "example.com") for the ID suffix; can be NULL
@@ -4847,15 +4592,15 @@ mailing_list_init (gpointer param)
 }
 
 /**
- * camel_header_raw_check_mailing_list:
- * @list: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderRaw
+ * camel_header_get_mailing_list:
+ * @header: a #CamelNameValueArray object containing the header information
  *
  * TODO: Document me.
  *
- * Returns: (transfer full) (nullable):
+ * Returns: (nullable): The mailing list header of %NULL if none are found
  **/
 gchar *
-camel_header_raw_check_mailing_list (CamelHeaderRaw **list)
+camel_header_get_mailing_list (CamelNameValueArray *header)
 {
 	static GOnce once = G_ONCE_INIT;
 	const gchar *v;
@@ -4865,7 +4610,7 @@ camel_header_raw_check_mailing_list (CamelHeaderRaw **list)
 	g_once (&once, mailing_list_init, NULL);
 
 	for (i = 0; i < G_N_ELEMENTS (mail_list_magic); i++) {
-		v = camel_header_raw_find (list, mail_list_magic[i].name, NULL);
+		v = camel_name_value_array_get_named (header, TRUE, mail_list_magic[i].name);
 		for (j = 0; j < 3; j++) {
 			match[j].rm_so = -1;
 			match[j].rm_eo = -1;
@@ -4981,6 +4726,14 @@ camel_header_address_set_addr (CamelHeaderAddress *h,
 	}
 }
 
+/**
+ * camel_header_address_set_members:
+ * @h: a #CamelHeaderAddress object
+ * @group: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress
+ *
+ * TODO: Document me.
+ *
+ **/
 void
 camel_header_address_set_members (CamelHeaderAddress *h,
                                   CamelHeaderAddress *group)
@@ -5011,6 +4764,14 @@ camel_header_address_add_member (CamelHeaderAddress *h,
 	}
 }
 
+/**
+ * camel_header_address_list_append_list:
+ * @l: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress objects
+ * @h: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress to add
+ *
+ * TODO: Document me.
+ *
+ **/
 void
 camel_header_address_list_append_list (CamelHeaderAddress **l,
                                        CamelHeaderAddress **h)
@@ -5024,6 +4785,14 @@ camel_header_address_list_append_list (CamelHeaderAddress **l,
 	}
 }
 
+/**
+ * camel_header_address_list_append:
+ * @l: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress objects
+ * @h: the #CamelHeaderAddress to add
+ *
+ * TODO: Document me.
+ *
+ **/
 void
 camel_header_address_list_append (CamelHeaderAddress **l,
                                   CamelHeaderAddress *h)
@@ -5034,6 +4803,13 @@ camel_header_address_list_append (CamelHeaderAddress **l,
 	}
 }
 
+/**
+ * camel_header_address_list_clear:
+ * @l: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress objects
+ *
+ * TODO: Document me.
+ *
+ **/
 void
 camel_header_address_list_clear (CamelHeaderAddress **l)
 {
@@ -5091,6 +4867,13 @@ header_address_list_encode_append (GString *out,
 	}
 }
 
+/**
+ * camel_header_address_list_encode:
+ * @a: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress objects
+ *
+ * TODO: Document me.
+ *
+ **/
 gchar *
 camel_header_address_list_encode (CamelHeaderAddress *a)
 {
@@ -5108,6 +4891,13 @@ camel_header_address_list_encode (CamelHeaderAddress *a)
 	return ret;
 }
 
+/**
+ * camel_header_address_list_format:
+ * @a: (array zero-terminated=1): a NULL-terminated list of #CamelHeaderAddress objects
+ *
+ * TODO: Document me.
+ *
+ **/
 gchar *
 camel_header_address_list_format (CamelHeaderAddress *a)
 {

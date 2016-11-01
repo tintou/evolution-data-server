@@ -254,10 +254,12 @@ check_header (struct _CamelSExp *f,
 		} else if (fms->message || !check_header_in_message_info (fms->info, argc, argv, how, &matched)) {
 			CamelMimeMessage *message;
 			CamelMimePart *mime_part;
-			CamelHeaderRaw *header;
+			CamelNameValueArray *header;
 			const gchar *charset = NULL;
 			camel_search_t type = CAMEL_SEARCH_TYPE_ENCODED;
 			CamelContentType *ct;
+			guint ii;
+			const gchar *header_name = NULL, *header_value = NULL;
 
 			message = camel_filter_search_get_message (fms, f);
 			mime_part = CAMEL_MIME_PART (message);
@@ -272,15 +274,18 @@ check_header (struct _CamelSExp *f,
 				}
 			}
 
-			for (header = mime_part->headers; header && !matched; header = header->next) {
+			header = camel_medium_dup_headers (CAMEL_MEDIUM (mime_part));
+			for (ii = 0; camel_name_value_array_get (header, ii, &header_name, &header_value); ii++) {
 				/* empty name means any header */
-				if (!name || !*name || !g_ascii_strcasecmp (header->name, name)) {
+				if (!name || !*name || !g_ascii_strcasecmp (header_name, name)) {
 					for (i = 1; i < argc && !matched; i++) {
 						if (argv[i]->type == CAMEL_SEXP_RES_STRING)
-							matched = camel_search_header_match (header->value, argv[i]->value.string, how, type, charset);
+							matched = camel_search_header_match (header_value, argv[i]->value.string, how, type, charset);
 					}
 				}
 			}
+
+			camel_name_value_array_free (header);
 		}
 	}
 
@@ -933,25 +938,27 @@ junk_test (struct _CamelSExp *f,
 	/* Not every message info has headers available, thus try headers of the message itself */
 	message = camel_filter_search_get_message (fms, f);
 	if (message) {
-		CamelHeaderRaw *h;
+		CamelNameValueArray *headers = NULL;
+		const gchar *raw_name = NULL, *raw_value = NULL;
+		guint ii;
 
-		for (h = CAMEL_MIME_PART (message)->headers; h; h = h->next) {
+		headers = camel_medium_dup_headers (CAMEL_MEDIUM (message));
+		for (ii = 0; camel_name_value_array_get (headers, ii, &raw_name, &raw_value); ii++) {
 			const gchar *value;
-
-			if (!h->name)
+			if (!raw_name)
 				continue;
 
-			value = g_hash_table_lookup ((GHashTable *) ht, h->name);
+			value = g_hash_table_lookup ((GHashTable *) ht, raw_name);
 			if (!value)
 				continue;
 
-			message_is_junk = camel_strstrcase (h->value, value) != NULL;
+			message_is_junk = camel_strstrcase (raw_value, value) != NULL;
 
 			if (message_is_junk) {
 				if (camel_debug ("junk"))
 					printf (
 						"Message contains \"%s: %s\"",
-						h->name, value);
+						raw_name, value);
 				goto done;
 			}
 		}

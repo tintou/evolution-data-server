@@ -45,7 +45,7 @@ static gboolean	summary_header_from_db		(CamelFolderSummary *,
 
 static CamelMessageInfo *
 		message_info_new_from_header	(CamelFolderSummary *,
-						 CamelHeaderRaw *);
+						 CamelNameValueArray *);
 
 static gint	local_summary_decode_x_evolution
 						(CamelLocalSummary *cls,
@@ -387,13 +387,15 @@ camel_local_summary_add (CamelLocalSummary *cls,
  **/
 gint
 camel_local_summary_write_headers (gint fd,
-                                   CamelHeaderRaw *header,
+                                   CamelNameValueArray *header,
                                    const gchar *xevline,
                                    const gchar *status,
                                    const gchar *xstatus)
 {
 	gint outlen = 0, len;
 	gint newfd;
+	guint ii;
+	const gchar *header_name = NULL, *header_value = NULL;
 	FILE *out;
 
 	/* dum de dum, maybe the whole sync function should just use stdio for output */
@@ -408,18 +410,17 @@ camel_local_summary_write_headers (gint fd,
 		return -1;
 	}
 
-	while (header) {
-		if (strcmp (header->name, "X-Evolution") != 0
-		    && (status == NULL || strcmp (header->name, "Status") != 0)
-		    && (xstatus == NULL || strcmp (header->name, "X-Status") != 0)) {
-			len = fprintf (out, "%s:%s\n", header->name, header->value);
+	for (ii = 0; camel_name_value_array_get (header, ii, &header_name, &header_value); ii++) {
+		if (strcmp (header_name, "X-Evolution") != 0
+		    && (status == NULL || strcmp (header_name, "Status") != 0)
+		    && (xstatus == NULL || strcmp (header_name, "X-Status") != 0)) {
+			len = fprintf (out, "%s:%s\n", header_name, header_value);
 			if (len == -1) {
 				fclose (out);
 				return -1;
 			}
 			outlen += len;
 		}
-		header = header->next;
 	}
 
 	if (status) {
@@ -736,7 +737,7 @@ summary_header_to_db (CamelFolderSummary *s,
 
 static CamelMessageInfo *
 message_info_new_from_header (CamelFolderSummary *s,
-                              CamelHeaderRaw *h)
+                              CamelNameValueArray *h)
 {
 	CamelMessageInfo *mi;
 	CamelLocalSummary *cls = (CamelLocalSummary *) s;
@@ -746,7 +747,7 @@ message_info_new_from_header (CamelFolderSummary *s,
 		const gchar *xev;
 		gint doindex = FALSE;
 
-		xev = camel_header_raw_find (&h, "X-Evolution", NULL);
+		xev = camel_name_value_array_get_named (h, TRUE, "X-Evolution");
 		if (xev == NULL || camel_local_summary_decode_x_evolution (cls, xev, mi) == -1) {
 			gchar *uid;
 

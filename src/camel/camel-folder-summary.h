@@ -110,7 +110,7 @@ struct _CamelFolderSummaryClass {
 	CamelMessageInfo *
 			(*message_info_new_from_header)
 					(CamelFolderSummary *summary,
-					 CamelHeaderRaw *header);
+					 CamelNameValueArray *headers);
 	CamelMessageInfo *
 			(*message_info_new_from_parser)
 					(CamelFolderSummary *summary,
@@ -189,7 +189,7 @@ void		camel_folder_summary_touch	(CamelFolderSummary *summary);
 CamelMessageInfo *
 		camel_folder_summary_info_new_from_header
 						(CamelFolderSummary *summary,
-						 CamelHeaderRaw *headers);
+						 CamelNameValueArray *headers);
 CamelMessageInfo *
 		camel_folder_summary_info_new_from_parser
 						(CamelFolderSummary *summary,
@@ -263,7 +263,7 @@ gboolean	camel_system_flag_get		(CamelMessageFlags flags,
 CamelMessageInfo *
 		camel_message_info_new_from_header
 						(CamelFolderSummary *summary,
-						 CamelHeaderRaw *header);
+						 CamelNameValueArray *header);
 G_END_DECLS
 
 #endif /* CAMEL_FOLDER_SUMMARY_H */

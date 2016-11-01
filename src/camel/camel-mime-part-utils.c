@@ -195,6 +195,7 @@ CamelMessageContentInfo *
 camel_message_content_info_new_from_parser (CamelMimeParser *mp)
 {
 	CamelMessageContentInfo *ci = NULL;
+	CamelNameValueArray *headers = NULL;
 
 	g_return_val_if_fail (CAMEL_IS_MIME_PARSER (mp), NULL);
 
@@ -202,7 +203,9 @@ camel_message_content_info_new_from_parser (CamelMimeParser *mp)
 	case CAMEL_MIME_PARSER_STATE_HEADER:
 	case CAMEL_MIME_PARSER_STATE_MESSAGE:
 	case CAMEL_MIME_PARSER_STATE_MULTIPART:
-		ci = camel_message_content_info_new_from_header (camel_mime_parser_headers_raw (mp));
+		headers = camel_mime_parser_dup_headers (mp);
+		ci = camel_message_content_info_new_from_header (headers);
+		camel_name_value_array_free (headers);
 		if (ci) {
 			if (ci->type)
 				camel_content_type_unref (ci->type);
@@ -220,13 +223,18 @@ camel_message_content_info_new_from_parser (CamelMimeParser *mp)
 CamelMessageContentInfo *
 camel_message_content_info_new_from_message (CamelMimePart *mp)
 {
+	CamelMessageContentInfo *ci = NULL;
+	CamelNameValueArray *header = NULL;
 	g_return_val_if_fail (CAMEL_IS_MIME_PART (mp), NULL);
 
-	return camel_message_content_info_new_from_header (mp->headers);
+	header = camel_medium_dup_headers (CAMEL_MEDIUM (mp));
+	ci = camel_message_content_info_new_from_header (header);
+	camel_name_value_array_free (header);
+	return ci;
 }
 
 CamelMessageContentInfo *
-camel_message_content_info_new_from_header (CamelHeaderRaw *h)
+camel_message_content_info_new_from_header (CamelNameValueArray *h)
 {
 	CamelMessageContentInfo *ci;
 	const gchar *charset;
@@ -234,10 +242,10 @@ camel_message_content_info_new_from_header (CamelHeaderRaw *h)
 	ci = camel_message_content_info_new ();
 
 	charset = camel_iconv_locale_charset ();
-	ci->id = camel_header_msgid_decode (camel_header_raw_find (&h, "content-id", NULL));
-	ci->description = camel_header_decode_string (camel_header_raw_find (&h, "content-description", NULL), charset);
-	ci->encoding = camel_content_transfer_encoding_decode (camel_header_raw_find (&h, "content-transfer-encoding", NULL));
-	ci->type = camel_content_type_decode (camel_header_raw_find (&h, "content-type", NULL));
+	ci->id = camel_header_msgid_decode (camel_name_value_array_get_named (h, TRUE, "content-id"));
+	ci->description = camel_header_decode_string (camel_name_value_array_get_named (h, TRUE,"content-description"), charset);
+	ci->encoding = camel_content_transfer_encoding_decode (camel_name_value_array_get_named (h, TRUE,"content-transfer-encoding"));
+	ci->type = camel_content_type_decode (camel_name_value_array_get_named (h, TRUE,"content-type"));
 
 	return ci;
 }

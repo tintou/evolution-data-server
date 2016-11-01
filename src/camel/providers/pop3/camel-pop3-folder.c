@@ -90,10 +90,12 @@ cmd_builduid (CamelPOP3Engine *pe,
 {
 	GChecksum *checksum;
 	CamelPOP3FolderInfo *fi = data;
-	CamelHeaderRaw *h;
+	CamelNameValueArray *h;
 	CamelMimeParser *mp;
 	guint8 *digest;
 	gsize length;
+	guint ii;
+	const gchar *header_name = NULL, *header_value = NULL;
 
 	length = g_checksum_type_get_length (G_CHECKSUM_MD5);
 	digest = g_alloca (length);
@@ -109,15 +111,16 @@ cmd_builduid (CamelPOP3Engine *pe,
 	case CAMEL_MIME_PARSER_STATE_HEADER:
 	case CAMEL_MIME_PARSER_STATE_MESSAGE:
 	case CAMEL_MIME_PARSER_STATE_MULTIPART:
-		h = camel_mime_parser_headers_raw (mp);
-		while (h) {
-			if (g_ascii_strcasecmp (h->name, "status") != 0
-			    && g_ascii_strcasecmp (h->name, "x-status") != 0) {
-				g_checksum_update (checksum, (guchar *) h->name, -1);
-				g_checksum_update (checksum, (guchar *) h->value, -1);
+		h = camel_mime_parser_dup_headers (mp);
+		for (ii = 0; camel_name_value_array_get (h, ii, &header_name, &header_value); ii++) {
+			if (g_ascii_strcasecmp (header_name, "status") != 0
+			    && g_ascii_strcasecmp (header_name, "x-status") != 0) {
+				g_checksum_update (checksum, (guchar *) header_name, -1);
+				g_checksum_update (checksum, (guchar *) header_value, -1);
 			}
-			h = h->next;
 		}
+
+		camel_name_value_array_free (h);
 	default:
 		break;
 	}
