@@ -89,6 +89,9 @@ struct _CamelMimeMessage {
 
 struct _CamelMimeMessageClass {
 	CamelMimePartClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_mime_message_get_type	(void);

@@ -110,8 +110,8 @@ struct _CamelDataWrapperClass {
 						 GCancellable *cancellable,
 						 GError **error);
 
-	/* Reserved slots. */
-	gpointer reserved[3];
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_data_wrapper_get_type	(void);

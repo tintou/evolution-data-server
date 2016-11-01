@@ -78,6 +78,9 @@ struct _CamelMediumClass {
 			(*get_content)		(CamelMedium *medium);
 	void		(*set_content)		(CamelMedium *medium,
 						 CamelDataWrapper *content);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_medium_get_type		(void);

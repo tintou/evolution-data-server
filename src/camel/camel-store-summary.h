@@ -112,6 +112,9 @@ struct _CamelStoreSummaryClass {
 						 CamelStoreInfo *info,
 						 gint type,
 						 const gchar *value);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_store_summary_get_type	(void) G_GNUC_CONST;

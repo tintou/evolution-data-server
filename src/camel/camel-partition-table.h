@@ -116,6 +116,9 @@ struct _CamelPartitionTable {
 
 struct _CamelPartitionTableClass {
 	GObjectClass parent;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_partition_table_get_type	(void);
@@ -179,6 +182,9 @@ struct _CamelKeyTable {
 
 struct _CamelKeyTableClass {
 	GObjectClass parent;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_key_table_get_type	(void);

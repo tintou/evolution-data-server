@@ -62,6 +62,9 @@ struct _CamelMaildirSummary {
 
 struct _CamelMaildirSummaryClass {
 	CamelLocalSummaryClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType	 camel_maildir_summary_get_type	(void);

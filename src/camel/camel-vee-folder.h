@@ -83,6 +83,9 @@ struct _CamelVeeFolderClass {
 	void		(*folder_changed)	(CamelVeeFolder *vfolder,
 						 CamelFolder *subfolder,
 						 CamelFolderChangeInfo *changes);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 #define CAMEL_UNMATCHED_NAME "UNMATCHED"

@@ -89,6 +89,9 @@ struct _CamelMimeParserClass {
 	void (*message) (CamelMimeParser *parser, gpointer headers);
 	void (*part) (CamelMimeParser *parser);
 	void (*content) (CamelMimeParser *parser);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType camel_mime_parser_get_type (void);

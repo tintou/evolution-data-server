@@ -72,6 +72,9 @@ struct _CamelMboxSummaryClass {
 						 CamelFolderChangeInfo *changeinfo,
 						 GCancellable *cancellable,
 						 GError **error);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_mbox_summary_get_type	(void);

@@ -49,11 +49,13 @@ typedef struct _CamelSpoolSummaryClass CamelSpoolSummaryClass;
 
 struct _CamelSpoolSummary {
 	CamelMboxSummary parent;
-
 };
 
 struct _CamelSpoolSummaryClass {
 	CamelMboxSummaryClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType	camel_spool_summary_get_type	(void);

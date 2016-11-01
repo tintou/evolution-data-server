@@ -109,6 +109,9 @@ struct _CamelIndexCursorClass {
 	GObjectClass parent;
 
 	const gchar * (*next) (CamelIndexCursor *idc);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType           camel_index_cursor_get_type (void);

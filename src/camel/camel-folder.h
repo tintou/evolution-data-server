@@ -127,9 +127,6 @@ struct _CamelFolder {
 
 	CamelFolderFlags folder_flags;
 	guint32 permanent_flags; /* bit-or of CamelMessageFlags */
-
-	/* Future ABI expansion */
-	gpointer later[4];
 };
 
 struct _CamelFolderClass {
@@ -253,8 +250,8 @@ struct _CamelFolderClass {
 	void		(*prepare_content_refresh)
 						(CamelFolder *folder);
 
-	/* Reserved slots for methods. */
-	gpointer reserved_for_methods[19];
+	/* Padding for future expansion */
+	gpointer reserved_methods[20];
 
 	/* Signals */
 	void		(*changed)		(CamelFolder *folder,
@@ -262,6 +259,9 @@ struct _CamelFolderClass {
 	void		(*deleted)		(CamelFolder *folder);
 	void		(*renamed)		(CamelFolder *folder,
 						 const gchar *old_name);
+
+	/* Padding for future expansion */
+	gpointer reserved_signals[20];
 };
 
 GType		camel_folder_get_type		(void);

@@ -72,6 +72,9 @@ struct _CamelAddressClass {
 						 CamelAddress *source);
 	void		(*remove)		(CamelAddress *addr,
 						 gint index);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_address_get_type		(void);

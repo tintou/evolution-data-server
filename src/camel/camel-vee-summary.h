@@ -64,6 +64,9 @@ struct _CamelVeeSummary {
 
 struct _CamelVeeSummaryClass {
 	CamelFolderSummaryClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_vee_summary_get_type	(void);

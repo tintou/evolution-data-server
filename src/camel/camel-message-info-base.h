@@ -58,6 +58,9 @@ struct _CamelMessageInfoBase {
 
 struct _CamelMessageInfoBaseClass {
 	CamelMessageInfoClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_message_info_base_get_type	(void);

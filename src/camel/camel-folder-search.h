@@ -263,6 +263,9 @@ struct _CamelFolderSearchClass {
 						 gint argc,
 						 CamelSExpResult **argv,
 						 CamelFolderSearch *search);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_folder_search_get_type	(void) G_GNUC_CONST;

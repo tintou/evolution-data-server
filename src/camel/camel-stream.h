@@ -82,6 +82,9 @@ struct _CamelStreamClass {
 						 GCancellable *cancellable,
 						 GError **error);
 	gboolean	(*eos)			(CamelStream *stream);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_stream_get_type		(void);

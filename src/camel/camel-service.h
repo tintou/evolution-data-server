@@ -115,8 +115,8 @@ struct _CamelServiceClass {
 						 GCancellable *cancellable,
 						 GError **error);
 
-	/* Reserved slots. */
-	gpointer reserved[8];
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 /* query_auth_types returns a GList of these */

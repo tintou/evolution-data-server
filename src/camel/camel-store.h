@@ -153,9 +153,6 @@ struct _CamelStore {
 	 *     The mode is only checked by the account combo box in
 	 *     Evolution's composer window. */
 	CamelStorePermissionFlags mode;
-
-	/* Future ABI expansion */
-	gpointer later[4];
 };
 
 struct _CamelStoreClass {
@@ -216,8 +213,8 @@ struct _CamelStoreClass {
 						 GCancellable *cancellable,
 						 GError **error);
 
-	/* Reserved slots for methods. */
-	gpointer reserved_for_methods[20];
+	/* Padding for future expansion */
+	gpointer reserved_methods[20];
 
 	/* Signals */
 	void		(*folder_created)	(CamelStore *store,
@@ -230,6 +227,9 @@ struct _CamelStoreClass {
 						 const gchar *old_name,
 						 CamelFolderInfo *folder_info);
 	void		(*folder_info_stale)	(CamelStore *store);
+
+	/* Padding for future expansion */
+	gpointer reserved_signals[20];
 };
 
 GType		camel_store_get_type		(void);

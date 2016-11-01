@@ -54,6 +54,9 @@ struct _CamelMaildirMessageInfo {
 
 struct _CamelMaildirMessageInfoClass {
 	CamelMessageInfoBaseClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_maildir_message_info_get_type	(void);

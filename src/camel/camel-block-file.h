@@ -135,6 +135,9 @@ struct _CamelBlockFileClass {
 
 	gint (*validate_root)(CamelBlockFile *bs);
 	gint (*init_root)(CamelBlockFile *bs);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_block_file_get_type	(void);
@@ -180,6 +183,9 @@ struct _CamelKeyFile {
 
 struct _CamelKeyFileClass {
 	GObjectClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType      camel_key_file_get_type (void);

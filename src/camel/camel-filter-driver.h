@@ -61,6 +61,9 @@ struct _CamelFilterDriver {
 
 struct _CamelFilterDriverClass {
 	GObjectClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 /* FIXME: this maybe should change... */

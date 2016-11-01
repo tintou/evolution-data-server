@@ -75,6 +75,9 @@ struct _CamelLocalSummaryClass {
 	gchar *(*encode_x_evolution)(CamelLocalSummary *cls, const CamelMessageInfo *info);
 	gint (*decode_x_evolution)(CamelLocalSummary *cls, const gchar *xev, CamelMessageInfo *info);
 	gint (*need_index)(void);
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType	camel_local_summary_get_type	(void);

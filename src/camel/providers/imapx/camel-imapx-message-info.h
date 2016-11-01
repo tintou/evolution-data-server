@@ -54,6 +54,9 @@ struct _CamelIMAPXMessageInfo {
 
 struct _CamelIMAPXMessageInfoClass {
 	CamelMessageInfoBaseClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_imapx_message_info_get_type	(void);

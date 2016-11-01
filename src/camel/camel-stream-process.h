@@ -59,6 +59,9 @@ struct _CamelStreamProcess {
 
 struct _CamelStreamProcessClass {
 	CamelStreamClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_stream_process_get_type	(void);

@@ -58,6 +58,9 @@ struct _CamelNNTPAddress {
 
 struct _CamelNNTPAddressClass {
 	CamelAddressClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_nntp_address_get_type	(void);

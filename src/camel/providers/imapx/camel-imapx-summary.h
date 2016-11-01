@@ -66,6 +66,9 @@ struct _CamelIMAPXSummary {
 
 struct _CamelIMAPXSummaryClass {
 	CamelFolderSummaryClass parent_class;
+
+	/* Padding for future expansion */
+	gpointer reserved[20];
 };
 
 GType		camel_imapx_summary_get_type	(void);
